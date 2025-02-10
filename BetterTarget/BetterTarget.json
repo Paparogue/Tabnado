@@ -1,0 +1,15 @@
+{
+    "Author": "Mentor Btw",
+    "Name": "BetterTarget",
+    "Punchline": "Because the targeting sucks.",
+    "Description": "When you lose you mind over the tab targeting system in this game.",
+    "InternalName": "BetterTarget",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 11,
+    "RepoUrl": "https://github.com/Paparogue",
+    "IconUrl": "",
+    "ImageUrls": [ "" ],
+    "Tags": [
+        "UI"
+    ]
+}
