@@ -75,15 +75,37 @@ namespace BetterTarget.Objects
             Update();
         }
 
-        public List<ScreenMonsterObject> GetEnemyList()
+        public List<ScreenMonsterObject> GetFullEnemyList()
         {
             return screenMonsterObjects;
         }
-        public ScreenMonsterObject? GetClosestEnemy2Camera()
+        public ScreenMonsterObject? GetClosestCameraEnemy()
         {
             var monsters = screenMonsterObjects;
             if (monsters == null || monsters.Count == 0) return null;
             return monsters.MinBy(m => m.Distance);
+        }
+        public List<ScreenMonsterObject> GetEnemiesWithinCameraRadius(float radius)
+        {
+            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
+                return new List<ScreenMonsterObject>();
+
+            return screenMonsterObjects
+                .Where(monster => monster.Distance <= radius)
+                .OrderBy(monster => monster.Distance)
+                .ToList();
+        }
+
+        public ScreenMonsterObject? GetClosestEnemyExcluding(List<ScreenMonsterObject> excludeList)
+        {
+            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
+                return null;
+
+            var excludeSet = new HashSet<ulong>(excludeList.Select(m => m.GameObjectId));
+
+            return screenMonsterObjects
+                .Where(monster => !excludeSet.Contains(monster.GameObjectId))
+                .MinBy(m => m.Distance);
         }
     }
 }

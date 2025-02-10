@@ -29,14 +29,7 @@ namespace BetterTarget.UI
         }
 
         public float MaxTargetDistance { get; set; } = 30f;
-        public float OverrideFieldOfView { get; set; } = 60f;
-        public float DistanceWeight { get; set; } = 1f;
-        public float AlignmentWeight { get; set; } = 1f;
-
-        public bool EnableTargetCycling { get; set; } = true;
-        public float CycleTimeout { get; set; } = 2f;   // Seconds.
-        public float AggroWeight { get; set; } = 0f;    // Extra multiplier if aggroed.
-        public float TypeWeight { get; set; } = 0f;     // Extra multiplier for target type.
+        public float CameraRadius { get; set; } = 60f;
         public bool ShowDebug { get; set; } = false;
     }
 }

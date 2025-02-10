@@ -1,4 +1,5 @@
 ﻿using BetterTarget.Objects;
+using BetterTarget.Others;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
@@ -45,7 +46,6 @@ namespace BetterTarget.UI
 
             // Initialize the targeting manager and UI.
             cameraEnemyList = new Camera2Enemy(ObjectTable, gameGui);
-            cameraEnemyList.UpdateEnemyList();
             targetingManager = new SmartTabTargetingManager(ClientState, ObjectTable, TargetManager, ChatGui, config);
             targetingUI = new SmartTabTargetingUI(PluginInterface, config, targetingManager);
             CommandManager.AddHandler("/smarttabui", new CommandInfo(OnToggleUI)

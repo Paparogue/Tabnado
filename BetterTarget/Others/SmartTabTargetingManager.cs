@@ -8,7 +8,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using BetterTarget.UI;
 
-namespace BetterTarget
+namespace BetterTarget.Others
 {
     public class SmartTabTargetingManager
     {
@@ -44,10 +44,7 @@ namespace BetterTarget
         {
             var localPlayer = clientState.LocalPlayer;
             if (localPlayer == null)
-            {
-                chatGui.Print("Local player not found.");
                 return null;
-            }
 
             // Get camera data (using the player's rotation as a proxy).
             CameraData camData = GetCameraData(localPlayer);
@@ -88,10 +85,10 @@ namespace BetterTarget
                     alignmentScore *= 0.5f;
 
                 // --- Base Composite Score ---
-                float baseScore = (config.DistanceWeight * distanceScore) + (config.AlignmentWeight * alignmentScore);
+                float baseScore = config.DistanceWeight * distanceScore + config.AlignmentWeight * alignmentScore;
 
                 // --- Additional Multipliers ---
-                float aggroMultiplier = IsAggro(obj) ? (1f + config.AggroWeight) : 1f;
+                float aggroMultiplier = IsAggro(obj) ? 1f + config.AggroWeight : 1f;
                 float typeMultiplier = GetTypeMultiplier(obj);
                 float compositeScore = baseScore * aggroMultiplier * typeMultiplier;
 
@@ -145,7 +142,7 @@ namespace BetterTarget
             {
                 Position = localPlayer.Position,
                 Forward = new Vector3(MathF.Sin(localPlayer.Rotation), 0, MathF.Cos(localPlayer.Rotation)),
-                FieldOfView = config.OverrideFieldOfView
+                FieldOfView = config.CameraRadius
             };
         }
 
@@ -184,7 +181,7 @@ namespace BetterTarget
         /// </summary>
         private static float Clamp(float value, float min, float max)
         {
-            return value < min ? min : (value > max ? max : value);
+            return value < min ? min : value > max ? max : value;
         }
 
         /// <summary>
