@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterTarget", "BetterTarget\BetterTarget.csproj", "{6E4788DD-AD37-4142-9F50-3963F8EE4A2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tabnado", "BetterTarget\Tabnado.csproj", "{6E4788DD-AD37-4142-9F50-3963F8EE4A2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,12 +14,19 @@
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ImGuiScene">
       <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 

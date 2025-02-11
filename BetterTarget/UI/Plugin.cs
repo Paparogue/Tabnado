@@ -1,5 +1,5 @@
-﻿using BetterTarget.Objects;
-using BetterTarget.Others;
+﻿using Tabnado.Objects;
+using Tabnado.Others;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
@@ -7,11 +7,11 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
-namespace BetterTarget.UI
+namespace Tabnado.UI
 {
     public class Plugin : IDalamudPlugin
     {
-        public string Name => "Smart Tab Target Plus";
+        public string Name => "Tabnado";
 
         [PluginService]
         public IDalamudPluginInterface PluginInterface { get; set; } = null!;
@@ -19,41 +19,38 @@ namespace BetterTarget.UI
         public ICommandManager CommandManager { get; set; } = null!;
         [PluginService]
         public IClientState ClientState { get; set; } = null!;
-        // Use ObjectTable instead of the old GameObjectManager.
         [PluginService]
         public IObjectTable ObjectTable { get; set; } = null!;
-        // Use the read-only ITargetManager.
         [PluginService]
         public ITargetManager TargetManager { get; set; } = null!;
         [PluginService]
         public IChatGui ChatGui { get; set; } = null!;
         [PluginService]
         public IGameGui gameGui { get; set; } = null!;
+        [PluginService]
+        public IPluginLog pluginLog { get; set; } = null!;
 
-        // Configuration and helper classes.
-        private PluginConfiguration config;
-        private SmartTabTargetingManager targetingManager;
-        private SmartTabTargetingUI targetingUI;
+        private PluginConfig PluginConfig;
+        private Others.Tabnado targetingManager;
+        private TabnadoUI targetingUI;
         private Camera2Enemy cameraEnemyList;
 
         public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commandManager)
         {
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
-            // Load configuration (or create a new one) and initialize it.
-            config = PluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
-            config.Initialize(PluginInterface);
 
-            // Initialize the targeting manager and UI.
-            cameraEnemyList = new Camera2Enemy(ObjectTable, gameGui);
-            targetingManager = new SmartTabTargetingManager(ClientState, ObjectTable, TargetManager, ChatGui, config);
-            targetingUI = new SmartTabTargetingUI(PluginInterface, config, targetingManager);
-            CommandManager.AddHandler("/smarttabui", new CommandInfo(OnToggleUI)
+            PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
+            PluginConfig.Initialize(PluginInterface);
+
+            cameraEnemyList = new Camera2Enemy(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
+            targetingManager = new Others.Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraEnemyList, gameGui, pluginLog);
+            targetingUI = new TabnadoUI(PluginInterface, PluginConfig, targetingManager);
+            CommandManager.AddHandler("/tabnado", new CommandInfo(OnToggleUI)
             {
-                HelpMessage = "Toggles the Smart Tab Target settings window."
+                HelpMessage = "Toggles the Tabnado settings window."
             });
 
-            // Register UI drawing callback.
             PluginInterface.UiBuilder.Draw += OnDraw;
             PluginInterface.UiBuilder.OpenMainUi += OnToggleUI;
             PluginInterface.UiBuilder.OpenConfigUi += OnToggleUI;
@@ -62,23 +59,12 @@ namespace BetterTarget.UI
 
         public void Dispose()
         {
-            CommandManager.RemoveHandler("/smarttabui");
+            CommandManager.RemoveHandler("/tabnado");
             PluginInterface.UiBuilder.Draw -= OnDraw;
             PluginInterface.UiBuilder.OpenMainUi -= OnToggleUI;
             PluginInterface.UiBuilder.OpenConfigUi -= OnToggleUI;
         }
 
-        /// <summary>
-        /// Command handler for /smarttab.
-        /// </summary>
-        private void OnSmartTab(string command, string args)
-        {
-            targetingManager.GetSmartTabCandidate();
-        }
-
-        /// <summary>
-        /// Command handler for /smarttabui.
-        /// </summary>
         private void OnToggleUI(string command, string args)
         {
             targetingUI.ToggleVisibility();
@@ -88,12 +74,9 @@ namespace BetterTarget.UI
         {
             OnToggleUI(null, null);
         }
-
-        /// <summary>
-        /// Draw callback for the UI.
-        /// </summary>
         private void OnDraw()
         {
+            targetingManager.Draw();
             targetingUI.Draw();
         }
     }

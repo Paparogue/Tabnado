@@ -2,34 +2,30 @@
 using Dalamud.Plugin;
 using System;
 
-namespace BetterTarget.UI
+namespace Tabnado.UI
 {
     [Serializable]
-    public class PluginConfiguration : IPluginConfiguration
+    public class PluginConfig : IPluginConfiguration
     {
         public int Version { get; set; } = 1;
 
         [NonSerialized]
         private IDalamudPluginInterface? pluginInterface;
 
-        /// <summary>
-        /// Initializes the configuration with the plugin interface.
-        /// </summary>
         public void Initialize(IDalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
         }
 
-        /// <summary>
-        /// Saves the configuration using the latest Dalamud API.
-        /// </summary>
         public void Save()
         {
             pluginInterface?.SavePluginConfig(this);
         }
 
-        public float MaxTargetDistance { get; set; } = 30f;
-        public float CameraRadius { get; set; } = 60f;
+        public float MaxTargetDistance { get; set; } = 60f;
+        public float CameraRadius { get; set; } = 10f;
+        public bool OnlyAttackAbles { get; set; } = true;
+        public bool OnlyVisibleObjects { get; set; } = true;
         public bool ShowDebug { get; set; } = false;
     }
 }
