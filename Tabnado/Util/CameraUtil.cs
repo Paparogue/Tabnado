@@ -9,7 +9,6 @@ using Tabnado.UI;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using ABI.Windows.ApplicationModel.Activation;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Collections.Specialized;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;

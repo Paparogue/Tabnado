@@ -7,9 +7,10 @@
     "ApplicableVersion": "any",
     "DalamudApiLevel": 11,
     "RepoUrl": "https://github.com/Paparogue",
-    "IconUrl": "",
+    "IconUrl": "https://github.com/Paparogue/Tabnado/blob/master/tabnado.png",
     "ImageUrls": [ "" ],
     "Tags": [
-        "UI"
+        "UI",
+        "Utility"
     ]
 }

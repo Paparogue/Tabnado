@@ -48,6 +48,7 @@ namespace Tabnado.Others
         {
             if (c2e == null)
                 return;
+
             if (keyDetector.IsKeyPressed())
             {
                 c2e.UpdateEnemyList();
