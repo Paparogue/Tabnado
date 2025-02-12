@@ -2,7 +2,6 @@
 using Tabnado.Others;
 using Dalamud.Plugin;
 using ImGuiNET;
-using Tabnado.Objects;
 using Tabnado.Util;
 
 namespace Tabnado.UI

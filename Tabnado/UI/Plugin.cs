@@ -1,11 +1,11 @@
-﻿using Tabnado.Objects;
-using Tabnado.Others;
+﻿using Tabnado.Others;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Tabnado.Util;
 
 namespace Tabnado.UI
 {

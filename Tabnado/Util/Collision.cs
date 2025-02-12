@@ -7,7 +7,7 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using static FFXIVClientStructs.ThisAssembly;
 
-namespace Tabnado.Objects
+namespace Tabnado.Util
 {
     internal static class Collision
     {

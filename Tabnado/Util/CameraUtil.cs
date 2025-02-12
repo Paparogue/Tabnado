@@ -3,7 +3,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Dalamud.Game.ClientState.Objects.Enums;
-using static Tabnado.Objects.CameraUtil;
+using static Tabnado.Util.CameraUtil;
 using Dalamud.Utility;
 using Tabnado.UI;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -13,7 +13,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Collections.Specialized;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
-namespace Tabnado.Objects
+namespace Tabnado.Util
 {
     public unsafe class CameraUtil
     {
@@ -32,9 +32,9 @@ namespace Tabnado.Objects
             this.state = state;
             this.config = config;
             this.pluginLog = pluginLog;
-            var cameraManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager.Instance();
+            var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
-                this.camera = cameraManager->CurrentCamera;
+                camera = cameraManager->CurrentCamera;
         }
 
 
@@ -91,74 +91,111 @@ namespace Tabnado.Objects
             bool showDebugRaycast = config.ShowDebugRaycast;
             var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
 
-            Vector2 npcScreenPos;
-            bool npcInView;
+            Vector2 npcScreenPos, npcHeadScreenPos;
+            bool npcInView, npcHeadInView;
             gameGui.WorldToScreen(npc.Position, out npcScreenPos, out npcInView);
+
+            GameObject* npcObject = (GameObject*)npc.Address;
+            Vector3 npcHead = new Vector3
+            {
+                X = npc.Position.X,
+                Y = npc.Position.Y + npcObject->Height,
+                Z = npc.Position.Z
+            };
+            gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
 
             Vector3[] cornerWorldPositions = GetCameraCornerPositions();
 
             for (int i = 0; i < screenCorners.Length; i++)
             {
                 Vector3 cornerWorldPos = cornerWorldPositions[i];
-                var direction = Vector3.Normalize(npc.Position - cornerWorldPos);
-                float distanceToNpc = Vector3.Distance(cornerWorldPos, npc.Position);
 
-                if (Collision.TryRaycastDetailed(cornerWorldPos, direction, out RaycastHit hit))
+                var directionToBody = Vector3.Normalize(npc.Position - cornerWorldPos);
+                float distanceToBody = Vector3.Distance(cornerWorldPos, npc.Position);
+
+                var directionToHead = Vector3.Normalize(npcHead - cornerWorldPos);
+                float distanceToHead = Vector3.Distance(cornerWorldPos, npcHead);
+
+                bool bodyVisible = false;
+                bool headVisible = false;
+
+                if (Collision.TryRaycastDetailed(cornerWorldPos, directionToBody, out RaycastHit hitBody))
                 {
-                    bool raycastReachesNpc = hit.Distance + RAYCAST_TOLERANCE >= distanceToNpc;
+                    bodyVisible = hitBody.Distance + RAYCAST_TOLERANCE >= distanceToBody;
+                }
 
-                    if (showDebugRaycast)
-                    {
-                        drawList.AddCircleFilled(
-                            screenCorners[i],
-                            5f,
-                            ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1))
-                        );
+                if (Collision.TryRaycastDetailed(cornerWorldPos, directionToHead, out RaycastHit hitHead))
+                {
+                    headVisible = hitHead.Distance + RAYCAST_TOLERANCE >= distanceToHead;
+                }
 
-                        Vector4 lineColor = raycastReachesNpc
-                            ? new Vector4(0, 1, 0, 0.5f)
-                            : new Vector4(1, 0, 0, 0.5f);
+                if (showDebugRaycast)
+                {
+                    DrawDebugRaycast(drawList, screenCorners[i], npcScreenPos, bodyVisible, hitBody, distanceToBody);
+                    DrawDebugRaycast(drawList, screenCorners[i], npcHeadScreenPos, headVisible, hitHead, distanceToHead);
+                }
 
-                        drawList.AddLine(
-                            screenCorners[i],
-                            npcScreenPos,
-                            ImGui.ColorConvertFloat4ToU32(lineColor),
-                            1.0f
-                        );
-
-                        Vector2 hitScreenPos;
-                        if (gameGui.WorldToScreen(hit.Point, out hitScreenPos, out bool hitInView) && hitInView)
-                        {
-                            drawList.AddCircleFilled(
-                                hitScreenPos,
-                                3f,
-                                ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1))
-                            );
-                        }
-
-                        Vector2 textPos = Vector2.Lerp(screenCorners[i], npcScreenPos, 0.5f);
-                        string distanceText = $"Hit: {hit.Distance:F1}";
-                        drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
-                    }
-
-                    if (raycastReachesNpc)
-                    {
-                        isVisibleFromAny = true;
-                        if (!showDebugRaycast) return true;
-                    }
+                if (bodyVisible || headVisible)
+                {
+                    isVisibleFromAny = true;
+                    if (!showDebugRaycast) return true;
                 }
             }
 
-            if (showDebugRaycast && npcInView)
+            if (showDebugRaycast)
             {
-                drawList.AddCircleFilled(
-                    npcScreenPos,
-                    5f,
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
-                );
+                if (npcInView)
+                {
+                    drawList.AddCircleFilled(
+                        npcScreenPos,
+                        5f,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
+                    );
+                }
+                if (npcHeadInView)
+                {
+                    drawList.AddCircleFilled(
+                        npcHeadScreenPos,
+                        5f,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)) // Cyan color for head
+                    );
+                }
             }
 
             return isVisibleFromAny;
+        }
+        private void DrawDebugRaycast(ImDrawListPtr drawList, Vector2 cornerPos, Vector2 targetPos, bool isVisible, RaycastHit hit, float distance)
+        {
+            drawList.AddCircleFilled(
+                cornerPos,
+                5f,
+                ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1))
+            );
+
+            Vector4 lineColor = isVisible
+                ? new Vector4(0, 1, 0, 0.5f)
+                : new Vector4(1, 0, 0, 0.5f);
+
+            drawList.AddLine(
+                cornerPos,
+                targetPos,
+                ImGui.ColorConvertFloat4ToU32(lineColor),
+                1.0f
+            );
+
+            Vector2 hitScreenPos;
+            if (gameGui.WorldToScreen(hit.Point, out hitScreenPos, out bool hitInView) && hitInView)
+            {
+                drawList.AddCircleFilled(
+                    hitScreenPos,
+                    3f,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1))
+                );
+            }
+
+            Vector2 textPos = Vector2.Lerp(cornerPos, targetPos, 0.5f);
+            string distanceText = $"Hit: {hit.Distance:F1}";
+            drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
         }
 
         private void Update()
@@ -175,7 +212,7 @@ namespace Tabnado.Objects
                 {
                     Vector2 screenPos;
                     bool inView;
-                    if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView) 
+                    if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
                     {
                         float unitDistance = Vector3.Distance(state.LocalPlayer.Position, npc.Position);
                         if (unitDistance > config.MaxTargetDistance)
@@ -184,7 +221,7 @@ namespace Tabnado.Objects
                         if (config.OnlyHostiles && !(npc.StatusFlags == StatusFlags.Hostile))
                             continue;
 
-                        if ((config.OnlyVisibleObjects || config.ShowDebugRaycast))
+                        if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
                             if (!IsVisibleFromAnyCorner(npc, screenCorners))
                                 continue;
 

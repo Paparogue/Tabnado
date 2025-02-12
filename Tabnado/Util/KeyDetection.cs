@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tabnado.Objects
+namespace Tabnado.Util
 {
-   public class KeyDetection
+    public class KeyDetection
     {
         [DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(int vKey);
@@ -22,7 +22,7 @@ namespace Tabnado.Objects
         public bool IsKeyPressed()
         {
             short keyState = GetAsyncKeyState(currentVirtualKey);
-            bool isPressed = ((keyState & 0x8000) != 0) && !wasKeyPressed;
+            bool isPressed = (keyState & 0x8000) != 0 && !wasKeyPressed;
             wasKeyPressed = (keyState & 0x8000) != 0;
             return isPressed;
         }

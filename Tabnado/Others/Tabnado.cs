@@ -7,10 +7,10 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Tabnado.UI;
-using Tabnado.Objects;
 using ImGuiNET;
 using static FFXIVClientStructs.ThisAssembly;
-using static Tabnado.Objects.CameraUtil;
+using static Tabnado.Util.CameraUtil;
+using Tabnado.Util;
 
 namespace Tabnado.Others
 {
