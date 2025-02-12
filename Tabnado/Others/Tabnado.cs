@@ -10,6 +10,7 @@ using Tabnado.UI;
 using Tabnado.Objects;
 using ImGuiNET;
 using static FFXIVClientStructs.ThisAssembly;
+using static Tabnado.Objects.CameraUtil;
 
 namespace Tabnado.Others
 {
@@ -25,6 +26,8 @@ namespace Tabnado.Others
         private IPluginLog pluginLog;
         private KeyDetection keyDetector;
         private bool wasTabPressed = false;
+        private int currentEnemyIndex;
+        private List<ScreenMonsterObject> lastEnemyList;
 
         public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager, IChatGui chatGui, PluginConfig config, CameraUtil c2e, IGameGui gameGui, IPluginLog pluginLog, KeyDetection keyDetector)
         {
@@ -37,27 +40,58 @@ namespace Tabnado.Others
             this.gameGui = gameGui;
             this.pluginLog = pluginLog;
             this.keyDetector = keyDetector;
+            this.currentEnemyIndex = -1;
+            this.lastEnemyList = new();
         }
 
         public void Draw()
         {
             if (c2e == null)
                 return;
-
-            if (config.ShowDebugRaycast || config.ShowDebugSelection)
-                c2e.UpdateEnemyList();
-
             if (keyDetector.IsKeyPressed())
             {
                 c2e.UpdateEnemyList();
-                var enemyList = c2e.GetFullEnemyList();
-                var mObject = c2e.GetClosestEnemyInCircle();
-                targetManager.Target = mObject?.GameObject;
+                var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
+
+                if (!IsListEqual(lastEnemyList, enemies))
+                {
+                    currentEnemyIndex = -1;
+                    lastEnemyList = new List<ScreenMonsterObject>(enemies);
+                }
+
+                if (enemies.Count > 0)
+                {
+                    currentEnemyIndex++;
+                    if (currentEnemyIndex >= enemies.Count)
+                        currentEnemyIndex = 0;
+
+                    targetManager.Target = enemies[currentEnemyIndex].GameObject;
+                }
+                else
+                {
+                    currentEnemyIndex = -1;
+                    lastEnemyList.Clear();
+                }
             }
+            if (config.ShowDebugRaycast || config.ShowDebugSelection)
+                c2e.UpdateEnemyList();
 
             ShowDebugSelection();
         }
 
+        private bool IsListEqual(List<ScreenMonsterObject> list1, List<ScreenMonsterObject> list2)
+        {
+            if (list1.Count != list2.Count)
+                return false;
+
+            for (int i = 0; i < list1.Count; i++)
+            {
+                if (list1[i].GameObjectId != list2[i].GameObjectId)
+                    return false;
+            }
+
+            return true;
+        }
 
         private void ShowDebugSelection()
         {

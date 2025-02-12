@@ -86,7 +86,7 @@ namespace Tabnado.Objects
 
         private bool IsVisibleFromAnyCorner(ICharacter npc, Vector2[] screenCorners)
         {
-            const float RAYCAST_TOLERANCE = 1f;
+            const float RAYCAST_TOLERANCE = 0.1f;
             bool isVisibleFromAny = false;
 
             bool showDebugRaycast = config.ShowDebugRaycast;
@@ -182,7 +182,7 @@ namespace Tabnado.Objects
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
 
-                        if (config.OnlyAttackAbles && !(npc.StatusFlags == StatusFlags.Hostile))
+                        if (config.OnlyHostiles && !(npc.StatusFlags == StatusFlags.Hostile))
                             continue;
 
                         if ((config.OnlyVisibleObjects || config.ShowDebugRaycast))
@@ -252,18 +252,6 @@ namespace Tabnado.Objects
 
             return screenMonsterObjects
                 .Where(monster => monster.CameraDistance <= config.CameraRadius)
-                .MinBy(m => m.CameraDistance);
-        }
-
-        public ScreenMonsterObject? GetClosestEnemyExcluding(List<ScreenMonsterObject> excludeList)
-        {
-            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
-                return null;
-
-            var excludeSet = new HashSet<ulong>(excludeList.Select(m => m.GameObjectId));
-
-            return screenMonsterObjects
-                .Where(monster => !excludeSet.Contains(monster.GameObjectId))
                 .MinBy(m => m.CameraDistance);
         }
     }
