@@ -90,10 +90,10 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                bool onlyHostileNPCs = config.OnlyBattleNPCs;
-                if (ImGui.Checkbox("Target Only Hostile NPCs", ref onlyHostileNPCs))
+                bool onlyBattleNPCs = config.OnlyBattleNPCs;
+                if (ImGui.Checkbox("Target Only Battle NPCs", ref onlyBattleNPCs))
                 {
-                    config.OnlyBattleNPCs = onlyHostileNPCs;
+                    config.OnlyBattleNPCs = onlyBattleNPCs;
                     configChanged = true;
                 }
 
