@@ -40,8 +40,6 @@ namespace Tabnado.UI
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
                 ImGui.TextWrapped("WARNING: If your selected key conflicts with any game keybind, please unbind it in the game's keybind settings to avoid conflicts!");
                 ImGui.PopStyleColor();
-
-                ImGui.Spacing();
                 ImGui.Separator();
                 ImGui.Spacing();
 
@@ -92,12 +90,21 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
+                bool onlyHostileNPCs = config.OnlyBattleNPCs;
+                if (ImGui.Checkbox("Target Only Hostile NPCs", ref onlyHostileNPCs))
+                {
+                    config.OnlyBattleNPCs = onlyHostileNPCs;
+                    configChanged = true;
+                }
+
                 bool onlyVisibleObjects = config.OnlyVisibleObjects;
                 if (ImGui.Checkbox("Target Only Visible Objects", ref onlyVisibleObjects))
                 {
                     config.OnlyVisibleObjects = onlyVisibleObjects;
                     configChanged = true;
                 }
+
+                ImGui.Separator();
 
                 bool showDebugRaycast = config.ShowDebugRaycast;
                 if (ImGui.Checkbox("Show Debug Raycast Info", ref showDebugRaycast))

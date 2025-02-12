@@ -49,7 +49,7 @@ namespace Tabnado.Others
             if (c2e == null)
                 return;
 
-            if (keyDetector.IsKeyPressed()) //check that key can only be pressed every 50 milliseconds
+            if (keyDetector.IsKeyPressed())
             {
                 c2e.UpdateEnemyList();
                 var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
@@ -126,7 +126,7 @@ namespace Tabnado.Others
                         5f,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
                     );
-                    string distanceText = $"Distance: {enemy.WorldDistance:F1}";
+                    string distanceText = $"Details: {enemy.NameNKind + " " + enemy.WorldDistance:F1}";
                     drawList.AddText(enemy.ScreenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
                 }
             }

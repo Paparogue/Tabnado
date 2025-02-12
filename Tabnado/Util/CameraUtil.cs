@@ -12,6 +12,8 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Collections.Specialized;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Group;
+using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Tabnado.Util
 {
@@ -24,6 +26,7 @@ namespace Tabnado.Util
         private readonly IPluginLog pluginLog;
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
+        public unsafe GroupManager* gpm;
 
         public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -32,6 +35,7 @@ namespace Tabnado.Util
             this.state = state;
             this.config = config;
             this.pluginLog = pluginLog;
+            gpm = FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance();
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
@@ -42,7 +46,7 @@ namespace Tabnado.Util
         {
             public required ulong GameObjectId { get; set; }
             public required IGameObject? GameObject { get; set; }
-            public required string Name { get; set; }
+            public required string NameNKind { get; set; }
             public required Vector2 ScreenPos { get; set; }
             public required float WorldDistance { get; set; }
             public required float CameraDistance { get; set; }
@@ -157,7 +161,7 @@ namespace Tabnado.Util
                     drawList.AddCircleFilled(
                         npcHeadScreenPos,
                         5f,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)) // Cyan color for head
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f))
                     );
                 }
             }
@@ -198,6 +202,15 @@ namespace Tabnado.Util
             drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
         }
 
+        public unsafe bool IsObjectFriendly(GameObject* ob)
+        {
+            if (ob is null) return false;
+            if (gpm is null) return false;
+            bool isAlliance = gpm->MainGroup.IsEntityIdInAlliance(ob->EntityId);
+            bool isGroup = gpm->MainGroup.IsEntityIdInParty(ob->EntityId);
+            return isAlliance || isGroup;
+        }
+
         private void Update()
         {
             var results = new List<ScreenMonsterObject>();
@@ -218,7 +231,10 @@ namespace Tabnado.Util
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
 
-                        if (config.OnlyHostilePlayers && (npc.StatusFlags == StatusFlags.AllianceMember || npc.StatusFlags == StatusFlags.Friend || npc.StatusFlags == StatusFlags.PartyMember))
+                        if (config.OnlyHostilePlayers && IsObjectFriendly((GameObject*)npc.Address))
+                            continue;
+
+                        if(config.OnlyBattleNPCs && obj.ObjectKind == ObjectKind.EventNpc)
                             continue;
 
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
@@ -229,7 +245,7 @@ namespace Tabnado.Util
                         {
                             GameObjectId = npc.GameObjectId,
                             GameObject = obj,
-                            Name = npc.Name.ToString(),
+                            NameNKind = npc.Name.ToString() + " " + obj.ObjectKind.ToString(),
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
                             WorldDistance = unitDistance,
