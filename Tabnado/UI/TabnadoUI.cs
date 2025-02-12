@@ -2,6 +2,8 @@
 using Tabnado.Others;
 using Dalamud.Plugin;
 using ImGuiNET;
+using Tabnado.Objects;
+using Tabnado.Util;
 
 namespace Tabnado.UI
 {
@@ -11,12 +13,14 @@ namespace Tabnado.UI
         private PluginConfig config;
         private Others.Tabnado targetingManager;
         private IDalamudPluginInterface pluginInterface;
+        private KeyDetection keyDetector;
 
-        public TabnadoUI(IDalamudPluginInterface pluginInterface, PluginConfig config, Others.Tabnado targetingManager)
+        public TabnadoUI(IDalamudPluginInterface pluginInterface, PluginConfig config, Others.Tabnado targetingManager, KeyDetection keyDetector)
         {
             this.pluginInterface = pluginInterface;
             this.config = config;
             this.targetingManager = targetingManager;
+            this.keyDetector = keyDetector;
         }
 
         public void ToggleVisibility()
@@ -33,6 +37,40 @@ namespace Tabnado.UI
             if (ImGui.Begin("Tabnado Target Settings", ref settingsVisible, ImGuiWindowFlags.AlwaysAutoResize))
             {
                 bool configChanged = false;
+
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui.TextWrapped("WARNING: If your selected key conflicts with any game keybind, please unbind it in the game's keybind settings to avoid conflicts!");
+                ImGui.PopStyleColor();
+
+                ImGui.Spacing();
+                ImGui.Separator();
+                ImGui.Spacing();
+
+                if (ImGui.BeginCombo("Target Key", config.SelectedKey))
+                {
+                    foreach (var key in KeyConfig.VirtualKeys)
+                    {
+                        bool isSelected = (config.SelectedKey).Equals(key.Key);
+                        if (ImGui.Selectable(key.Key, isSelected))
+                        {
+                            config.SelectedKey = key.Key;
+                            keyDetector.SetCurrentKey(key.Value);
+                            configChanged = true;
+                        }
+                        if (isSelected)
+                        {
+                            ImGui.SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                if (config.SelectedKey == "Tab")
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.65f, 0.0f, 1.0f));
+                    ImGui.TextWrapped("Note: If using Tab, make sure to unbind the default target key in your game settings!");
+                    ImGui.PopStyleColor();
+                }
 
                 int maxTargetDistance = config.MaxTargetDistance;
                 if (ImGui.SliderInt("Max Target Distance", ref maxTargetDistance, 1, 55))

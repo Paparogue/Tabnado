@@ -22,11 +22,12 @@ namespace Tabnado.UI
             pluginInterface?.SavePluginConfig(this);
         }
 
-        public int MaxTargetDistance { get; set; } = 50;
+        public int MaxTargetDistance { get; set; } = 55;
         public int CameraRadius { get; set; } = 300;
-        public bool OnlyAttackAbles { get; set; } = true;
+        public bool OnlyAttackAbles { get; set; } = false;
         public bool OnlyVisibleObjects { get; set; } = true;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
+        public string SelectedKey { get; set; } = "Tab";
     }
 }

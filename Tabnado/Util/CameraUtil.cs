@@ -3,7 +3,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Dalamud.Game.ClientState.Objects.Enums;
-using static Tabnado.Objects.Camera2Enemy;
+using static Tabnado.Objects.CameraUtil;
 using Dalamud.Utility;
 using Tabnado.UI;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -16,7 +16,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Tabnado.Objects
 {
-    public unsafe class Camera2Enemy
+    public unsafe class CameraUtil
     {
         private readonly IObjectTable objectTable;
         private readonly IGameGui gameGui;
@@ -26,7 +26,7 @@ namespace Tabnado.Objects
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
 
-        public Camera2Enemy(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
+        public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
             this.objectTable = objectTable;
             this.gameGui = gameGui;

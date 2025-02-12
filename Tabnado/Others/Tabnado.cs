@@ -20,13 +20,13 @@ namespace Tabnado.Others
         private ITargetManager targetManager;
         private IChatGui chatGui;
         private PluginConfig config;
-        private Camera2Enemy c2e;
+        private CameraUtil c2e;
         private IGameGui gameGui;
         private IPluginLog pluginLog;
-        private KeyDetector keyDetector;
+        private KeyDetection keyDetector;
         private bool wasTabPressed = false;
 
-        public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager, IChatGui chatGui, PluginConfig config, Camera2Enemy c2e, IGameGui gameGui, IPluginLog pluginLog)
+        public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager, IChatGui chatGui, PluginConfig config, CameraUtil c2e, IGameGui gameGui, IPluginLog pluginLog, KeyDetection keyDetector)
         {
             this.clientState = clientState;
             this.objectTable = objectTable;
@@ -36,7 +36,7 @@ namespace Tabnado.Others
             this.c2e = c2e;
             this.gameGui = gameGui;
             this.pluginLog = pluginLog;
-            this.keyDetector = new KeyDetector();
+            this.keyDetector = keyDetector;
         }
 
         public void Draw()
@@ -47,7 +47,7 @@ namespace Tabnado.Others
             if (config.ShowDebugRaycast || config.ShowDebugSelection)
                 c2e.UpdateEnemyList();
 
-            if (keyDetector.IsTabPressed())
+            if (keyDetector.IsKeyPressed())
             {
                 c2e.UpdateEnemyList();
                 var enemyList = c2e.GetFullEnemyList();

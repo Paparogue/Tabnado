@@ -33,7 +33,8 @@ namespace Tabnado.UI
         private PluginConfig PluginConfig;
         private Others.Tabnado targetingManager;
         private TabnadoUI targetingUI;
-        private Camera2Enemy cameraEnemyList;
+        private CameraUtil cameraEnemyList;
+        private KeyDetection keyDetector;
 
         public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commandManager)
         {
@@ -43,9 +44,10 @@ namespace Tabnado.UI
             PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
             PluginConfig.Initialize(PluginInterface);
 
-            cameraEnemyList = new Camera2Enemy(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
-            targetingManager = new Others.Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraEnemyList, gameGui, pluginLog);
-            targetingUI = new TabnadoUI(PluginInterface, PluginConfig, targetingManager);
+            keyDetector = new KeyDetection();
+            cameraEnemyList = new CameraUtil(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
+            targetingManager = new Others.Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraEnemyList, gameGui, pluginLog, keyDetector);
+            targetingUI = new TabnadoUI(PluginInterface, PluginConfig, targetingManager, keyDetector);
             CommandManager.AddHandler("/tabnado", new CommandInfo(OnToggleUI)
             {
                 HelpMessage = "Toggles the Tabnado settings window."
