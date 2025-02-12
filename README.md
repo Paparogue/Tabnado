@@ -1,9 +1,9 @@
 # Tabnado
 > Because tab targeting is hard.
 
-A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting system by applying more intelligent filtering and visibility checks. Tired of cycling through every single object in front of you? **Tabnado** is here to save the day!
-
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
+
+A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting system by applying more intelligent filtering and visibility checks. Tired of cycling through every single object in front of you? **Tabnado** is here to save the day!
 
 ---
 
@@ -47,4 +47,4 @@ Tabnado operates by:
 
 ## Configurations
 
-   
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/e086b975161d4844f0a097a50d38e28b772a73b9/config.png)
