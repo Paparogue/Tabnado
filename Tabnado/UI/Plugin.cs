@@ -78,8 +78,11 @@ namespace Tabnado.UI
         }
         private void OnDraw()
         {
-            targetingManager.Draw();
-            targetingUI.Draw();
+            if (ClientState.LocalPlayer != null)
+            {
+                targetingManager.Draw();
+                targetingUI.Draw();
+            }
         }
     }
 }
