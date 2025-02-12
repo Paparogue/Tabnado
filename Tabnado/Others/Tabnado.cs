@@ -9,6 +9,7 @@ using Dalamud.Plugin.Services;
 using Tabnado.UI;
 using Tabnado.Objects;
 using ImGuiNET;
+using static FFXIVClientStructs.ThisAssembly;
 
 namespace Tabnado.Others
 {
@@ -70,7 +71,7 @@ namespace Tabnado.Others
             drawList.AddCircle(
                 screenCenter,
                 config.CameraRadius,
-                ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 0.5f)),
+                ImGui.ColorConvertFloat4ToU32(new Vector4(2, 0, 0, 1f)),
                 32
             );
 
@@ -90,6 +91,8 @@ namespace Tabnado.Others
                         5f,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
                     );
+                    string distanceText = $"Distance: {enemy.WorldDistance:F1}";
+                    drawList.AddText(enemy.ScreenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
                 }
             }
         }

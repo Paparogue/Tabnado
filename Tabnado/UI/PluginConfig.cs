@@ -22,8 +22,8 @@ namespace Tabnado.UI
             pluginInterface?.SavePluginConfig(this);
         }
 
-        public float MaxTargetDistance { get; set; } = 60f;
-        public float CameraRadius { get; set; } = 300f;
+        public int MaxTargetDistance { get; set; } = 50;
+        public int CameraRadius { get; set; } = 300;
         public bool OnlyAttackAbles { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
         public bool ShowDebugSelection { get; set; } = false;

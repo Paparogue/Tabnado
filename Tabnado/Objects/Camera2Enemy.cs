@@ -45,7 +45,8 @@ namespace Tabnado.Objects
             public required IGameObject? GameObject { get; set; }
             public required string Name { get; set; }
             public required Vector2 ScreenPos { get; set; }
-            public required float Distance { get; set; }
+            public required float WorldDistance { get; set; }
+            public required float CameraDistance { get; set; }
             public required float Angle { get; set; }
             public required float HpPercent { get; set; }
             public required bool IsTargetable { get; set; }
@@ -171,16 +172,20 @@ namespace Tabnado.Objects
 
             foreach (var obj in objectTable)
             {
-                if (obj is ICharacter npc && IsSanitized(npc))
+                if (obj is ICharacter npc && IsSanitized(npc) && state.LocalPlayer != null)
                 {
                     Vector2 screenPos;
                     bool inView;
                     if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView) 
                     {
+                        float unitDistance = Vector3.Distance(state.LocalPlayer.Position, npc.Position);
+                        if (unitDistance > config.MaxTargetDistance)
+                            continue;
+
                         if (config.OnlyAttackAbles && !(npc.StatusFlags == StatusFlags.Hostile))
                             continue;
 
-                        if ((config.OnlyVisibleObjects || config.ShowDebugRaycast) && state.LocalPlayer != null)
+                        if ((config.OnlyVisibleObjects || config.ShowDebugRaycast))
                             if (!IsVisibleFromAnyCorner(npc, screenCorners))
                                 continue;
 
@@ -190,7 +195,8 @@ namespace Tabnado.Objects
                             GameObject = obj,
                             Name = npc.Name.ToString(),
                             ScreenPos = screenPos,
-                            Distance = Vector2.Distance(screenCenter, screenPos),
+                            CameraDistance = Vector2.Distance(screenCenter, screenPos),
+                            WorldDistance = unitDistance,
                             Angle = (float)Math.Atan2(screenPos.Y - screenCenter.Y, screenPos.X - screenCenter.X),
                             HpPercent = npc.CurrentHp / (float)npc.MaxHp * 100f,
                             IsTargetable = npc.IsTargetable
@@ -226,7 +232,7 @@ namespace Tabnado.Objects
         {
             var monsters = screenMonsterObjects;
             if (monsters == null || monsters.Count == 0) return null;
-            return monsters.MinBy(m => m.Distance);
+            return monsters.MinBy(m => m.CameraDistance);
         }
         public List<ScreenMonsterObject> GetEnemiesWithinCameraRadius(float radius)
         {
@@ -234,8 +240,8 @@ namespace Tabnado.Objects
                 return new List<ScreenMonsterObject>();
 
             return screenMonsterObjects
-                .Where(monster => monster.Distance <= radius)
-                .OrderBy(monster => monster.Distance)
+                .Where(monster => monster.CameraDistance <= radius)
+                .OrderBy(monster => monster.CameraDistance)
                 .ToList();
         }
 
@@ -245,8 +251,8 @@ namespace Tabnado.Objects
                 return null;
 
             return screenMonsterObjects
-                .Where(monster => monster.Distance <= config.CameraRadius)
-                .MinBy(m => m.Distance);
+                .Where(monster => monster.CameraDistance <= config.CameraRadius)
+                .MinBy(m => m.CameraDistance);
         }
 
         public ScreenMonsterObject? GetClosestEnemyExcluding(List<ScreenMonsterObject> excludeList)
@@ -258,7 +264,7 @@ namespace Tabnado.Objects
 
             return screenMonsterObjects
                 .Where(monster => !excludeSet.Contains(monster.GameObjectId))
-                .MinBy(m => m.Distance);
+                .MinBy(m => m.CameraDistance);
         }
     }
 }

@@ -34,15 +34,15 @@ namespace Tabnado.UI
             {
                 bool configChanged = false;
 
-                float maxTargetDistance = config.MaxTargetDistance;
-                if (ImGui.SliderFloat("Max Target Distance", ref maxTargetDistance, 1f, 100f, "%.1f"))
+                int maxTargetDistance = config.MaxTargetDistance;
+                if (ImGui.SliderInt("Max Target Distance", ref maxTargetDistance, 1, 55))
                 {
                     config.MaxTargetDistance = maxTargetDistance;
                     configChanged = true;
                 }
 
-                float cameraRadius = config.CameraRadius;
-                if (ImGui.SliderFloat("Camera Search Radius", ref cameraRadius, 1f, 1000f, "%.1f"))
+                int cameraRadius = config.CameraRadius;
+                if (ImGui.SliderInt("Camera Search Radius", ref cameraRadius, 1, 1000))
                 {
                     config.CameraRadius = cameraRadius;
                     configChanged = true;
@@ -69,10 +69,10 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                bool showDebugSelection = config.ShowDebugSelection;
-                if (ImGui.Checkbox("Show Debug Selection Info", ref showDebugSelection))
+                bool showDebug = config.ShowDebugSelection;
+                if (ImGui.Checkbox("Show Debug Selection Info", ref showDebug))
                 {
-                    config.ShowDebugSelection = showDebugSelection;
+                    config.ShowDebugSelection = showDebug;
                     configChanged = true;
                 }
 
