@@ -57,6 +57,8 @@ namespace Tabnado.Others
 
         private void ShowDebug()
         {
+            c2e.UpdateEnemyList();
+            return;
             if (config.ShowDebug == false) return;
             var screenCenter = new Vector2(ImGui.GetIO().DisplaySize.X / 2, ImGui.GetIO().DisplaySize.Y / 2);
 
