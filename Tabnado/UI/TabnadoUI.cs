@@ -83,6 +83,17 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
+                int collisionMultiplier = config.CollissionMultiplier;
+                if (ImGui.SliderInt("Collision Multiplier", ref collisionMultiplier, 1, 16))
+                {
+                    config.CollissionMultiplier = collisionMultiplier;
+                    configChanged = true;
+                }
+
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.65f, 0.0f, 1.0f));
+                ImGui.TextWrapped("Higher multiplier: better accuracy visbility check but higher CPU usage!");
+                ImGui.PopStyleColor();
+
                 bool onlyAttackable = config.OnlyHostilePlayers;
                 if (ImGui.Checkbox("Target Only Hostile Players", ref onlyAttackable))
                 {
