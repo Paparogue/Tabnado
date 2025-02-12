@@ -85,10 +85,10 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                bool onlyAttackable = config.OnlyHostiles;
-                if (ImGui.Checkbox("Target Only Hostile Objects", ref onlyAttackable))
+                bool onlyAttackable = config.OnlyHostilePlayers;
+                if (ImGui.Checkbox("Target Only Hostile Players", ref onlyAttackable))
                 {
-                    config.OnlyHostiles = onlyAttackable;
+                    config.OnlyHostilePlayers = onlyAttackable;
                     configChanged = true;
                 }
 

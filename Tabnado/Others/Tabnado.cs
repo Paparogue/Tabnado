@@ -49,7 +49,7 @@ namespace Tabnado.Others
             if (c2e == null)
                 return;
 
-            if (keyDetector.IsKeyPressed())
+            if (keyDetector.IsKeyPressed()) //check that key can only be pressed every 50 milliseconds
             {
                 c2e.UpdateEnemyList();
                 var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);

@@ -85,7 +85,7 @@ namespace Tabnado.Util
 
         private bool IsVisibleFromAnyCorner(ICharacter npc, Vector2[] screenCorners)
         {
-            const float RAYCAST_TOLERANCE = 0.1f;
+            const float RAYCAST_TOLERANCE = 0.5f;
             bool isVisibleFromAny = false;
 
             bool showDebugRaycast = config.ShowDebugRaycast;
@@ -218,7 +218,7 @@ namespace Tabnado.Util
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
 
-                        if (config.OnlyHostiles && !(npc.StatusFlags == StatusFlags.Hostile))
+                        if (config.OnlyHostilePlayers && (npc.StatusFlags == StatusFlags.AllianceMember || npc.StatusFlags == StatusFlags.Friend || npc.StatusFlags == StatusFlags.PartyMember))
                             continue;
 
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)

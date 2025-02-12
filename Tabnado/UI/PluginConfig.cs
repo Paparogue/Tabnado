@@ -24,7 +24,7 @@ namespace Tabnado.UI
 
         public int MaxTargetDistance { get; set; } = 55;
         public int CameraRadius { get; set; } = 300;
-        public bool OnlyHostiles { get; set; } = false;
+        public bool OnlyHostilePlayers { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
