@@ -42,7 +42,7 @@ namespace Tabnado.UI
                 }
 
                 float cameraRadius = config.CameraRadius;
-                if (ImGui.SliderFloat("Camera Search Radius", ref cameraRadius, 1f, 100f, "%.1f"))
+                if (ImGui.SliderFloat("Camera Search Radius", ref cameraRadius, 1f, 1000f, "%.1f"))
                 {
                     config.CameraRadius = cameraRadius;
                     configChanged = true;
@@ -62,10 +62,17 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                bool showDebug = config.ShowDebug;
-                if (ImGui.Checkbox("Show Debug Info", ref showDebug))
+                bool showDebugRaycast = config.ShowDebugRaycast;
+                if (ImGui.Checkbox("Show Debug Raycast Info", ref showDebugRaycast))
                 {
-                    config.ShowDebug = showDebug;
+                    config.ShowDebugRaycast = showDebugRaycast;
+                    configChanged = true;
+                }
+
+                bool showDebugSelection = config.ShowDebugSelection;
+                if (ImGui.Checkbox("Show Debug Selection Info", ref showDebugSelection))
+                {
+                    config.ShowDebugSelection = showDebugSelection;
                     configChanged = true;
                 }
 

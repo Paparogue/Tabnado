@@ -43,30 +43,38 @@ namespace Tabnado.Others
             if (c2e == null)
                 return;
 
+            if (config.ShowDebugRaycast || config.ShowDebugSelection)
+                c2e.UpdateEnemyList();
+
             if (keyDetector.IsTabPressed())
             {
                 c2e.UpdateEnemyList();
                 var enemyList = c2e.GetFullEnemyList();
-                var mObject = c2e.GetClosestCameraEnemy();
+                var mObject = c2e.GetClosestEnemyInCircle();
                 targetManager.Target = mObject?.GameObject;
             }
 
-            ShowDebug();
+            ShowDebugSelection();
         }
 
 
-        private void ShowDebug()
+        private void ShowDebugSelection()
         {
-            c2e.UpdateEnemyList();
-            return;
-            if (config.ShowDebug == false) return;
-            var screenCenter = new Vector2(ImGui.GetIO().DisplaySize.X / 2, ImGui.GetIO().DisplaySize.Y / 2);
+            if (!config.ShowDebugSelection) return;
 
+            var screenCenter = new Vector2(ImGui.GetIO().DisplaySize.X / 2, ImGui.GetIO().DisplaySize.Y / 2);
             var drawList = ImGui.GetForegroundDrawList();
+
             drawList.AddCircleFilled(screenCenter, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
 
-            c2e.UpdateEnemyList();
-            var enemies = c2e.GetFullEnemyList();
+            drawList.AddCircle(
+                screenCenter,
+                config.CameraRadius,
+                ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 0.5f)),
+                32
+            );
+
+            var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)
@@ -77,7 +85,6 @@ namespace Tabnado.Others
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.5f)),
                         2.0f
                     );
-
                     drawList.AddCircleFilled(
                         enemy.ScreenPos,
                         5f,

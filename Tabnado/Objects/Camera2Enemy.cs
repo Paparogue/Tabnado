@@ -11,6 +11,8 @@ using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using ABI.Windows.ApplicationModel.Activation;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using System.Collections.Specialized;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace Tabnado.Objects
 {
@@ -19,17 +21,17 @@ namespace Tabnado.Objects
         private readonly IObjectTable objectTable;
         private readonly IGameGui gameGui;
         private readonly IClientState state;
-        private readonly PluginConfig pluginConfig;
+        private readonly PluginConfig config;
         private readonly IPluginLog pluginLog;
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
 
-        public Camera2Enemy(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig pluginConfig, IPluginLog pluginLog)
+        public Camera2Enemy(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
             this.objectTable = objectTable;
             this.gameGui = gameGui;
             this.state = state;
-            this.pluginConfig = pluginConfig;
+            this.config = config;
             this.pluginLog = pluginLog;
             var cameraManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager.Instance();
             if (cameraManager != null)
@@ -86,8 +88,8 @@ namespace Tabnado.Objects
             const float RAYCAST_TOLERANCE = 1f;
             bool isVisibleFromAny = false;
 
-            bool showDebug = pluginConfig.ShowDebug;
-            var drawList = showDebug ? ImGui.GetForegroundDrawList() : null;
+            bool showDebugRaycast = config.ShowDebugRaycast;
+            var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
 
             Vector2 npcScreenPos;
             bool npcInView;
@@ -105,7 +107,7 @@ namespace Tabnado.Objects
                 {
                     bool raycastReachesNpc = hit.Distance + RAYCAST_TOLERANCE >= distanceToNpc;
 
-                    if (showDebug)
+                    if (showDebugRaycast)
                     {
                         drawList.AddCircleFilled(
                             screenCorners[i],
@@ -142,12 +144,12 @@ namespace Tabnado.Objects
                     if (raycastReachesNpc)
                     {
                         isVisibleFromAny = true;
-                        if (!showDebug) return true;
+                        if (!showDebugRaycast) return true;
                     }
                 }
             }
 
-            if (showDebug && npcInView)
+            if (showDebugRaycast && npcInView)
             {
                 drawList.AddCircleFilled(
                     npcScreenPos,
@@ -173,15 +175,14 @@ namespace Tabnado.Objects
                 {
                     Vector2 screenPos;
                     bool inView;
-                    if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
+                    if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView) 
                     {
-                        if (pluginConfig.OnlyVisibleObjects && state.LocalPlayer != null)
-                        {
+                        if (config.OnlyAttackAbles && !(npc.StatusFlags == StatusFlags.Hostile))
+                            continue;
+
+                        if ((config.OnlyVisibleObjects || config.ShowDebugRaycast) && state.LocalPlayer != null)
                             if (!IsVisibleFromAnyCorner(npc, screenCorners))
-                            {
                                 continue;
-                            }
-                        }
 
                         results.Add(new ScreenMonsterObject
                         {
@@ -236,6 +237,16 @@ namespace Tabnado.Objects
                 .Where(monster => monster.Distance <= radius)
                 .OrderBy(monster => monster.Distance)
                 .ToList();
+        }
+
+        public ScreenMonsterObject? GetClosestEnemyInCircle()
+        {
+            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
+                return null;
+
+            return screenMonsterObjects
+                .Where(monster => monster.Distance <= config.CameraRadius)
+                .MinBy(m => m.Distance);
         }
 
         public ScreenMonsterObject? GetClosestEnemyExcluding(List<ScreenMonsterObject> excludeList)
