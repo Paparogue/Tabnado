@@ -11,10 +11,14 @@ using ImGuiNET;
 using static FFXIVClientStructs.ThisAssembly;
 using static Tabnado.Util.CameraUtil;
 using Tabnado.Util;
+using FFXIVClientStructs.FFXIV.Client.Graphics;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 namespace Tabnado.Others
 {
-    public class Tabnado
+    public unsafe class Tabnado
     {
         private IClientState clientState;
         private IObjectTable objectTable;
@@ -28,8 +32,14 @@ namespace Tabnado.Others
         private bool wasTabPressed = false;
         private int currentEnemyIndex;
         private List<ScreenMonsterObject> lastEnemyList;
+        private DateTime lastUpdateTime = DateTime.Now;
+        private const int CIRCLE_SEGMENTS = 16;
+        private Vector3[] circlePoints;
+        private bool circlePointsInitialized = false;
 
-        public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager, IChatGui chatGui, PluginConfig config, CameraUtil c2e, IGameGui gameGui, IPluginLog pluginLog, KeyDetection keyDetector)
+        public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager,
+                      IChatGui chatGui, PluginConfig config, CameraUtil c2e, IGameGui gameGui,
+                      IPluginLog pluginLog, KeyDetection keyDetector)
         {
             this.clientState = clientState;
             this.objectTable = objectTable;
@@ -42,6 +52,67 @@ namespace Tabnado.Others
             this.keyDetector = keyDetector;
             this.currentEnemyIndex = -1;
             this.lastEnemyList = new();
+            InitializeCirclePoints();
+        }
+
+        private void InitializeCirclePoints()
+        {
+            circlePoints = new Vector3[CIRCLE_SEGMENTS];
+            for (int i = 0; i < CIRCLE_SEGMENTS; i++)
+            {
+                float angle = (float)(2 * Math.PI * i / CIRCLE_SEGMENTS);
+                circlePoints[i] = new Vector3(
+                    MathF.Cos(angle),
+                    0,
+                    MathF.Sin(angle)
+                );
+            }
+            circlePointsInitialized = true;
+        }
+
+        private void Draw3DSelectionCircle(Character* character)
+        {
+            if (!circlePointsInitialized) return;
+
+            var cameraManager = CameraManager.Instance();
+            if (cameraManager == null || cameraManager->CurrentCamera == null) return;
+
+            float radius = character->Height * 0.5f;
+            Vector3 characterPos = new(character->Position.X, character->Position.Y, character->Position.Z);
+
+            var drawList = ImGui.GetForegroundDrawList();
+            Vector2 lastScreenPos = new();
+            bool lastInView = false;
+
+            for (int i = 0; i <= CIRCLE_SEGMENTS; i++)
+            {
+                int index = i % CIRCLE_SEGMENTS;
+                Vector3 worldPoint = new(
+                    characterPos.X + (circlePoints[index].X * radius),
+                    characterPos.Y + 0.1f,
+                    characterPos.Z + (circlePoints[index].Z * radius)
+                );
+
+                Vector2 screenPos;
+                bool inView;
+                gameGui.WorldToScreen(worldPoint, out screenPos, out inView);
+
+                if (i > 0 && (inView || lastInView))
+                {
+                    float time = (float)(DateTime.Now.Millisecond) / 1000f;
+                    float alpha = 0.4f + (MathF.Sin(time * MathF.PI * 2) * 0.2f);
+
+                    drawList.AddLine(
+                        lastScreenPos,
+                        screenPos,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0.7f, 0, alpha)),
+                        2f
+                    );
+                }
+
+                lastScreenPos = screenPos;
+                lastInView = inView;
+            }
         }
 
         public void Draw()
@@ -74,8 +145,34 @@ namespace Tabnado.Others
                     lastEnemyList.Clear();
                 }
             }
-            if (config.ShowDebugRaycast || config.ShowDebugSelection)
-                c2e.UpdateEnemyList();
+
+            if (config.ShowDebugRaycast || config.ShowDebugSelection || config.DrawSelection)
+            {
+                var currentTime = DateTime.Now;
+                if (((currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate) || (config.ShowDebugRaycast || config.ShowDebugSelection))
+                {
+                    c2e.UpdateEnemyList();
+                    lastUpdateTime = currentTime;
+                }
+            }
+
+            if (config.DrawSelection)
+            {
+                var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                if (enemies != null && enemies.Count > 0)
+                {
+                    int nextIndex = (currentEnemyIndex + 1) >= enemies.Count ? 0 : currentEnemyIndex + 1;
+
+                    if (nextIndex < enemies.Count)
+                    {
+                        var nextTarget = enemies[nextIndex];
+                        if (nextTarget?.GameObject is IGameObject gameObject)
+                        {
+                            Draw3DSelectionCircle((Character*)gameObject.Address);
+                        }
+                    }
+                }
+            }
 
             ShowDebugSelection();
         }

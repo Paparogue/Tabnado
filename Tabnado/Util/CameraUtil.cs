@@ -30,6 +30,9 @@ namespace Tabnado.Util
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
         public unsafe GroupManager* gpm;
+        private float screenWidth;
+        private float screenHeight;
+        Vector2 screenCenter;
 
         public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -38,7 +41,10 @@ namespace Tabnado.Util
             this.state = state;
             this.config = config;
             this.pluginLog = pluginLog;
-            gpm = FFXIVClientStructs.FFXIV.Client.Game.Group.GroupManager.Instance();
+            gpm = GroupManager.Instance();
+            screenWidth = ImGui.GetIO().DisplaySize.X;
+            screenHeight = ImGui.GetIO().DisplaySize.Y;
+            screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
@@ -64,8 +70,6 @@ namespace Tabnado.Util
 
         private Vector2[] GetScreenEdgePoints()
         {
-            float screenWidth = ImGui.GetIO().DisplaySize.X;
-            float screenHeight = ImGui.GetIO().DisplaySize.Y;
             int segments = config.CollissionMultiplier;
             int pointsPerEdge = segments + 1;
             List<Vector2> points = new List<Vector2>();
@@ -191,9 +195,6 @@ namespace Tabnado.Util
         private void Update()
         {
             var results = new List<ScreenMonsterObject>();
-            float screenWidth = ImGui.GetIO().DisplaySize.X;
-            float screenHeight = ImGui.GetIO().DisplaySize.Y;
-            var screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             foreach (var obj in objectTable)
             {
@@ -213,6 +214,7 @@ namespace Tabnado.Util
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
                             if (!IsVisibleFromAnyEdge(npc, screenEdgePoints))
                                 continue;
+
                         results.Add(new ScreenMonsterObject
                         {
                             GameObjectId = npc.GameObjectId,

@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<VersionPrefix>1.1.0</VersionPrefix>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<Platforms>x64</Platforms>
 		<Nullable>enable</Nullable>
@@ -9,7 +10,6 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-
 		<DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 		<DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
 		<DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
