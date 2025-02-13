@@ -3,7 +3,7 @@
 
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
 
-A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting system by applying more intelligent filtering and visibility checks. Tired of cycling through every single object in front of you? **Tabnado** is here to save the day!
+A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting system by applying more intelligent filtering and visibility checks.
 
 ---
 
@@ -26,7 +26,7 @@ A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting s
    - Chooses targets based on what's closest to the center of your screen, making it easier to switch quickly in hectic fights.
 
 4. **Configurable Keys**  
-   - Bind any key (e.g., `Tab`, `F1`, etc.) to trigger Tabnado’s targeting logic, freeing you from the default game keybind limitations.
+   - Bind any key (e.g., `Tab`, `F1`, etc.) to trigger Tabnado’s targeting logic.
 
 5. **Debug Views**  
    - Turn on debug displays to visualize how Tabnado processes targets and see line-of-sight checks in real-time.
@@ -37,11 +37,11 @@ A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting s
 
 Tabnado operates by:
 1. **Scanning Nearby Objects**  
-   It looks for enemies or players within a certain radius (default 55 yalms).
+   It looks for enemies or players within a certain radius.
 2. **Performing Visibility Checks**  
    It uses collision raycasts to see if a potential target is actually visible, ignoring those behind walls or large obstacles.
 3. **Prioritizing**  
-   Among all valid targets, it picks the one closest to your camera center or within the configured distance.
+   Among all valid targets, it picks the one closest to your camera center or within the configured radius distance.
    
 ---
 
