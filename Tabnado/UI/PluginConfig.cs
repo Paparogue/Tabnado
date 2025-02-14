@@ -30,6 +30,7 @@ namespace Tabnado.UI
         public bool OnlyHostilePlayers { get; set; } = true;
         public bool UseCameraRotationReset { get; set; } = true;
         public bool UseCombatantReset { get; set; } = false;
+        public bool UseNewTargetReset { get; set; } = true;
         public bool OnlyBattleNPCs { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
         public bool DrawSelection { get; set; } = false;

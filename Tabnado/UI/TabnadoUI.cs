@@ -133,6 +133,17 @@ namespace Tabnado.UI
                 ImGui.TextWrapped("Target selection resets when new combatants enter the specified targeting radius"); ;
                 ImGui.PopStyleColor();
 
+                bool useNewTargetReset = config.UseNewTargetReset;
+                if (ImGui.Checkbox("Use new main target as reset", ref useCombatantReset))
+                {
+                    config.UseNewTargetReset = useNewTargetReset;
+                    configChanged = true;
+                }
+
+                ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
+                ImGui.TextWrapped("Target priority updates when a new entity becomes the nearest valid target");
+                ImGui.PopStyleColor();
+
                 ImGui.Spacing();
 
                 ImGui.TextDisabled("Target Filtering Options");
