@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Tabnado.Others;
 using Dalamud.Plugin;
 using ImGuiNET;
 using Tabnado.Util;
@@ -13,16 +12,16 @@ namespace Tabnado.UI
 
         private bool settingsVisible = false;
         private readonly PluginConfig config;
-        private readonly Others.Tabnado targetingManager;
+        private readonly Tabnado tabnado;
         private readonly IDalamudPluginInterface pluginInterface;
-        private readonly KeyDetection keyDetector;
+        private readonly KeyDetection keyDetection;
 
-        public TabnadoUI(IDalamudPluginInterface pluginInterface, PluginConfig config, Others.Tabnado targetingManager, KeyDetection keyDetector)
+        public TabnadoUI(IDalamudPluginInterface pluginInterface, PluginConfig config, Tabnado targetingManager, KeyDetection keyDetector)
         {
             this.pluginInterface = pluginInterface;
             this.config = config;
-            this.targetingManager = targetingManager;
-            this.keyDetector = keyDetector;
+            this.tabnado = targetingManager;
+            this.keyDetection = keyDetector;
         }
 
         public void ToggleVisibility()
@@ -55,7 +54,7 @@ namespace Tabnado.UI
                         if (ImGui.Selectable(key.Key, isSelected))
                         {
                             config.SelectedKey = key.Key;
-                            keyDetector.SetCurrentKey(key.Value);
+                            keyDetection.SetCurrentKey(key.Value);
                             configChanged = true;
                         }
                         if (isSelected)
@@ -101,6 +100,37 @@ namespace Tabnado.UI
 
                 ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
                 ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
+                ImGui.PopStyleColor();
+
+                bool useCameraRotationReset = config.UseCameraRotationReset;
+                if (ImGui.Checkbox("Camera rotation resets selection", ref useCameraRotationReset))
+                {
+                    config.UseCameraRotationReset = useCameraRotationReset;
+                    configChanged = true;
+                }
+
+                if(useCameraRotationReset) {
+                    int rotationPercent = config.RotationPercent;
+                    if (ImGui.SliderInt("Camera Rotation Reset Percent", ref rotationPercent, 1, 100))
+                    {
+                        config.RotationPercent = rotationPercent;
+                        configChanged = true;
+                    }
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
+                    ImGui.TextWrapped("Camera rotation exceeding this threshold will reset target selection to the nearest enemy in camera range.");
+                    ImGui.PopStyleColor();
+                }
+
+                bool useCombatantReset = config.UseCombatantReset;
+                if (ImGui.Checkbox("Combatants resets selection", ref useCombatantReset))
+                {
+                    config.UseCombatantReset = useCombatantReset;
+                    configChanged = true;
+                }
+
+                ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
+                ImGui.TextWrapped("Target selection resets when new combatants enter the specified targeting radius"); ;
                 ImGui.PopStyleColor();
 
                 ImGui.Spacing();

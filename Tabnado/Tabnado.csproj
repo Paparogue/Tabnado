@@ -39,5 +39,9 @@
 		</Reference>
 	</ItemGroup>
 
-	<Import Project="$(DalamudLibPath)/targets/Dalamud.Plugin.targets"/>
+	<ItemGroup>
+	  <Folder Include="Others\" />
+	</ItemGroup>
+
+	<Import Project="$(DalamudLibPath)/targets/Dalamud.Plugin.targets" />
 </Project>

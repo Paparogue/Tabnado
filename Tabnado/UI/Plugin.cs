@@ -1,5 +1,4 @@
-﻿using Tabnado.Others;
-using Dalamud.Game.ClientState.Objects;
+﻿using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
@@ -31,10 +30,10 @@ namespace Tabnado.UI
         public IPluginLog pluginLog { get; set; } = null!;
 
         private PluginConfig PluginConfig;
-        private Others.Tabnado targetingManager;
-        private TabnadoUI targetingUI;
-        private CameraUtil cameraEnemyList;
-        private KeyDetection keyDetector;
+        private Tabnado tabnado;
+        private TabnadoUI tabnadoUI;
+        private CameraUtil cameraUtil;
+        private KeyDetection keyDetection;
 
         public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commandManager)
         {
@@ -44,10 +43,10 @@ namespace Tabnado.UI
             PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
             PluginConfig.Initialize(PluginInterface);
 
-            keyDetector = new KeyDetection();
-            cameraEnemyList = new CameraUtil(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
-            targetingManager = new Others.Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraEnemyList, gameGui, pluginLog, keyDetector);
-            targetingUI = new TabnadoUI(PluginInterface, PluginConfig, targetingManager, keyDetector);
+            keyDetection = new KeyDetection();
+            cameraUtil = new CameraUtil(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
+            tabnado = new Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraUtil, gameGui, pluginLog, keyDetection);
+            tabnadoUI = new TabnadoUI(PluginInterface, PluginConfig, tabnado, keyDetection);
             CommandManager.AddHandler("/tabnado", new CommandInfo(OnToggleUI)
             {
                 HelpMessage = "Toggles the Tabnado settings window."
@@ -69,7 +68,7 @@ namespace Tabnado.UI
 
         private void OnToggleUI(string command, string args)
         {
-            targetingUI.ToggleVisibility();
+            tabnadoUI.ToggleVisibility();
         }
 
         private void OnToggleUI()
@@ -80,8 +79,8 @@ namespace Tabnado.UI
         {
             if (ClientState.LocalPlayer != null)
             {
-                targetingManager.Draw();
-                targetingUI.Draw();
+                tabnado.Draw();
+                tabnadoUI.Draw();
             }
         }
     }

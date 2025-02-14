@@ -16,7 +16,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
-namespace Tabnado.Others
+namespace Tabnado
 {
     public unsafe class Tabnado
     {
@@ -25,10 +25,10 @@ namespace Tabnado.Others
         private ITargetManager targetManager;
         private IChatGui chatGui;
         private PluginConfig config;
-        private CameraUtil c2e;
+        private CameraUtil cameraUtil;
         private IGameGui gameGui;
         private IPluginLog pluginLog;
-        private KeyDetection keyDetector;
+        private KeyDetection keyDetection;
         private bool wasTabPressed = false;
         private int currentEnemyIndex;
         private List<ScreenMonsterObject> lastEnemyList;
@@ -38,20 +38,20 @@ namespace Tabnado.Others
         private bool circlePointsInitialized = false;
 
         public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager,
-                      IChatGui chatGui, PluginConfig config, CameraUtil c2e, IGameGui gameGui,
-                      IPluginLog pluginLog, KeyDetection keyDetector)
+                      IChatGui chatGui, PluginConfig config, CameraUtil cameraUtil, IGameGui gameGui,
+                      IPluginLog pluginLog, KeyDetection keyDetection)
         {
             this.clientState = clientState;
             this.objectTable = objectTable;
             this.targetManager = targetManager;
             this.chatGui = chatGui;
             this.config = config;
-            this.c2e = c2e;
+            this.cameraUtil = cameraUtil;
             this.gameGui = gameGui;
             this.pluginLog = pluginLog;
-            this.keyDetector = keyDetector;
-            this.currentEnemyIndex = -1;
-            this.lastEnemyList = new();
+            this.keyDetection = keyDetection;
+            currentEnemyIndex = -1;
+            lastEnemyList = new();
             InitializeCirclePoints();
         }
 
@@ -88,9 +88,9 @@ namespace Tabnado.Others
             {
                 int index = i % CIRCLE_SEGMENTS;
                 Vector3 worldPoint = new(
-                    characterPos.X + (circlePoints[index].X * radius),
+                    characterPos.X + circlePoints[index].X * radius,
                     characterPos.Y + 0.1f,
-                    characterPos.Z + (circlePoints[index].Z * radius)
+                    characterPos.Z + circlePoints[index].Z * radius
                 );
 
                 Vector2 screenPos;
@@ -99,8 +99,8 @@ namespace Tabnado.Others
 
                 if (i > 0 && (inView || lastInView))
                 {
-                    float time = (float)(DateTime.Now.Millisecond) / 1000f;
-                    float alpha = 0.4f + (MathF.Sin(time * MathF.PI * 2) * 0.2f);
+                    float time = DateTime.Now.Millisecond / 1000f;
+                    float alpha = 0.4f + MathF.Sin(time * MathF.PI * 2) * 0.2f;
 
                     drawList.AddLine(
                         lastScreenPos,
@@ -117,13 +117,15 @@ namespace Tabnado.Others
 
         public void Draw()
         {
-            if (c2e == null)
+            if (cameraUtil == null)
                 return;
 
-            if (keyDetector.IsKeyPressed())
+            var cameraExeecds = cameraUtil.CameraExceedsRotation();
+
+            if (keyDetection.IsKeyPressed())
             {
-                c2e.UpdateEnemyList();
-                var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                cameraUtil.UpdateEnemyList();
+                var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
 
                 if (!IsListEqual(lastEnemyList, enemies))
                 {
@@ -149,19 +151,19 @@ namespace Tabnado.Others
             if (config.ShowDebugRaycast || config.ShowDebugSelection || config.DrawSelection)
             {
                 var currentTime = DateTime.Now;
-                if (((currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate) || (config.ShowDebugRaycast || config.ShowDebugSelection))
+                if ((currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate || config.ShowDebugRaycast || config.ShowDebugSelection)
                 {
-                    c2e.UpdateEnemyList();
+                    cameraUtil.UpdateEnemyList();
                     lastUpdateTime = currentTime;
                 }
             }
 
             if (config.DrawSelection)
             {
-                var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 if (enemies != null && enemies.Count > 0)
                 {
-                    int nextIndex = (currentEnemyIndex + 1) >= enemies.Count ? 0 : currentEnemyIndex + 1;
+                    int nextIndex = currentEnemyIndex + 1 >= enemies.Count ? 0 : currentEnemyIndex + 1;
 
                     if (nextIndex < enemies.Count)
                     {
@@ -207,7 +209,7 @@ namespace Tabnado.Others
                 32
             );
 
-            var enemies = c2e.GetEnemiesWithinCameraRadius(config.CameraRadius);
+            var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)

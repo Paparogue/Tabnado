@@ -29,10 +29,11 @@ namespace Tabnado.Util
         private readonly IPluginLog pluginLog;
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
-        public unsafe GroupManager* gpm;
+        public unsafe GroupManager* groupManager;
         private float screenWidth;
         private float screenHeight;
         Vector2 screenCenter;
+        private Matrix4x4 lastViewMatrix;
 
         public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -41,13 +42,14 @@ namespace Tabnado.Util
             this.state = state;
             this.config = config;
             this.pluginLog = pluginLog;
-            gpm = GroupManager.Instance();
+            groupManager = GroupManager.Instance();
             screenWidth = ImGui.GetIO().DisplaySize.X;
             screenHeight = ImGui.GetIO().DisplaySize.Y;
             screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
+            lastViewMatrix = camera->ViewMatrix;
         }
 
         public class ScreenMonsterObject
@@ -183,13 +185,36 @@ namespace Tabnado.Util
             drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
         }
 
-        public unsafe bool IsObjectFriendly(GameObject* ob)
+        public unsafe bool IsObjectAllianceOrGroup(GameObject* ob)
         {
             if (ob is null) return false;
-            if (gpm is null) return false;
-            bool isAlliance = gpm->MainGroup.IsEntityIdInAlliance(ob->EntityId);
-            bool isGroup = gpm->MainGroup.IsEntityIdInParty(ob->EntityId);
+            bool isAlliance = groupManager->MainGroup.IsEntityIdInAlliance(ob->EntityId);
+            bool isGroup = groupManager->MainGroup.IsEntityIdInParty(ob->EntityId);
             return isAlliance || isGroup;
+        }
+
+        public bool CameraExceedsRotation()
+        {
+            float ROTATION_THRESHOLD = config.RotationPercent;
+            Matrix4x4 currentViewMatrix = camera->ViewMatrix;
+            Vector3 lastForward = new Vector3(lastViewMatrix.M13, lastViewMatrix.M23, lastViewMatrix.M33);
+            Vector3 lastUp = new Vector3(lastViewMatrix.M12, lastViewMatrix.M22, lastViewMatrix.M32);
+
+            Vector3 currentForward = new Vector3(currentViewMatrix.M13, currentViewMatrix.M23, currentViewMatrix.M33);
+            Vector3 currentUp = new Vector3(currentViewMatrix.M12, currentViewMatrix.M22, currentViewMatrix.M32);
+
+            float forwardAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastForward), Vector3.Normalize(currentForward)));
+            float upAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastUp), Vector3.Normalize(currentUp)));
+
+            float rotationPercentage = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
+
+            if (rotationPercentage >= ROTATION_THRESHOLD)
+            {
+                lastViewMatrix = currentViewMatrix;
+                return true;
+            }
+
+            return false;
         }
 
         private void Update()
@@ -207,7 +232,7 @@ namespace Tabnado.Util
                         float unitDistance = Vector3.Distance(state.LocalPlayer.Position, npc.Position);
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
-                        if (config.OnlyHostilePlayers && IsObjectFriendly((GameObject*)npc.Address))
+                        if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
                             continue;
                         if (config.OnlyBattleNPCs && obj.ObjectKind == ObjectKind.EventNpc)
                             continue;
