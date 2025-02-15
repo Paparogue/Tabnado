@@ -1,50 +1,68 @@
 # Tabnado
-> Because tab targeting is hard.
+
+> A sophisticated tab-targeting enhancement plugin for Final Fantasy XIV using Dalamud
 
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
 
-A Dalamud plugin for Final Fantasy XIV that enhances the default tab-targeting system by applying more intelligent filtering and visibility checks.
-
----
-
-## Table of Contents
-- [Features](#features)
-- [How It Works](#how-it-works)
-- [Configurations](#configurations)
-
----
+Tabnado enhances FFXIV's default tab-targeting system through intelligent algorithms, advanced visibility checks, and customizable targeting preferences for both PvE and PvP.
 
 ## Features
 
-1. **Intelligent Targeting**  
-   - Only target enemies or players that are actually in your line of sight (using a configurable collision multiplier).
+### Core Targeting
+- **Line of Sight**: Advanced raycast calculations ensure targets are actually visible
+- **Distance Management**: 
+  - Configurable maximum range (up to 55 yalms)
+  - Adjustable camera radius for selection
+  - Dynamic filtering based on screen center distance
+- **Smart Selection**:
+  - Camera-centric targeting priority
+  - Optional reset based on camera rotation
+  - Configurable target table cleanup
 
-2. **Distance Threshold**  
-   - Prevents targeting enemies or objects that are too far away (configurable up to 55 yalms by default).
+### Combat Modes
+- **PvP Optimization**:
+  - Hostile player targeting
+  - Alliance/party member filtering
+- **PvE Enhancements**:
+  - Battle NPC filtering
+  - Configurable reset conditions
 
-3. **Camera-Based Selection**  
-   - Chooses targets based on what's closest to the center of your screen, making it easier to switch quickly in hectic fights.
+### Technical Systems
+- **Raycast Configuration**:
+  - Adjustable multiplier for precision vs performance
+  - Multiple collision detection points
+  - Camera rotation threshold options
+- **Performance Features**:
+  - Efficient target table management
+  - Customizable refresh rates
+  - Performance-based scaling
 
-4. **Configurable Keys**  
-   - Bind any key (e.g., `Tab`, `F1`, etc.) to trigger Tabnado’s targeting logic.
+## Configuration
 
-5. **Debug Views**  
-   - Turn on debug displays to visualize how Tabnado processes targets and see line-of-sight checks in real-time.
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/038c96a4cd18140322f988d9e22e661121ee9515/version1.2.png)
 
----
+### Key Settings
+- **Distance**: Maximum targeting range (1-55 yalms)
+- **Camera**: Search radius from screen center
+- **Raycast**: Precision multiplier (higher = more accurate but more demanding)
+- **Reset Triggers**:
+  - Camera rotation threshold
+  - New combatant detection
+  - Nearest target changes
+- **Filters**:
+  - PvP: Hostile players only
+  - PvE: Battle NPCs only
+  - Visibility requirements
+  - Dead target management
 
-## How It Works
+### Debug Tools
+- Target selection preview
+- Line-of-sight visualization
+- Selection process information
 
-Tabnado operates by:
-1. **Scanning Nearby Objects**  
-   It looks for enemies or players within a certain radius.
-2. **Performing Visibility Checks**  
-   It uses collision raycasts to see if a potential target is actually visible, ignoring those behind walls or large obstacles.
-3. **Prioritizing**  
-   Among all valid targets, it picks the one closest to your camera center or within the configured radius distance.
-   
----
+## Installation & Usage
 
-## Configurations
-
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/e086b975161d4844f0a097a50d38e28b772a73b9/config.png)
+1. Install via FFXIV Dalamud plugin installer
+2. Type `/tabnado` to configure
+3. Set targeting key (default: Tab)
+4. Unbind FFXIV's default target key if using Tab
