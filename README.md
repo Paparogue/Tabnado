@@ -21,7 +21,7 @@ Tabnado enhances FFXIV's default tab-targeting system through intelligent algori
 
 ## Configuration
 
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/038c96a4cd18140322f988d9e22e661121ee9515/version1.2.png)
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/345c70ed176ac83051a922e59002944206b4d55b/tabnado_config.png)
 
 ### Key Settings
 - **Distance**: Maximum targeting range (1-55 yalms)
