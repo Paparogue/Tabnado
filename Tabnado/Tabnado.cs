@@ -126,20 +126,18 @@ namespace Tabnado
 
             List<ScreenMonsterObject> enemies = null;
             var currentTime = DateTime.Now;
-            var clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > 250;
-            var refreshRateUpdate = config.DrawSelection && (currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate;
+            bool clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > 1000;
 
-            if (config.ShowDebugRaycast || config.ShowDebugSelection || refreshRateUpdate || clearTargetUpdate)
+            if (config.ShowDebugRaycast || config.ShowDebugSelection || clearTargetUpdate)
             {
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
-                lastUpdateTime = currentTime;
-                if(clearTargetUpdate && enemies.Count <= 0)
+                lastClearTime = currentTime;
+                if (enemies.Count <= 0)
                 {
                     currentEnemyIndex = -1;
                     lastEnemyList.Clear();
                     previousClosestTargetId = 0;
-                    lastClearTime = currentTime;
                 }
             }
 

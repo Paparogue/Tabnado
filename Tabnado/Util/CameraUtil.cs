@@ -29,10 +29,10 @@ namespace Tabnado.Util
         private readonly IPluginLog pluginLog;
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
-        public unsafe GroupManager* groupManager;
+        private GroupManager* groupManager;
         private float screenWidth;
         private float screenHeight;
-        Vector2 screenCenter;
+        private Vector2 screenCenter;
         private Matrix4x4 lastViewMatrix;
         const float RAYCAST_TOLERANCE = 0.1f;
 

@@ -33,7 +33,7 @@ namespace Tabnado.UI
         public bool UseNewTargetReset { get; set; } = true;
         public bool OnlyBattleNPCs { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
-        public bool ClearTargetTable { get; set; } = true;
+        public bool ClearTargetTable { get; set; } = false;
         public bool DrawSelection { get; set; } = false;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
