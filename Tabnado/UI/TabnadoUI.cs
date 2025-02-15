@@ -91,16 +91,21 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                int rayMultiplier = config.CollissionMultiplier;
+                int rayMultiplier = config.RaycastMultiplier;
                 if (ImGui.SliderInt("Raycast Multiplier", ref rayMultiplier, 1, 16))
                 {
-                    config.CollissionMultiplier = rayMultiplier;
+                    config.RaycastMultiplier = rayMultiplier;
                     configChanged = true;
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
                 ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
                 ImGui.PopStyleColor();
+
+                ImGui.Spacing();
+
+                ImGui.TextDisabled("Target Reset Options");
+                ImGui.Separator();
 
                 bool useCameraRotationReset = config.UseCameraRotationReset;
                 if (ImGui.Checkbox("Camera rotation resets selection", ref useCameraRotationReset))
@@ -111,14 +116,14 @@ namespace Tabnado.UI
 
                 if(useCameraRotationReset) {
                     int rotationPercent = config.RotationPercent;
-                    if (ImGui.SliderInt("Camera Rotation Reset Percent", ref rotationPercent, 1, 100))
+                    if (ImGui.SliderInt("% camera movement until reset", ref rotationPercent, 1, 100))
                     {
                         config.RotationPercent = rotationPercent;
                         configChanged = true;
                     }
 
-                    ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                    ImGui.TextWrapped("Camera rotation exceeding this threshold will reset target selection to the nearest enemy in camera range.");
+                    ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
+                    ImGui.TextWrapped("Target selection resets when camera rotation exceeding this threshold.");
                     ImGui.PopStyleColor();
                 }
 
@@ -129,19 +134,19 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                ImGui.TextWrapped("Target selection resets when new combatants enter the specified targeting radius"); ;
+                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
+                ImGui.TextWrapped("Target selection resets when new entity enters the specified camera search radius."); ;
                 ImGui.PopStyleColor();
 
                 bool useNewTargetReset = config.UseNewTargetReset;
-                if (ImGui.Checkbox("Use new main target as reset", ref useCombatantReset))
+                if (ImGui.Checkbox("Use new main target as reset", ref useNewTargetReset))
                 {
                     config.UseNewTargetReset = useNewTargetReset;
                     configChanged = true;
                 }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                ImGui.TextWrapped("Target priority updates when a new entity becomes the nearest valid target");
+                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
+                ImGui.TextWrapped("Target selection resets when a new entity becomes the nearest valid target.");
                 ImGui.PopStyleColor();
 
                 ImGui.Spacing();
@@ -172,6 +177,18 @@ namespace Tabnado.UI
 
                 ImGui.Spacing();
 
+                ImGui.TextDisabled("Other Options");
+                ImGui.Separator();
+
+                bool clearTargetTable = config.ClearTargetTable;
+                if (ImGui.Checkbox("Periodically Clear Dead Target Table (PvE/PvP)", ref clearTargetTable))
+                {
+                    config.ClearTargetTable = clearTargetTable;
+                    configChanged = true;
+                }
+
+                ImGui.Spacing();
+
                 ImGui.TextDisabled("Debug Options");
                 ImGui.Separator();
 
@@ -179,12 +196,13 @@ namespace Tabnado.UI
                 ImGui.TextWrapped("Warning: Enabling this option may significantly impact performance!");
                 ImGui.PopStyleColor();
 
+                /*
                 bool drawSelection = config.DrawSelection;
                 if (ImGui.Checkbox("Draw the Object that would be selected (PvE/PvP)", ref drawSelection))
                 {
                     config.DrawSelection = drawSelection;
                     configChanged = true;
-                }
+                }*/
 
                 bool showDebugRaycast = config.ShowDebugRaycast;
                 if (ImGui.Checkbox("Show Debug Raycast Info (PvE/PvP)", ref showDebugRaycast))
@@ -200,12 +218,13 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
+                /*
                 int drawRefreshRate = config.DrawRefreshRate;
                 if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
                 {
                     config.DrawRefreshRate = drawRefreshRate;
                     configChanged = true;
-                }
+                }*/
 
                 if (configChanged)
                     config.Save();

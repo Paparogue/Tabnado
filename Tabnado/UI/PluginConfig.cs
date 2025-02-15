@@ -25,7 +25,7 @@ namespace Tabnado.UI
         public int MaxTargetDistance { get; set; } = 55;
         public int CameraRadius { get; set; } = 400;
         public int RotationPercent { get; set; } = 5;
-        public int CollissionMultiplier { get; set; } = 8;
+        public int RaycastMultiplier { get; set; } = 8;
         public int DrawRefreshRate { get; set; } = 60;
         public bool OnlyHostilePlayers { get; set; } = true;
         public bool UseCameraRotationReset { get; set; } = true;
@@ -33,6 +33,7 @@ namespace Tabnado.UI
         public bool UseNewTargetReset { get; set; } = true;
         public bool OnlyBattleNPCs { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
+        public bool ClearTargetTable { get; set; } = true;
         public bool DrawSelection { get; set; } = false;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;

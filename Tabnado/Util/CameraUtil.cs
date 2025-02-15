@@ -34,6 +34,7 @@ namespace Tabnado.Util
         private float screenHeight;
         Vector2 screenCenter;
         private Matrix4x4 lastViewMatrix;
+        const float RAYCAST_TOLERANCE = 0.1f;
 
         public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -60,9 +61,6 @@ namespace Tabnado.Util
             public required Vector2 ScreenPos { get; set; }
             public required float WorldDistance { get; set; }
             public required float CameraDistance { get; set; }
-            public required float Angle { get; set; }
-            public required float HpPercent { get; set; }
-            public required bool IsTargetable { get; set; }
         }
 
         private static float Lerp(float a, float b, float t)
@@ -72,7 +70,7 @@ namespace Tabnado.Util
 
         private Vector2[] GetScreenEdgePoints()
         {
-            int segments = config.CollissionMultiplier;
+            int segments = config.RaycastMultiplier;
             int pointsPerEdge = segments + 1;
             List<Vector2> points = new List<Vector2>();
             for (int i = 0; i < pointsPerEdge; i++)
@@ -114,7 +112,6 @@ namespace Tabnado.Util
 
         private bool IsVisibleFromAnyEdge(ICharacter npc, Vector2[] screenEdgePoints)
         {
-            const float RAYCAST_TOLERANCE = 0.5f;
             bool isVisibleFromAny = false;
             bool showDebugRaycast = config.ShowDebugRaycast;
             var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
@@ -181,7 +178,7 @@ namespace Tabnado.Util
                 drawList.AddCircleFilled(hitScreenPos, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
             }
             Vector2 textPos = Vector2.Lerp(originPos, targetPos, 0.5f);
-            string distanceText = $"Hit: {hit.Distance:F1}";
+            string distanceText = $"{hit.Distance:F1}";
             drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
         }
 
@@ -195,7 +192,6 @@ namespace Tabnado.Util
 
         public bool CameraExceedsRotation()
         {
-            float ROTATION_THRESHOLD = config.RotationPercent;
             Matrix4x4 currentViewMatrix = camera->ViewMatrix;
             Vector3 lastForward = new Vector3(lastViewMatrix.M13, lastViewMatrix.M23, lastViewMatrix.M33);
             Vector3 lastUp = new Vector3(lastViewMatrix.M12, lastViewMatrix.M22, lastViewMatrix.M32);
@@ -208,7 +204,7 @@ namespace Tabnado.Util
 
             float rotationPercentage = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
 
-            if (rotationPercentage >= ROTATION_THRESHOLD)
+            if (rotationPercentage >= ((float)config.RotationPercent/100f))
             {
                 lastViewMatrix = currentViewMatrix;
                 return true;
@@ -247,10 +243,7 @@ namespace Tabnado.Util
                             NameNKind = npc.Name.ToString() + " " + obj.ObjectKind.ToString(),
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
-                            WorldDistance = unitDistance,
-                            Angle = (float)Math.Atan2(screenPos.Y - screenCenter.Y, screenPos.X - screenCenter.X),
-                            HpPercent = npc.CurrentHp / (float)npc.MaxHp * 100f,
-                            IsTargetable = npc.IsTargetable
+                            WorldDistance = unitDistance
                         });
                     }
                 }

@@ -32,7 +32,9 @@ namespace Tabnado
         private bool wasTabPressed = false;
         private int currentEnemyIndex;
         private List<ScreenMonsterObject> lastEnemyList;
-        private DateTime lastUpdateTime = DateTime.Now;
+        private DateTime lastUpdateTime;
+        private DateTime lastClearTime;
+        private ulong previousClosestTargetId;
         private const int CIRCLE_SEGMENTS = 16;
         private Vector3[] circlePoints;
         private bool circlePointsInitialized = false;
@@ -50,6 +52,8 @@ namespace Tabnado
             this.gameGui = gameGui;
             this.pluginLog = pluginLog;
             this.keyDetection = keyDetection;
+            lastUpdateTime = DateTime.Now;
+            lastClearTime = DateTime.Now;
             currentEnemyIndex = -1;
             lastEnemyList = new();
             InitializeCirclePoints();
@@ -120,63 +124,73 @@ namespace Tabnado
             if (cameraUtil == null)
                 return;
 
-            var cameraExeecds = cameraUtil.CameraExceedsRotation();
+            List<ScreenMonsterObject> enemies = null;
+            var currentTime = DateTime.Now;
+            var clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > 250;
+            var refreshRateUpdate = config.DrawSelection && (currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate;
+
+            if (config.ShowDebugRaycast || config.ShowDebugSelection || refreshRateUpdate || clearTargetUpdate)
+            {
+                cameraUtil.UpdateEnemyList();
+                enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                lastUpdateTime = currentTime;
+                if(clearTargetUpdate && enemies.Count <= 0)
+                {
+                    currentEnemyIndex = -1;
+                    lastEnemyList.Clear();
+                    previousClosestTargetId = 0;
+                    lastClearTime = currentTime;
+                }
+            }
 
             if (keyDetection.IsKeyPressed())
             {
                 cameraUtil.UpdateEnemyList();
-                var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                bool resetTarget = false;
 
-                if (!IsListEqual(lastEnemyList, enemies))
+                if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation())
                 {
-                    currentEnemyIndex = -1;
+                    resetTarget = true;
+                }
+
+                if (config.UseCombatantReset && !IsListEqual(lastEnemyList, enemies))
+                {
+                    resetTarget = true;
                     lastEnemyList = new List<ScreenMonsterObject>(enemies);
+                }
+
+                if (config.UseNewTargetReset && enemies.Count > 0)
+                {
+                    var closestEnemy = enemies[0];
+                    if (closestEnemy.GameObjectId != previousClosestTargetId)
+                    {
+                        resetTarget = true;
+                        previousClosestTargetId = closestEnemy.GameObjectId;
+                    }
                 }
 
                 if (enemies.Count > 0)
                 {
-                    currentEnemyIndex++;
-                    if (currentEnemyIndex >= enemies.Count)
+                    if (resetTarget)
+                    {
                         currentEnemyIndex = 0;
+                    }
+                    else
+                    {
+                        currentEnemyIndex++;
+                        if (currentEnemyIndex >= enemies.Count)
+                            currentEnemyIndex = 0;
+                    }
 
                     targetManager.Target = enemies[currentEnemyIndex].GameObject;
                 }
-                else
-                {
-                    currentEnemyIndex = -1;
-                    lastEnemyList.Clear();
-                }
             }
 
-            if (config.ShowDebugRaycast || config.ShowDebugSelection || config.DrawSelection)
+            if (config.ShowDebugSelection)
             {
-                var currentTime = DateTime.Now;
-                if ((currentTime - lastUpdateTime).TotalMilliseconds >= config.DrawRefreshRate || config.ShowDebugRaycast || config.ShowDebugSelection)
-                {
-                    cameraUtil.UpdateEnemyList();
-                    lastUpdateTime = currentTime;
-                }
+                ShowDebugSelection();
             }
-
-            if (config.DrawSelection)
-            {
-                var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
-                if (enemies != null && enemies.Count > 0)
-                {
-                    int nextIndex = currentEnemyIndex + 1 >= enemies.Count ? 0 : currentEnemyIndex + 1;
-
-                    if (nextIndex < enemies.Count)
-                    {
-                        var nextTarget = enemies[nextIndex];
-                        if (nextTarget?.GameObject is IGameObject gameObject)
-                        {
-                            Draw3DSelectionCircle((Character*)gameObject.Address);
-                        }
-                    }
-                }
-            }
-
-            ShowDebugSelection();
         }
 
         private bool IsListEqual(List<ScreenMonsterObject> list1, List<ScreenMonsterObject> list2)
