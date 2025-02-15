@@ -128,17 +128,25 @@ namespace Tabnado.Util
             bool showDebugRaycast = config.ShowDebugRaycast;
             var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
 
-
-            Vector2 npcScreenPos, npcHeadScreenPos;
+            Vector2 npcFeetScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
-            gameGui.WorldToScreen(npc.Position, out npcScreenPos, out npcInView);
             GameObject* npcObject = (GameObject*)npc.Address;
+
             Vector3 npcHead = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + (npcObject->Height * 1.5f),
+                Y = npc.Position.Y + (npcObject->Height + 0.5f),
                 Z = npc.Position.Z
             };
+
+            Vector3 npcFeet = new Vector3
+            {
+                X = npc.Position.X,
+                Y = npc.Position.Y + 0.2f,
+                Z = npc.Position.Z
+            };
+
+            gameGui.WorldToScreen(npcFeet, out npcFeetScreenPos, out npcInView);
             gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
 
             Vector3[] edgeWorldPositions = GetCameraCornerPositions();
@@ -170,7 +178,7 @@ namespace Tabnado.Util
             {
                 Vector3 edgeWorldPos = edgeWorldPositions[i];
 
-                if (RaycastAndDraw(edgeWorldPos, npc.Position, screenEdgePoints[i], npcScreenPos))
+                if (RaycastAndDraw(edgeWorldPos, npcFeet, screenEdgePoints[i], npcFeetScreenPos))
                     successfulRays++;
                 if (RaycastAndDraw(edgeWorldPos, npcHead, screenEdgePoints[i], npcHeadScreenPos))
                     successfulRays++;
@@ -190,7 +198,7 @@ namespace Tabnado.Util
             {
                 if (npcInView)
                 {
-                    drawList.AddCircleFilled(npcScreenPos, 5f,
+                    drawList.AddCircleFilled(npcFeetScreenPos, 5f,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f)));
                 }
                 if (npcHeadInView)
@@ -199,7 +207,7 @@ namespace Tabnado.Util
                         ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)));
                 }
 
-                Vector2 textPos = new Vector2(npcScreenPos.X, npcScreenPos.Y - 20);
+                Vector2 textPos = new Vector2(npcFeetScreenPos.X, npcFeetScreenPos.Y - 20);
                 float visibilityPercentage = (successfulRays * 100f) / totalRays;
                 string percentageText = $"{visibilityPercentage:F1}%";
                 drawList.AddText(textPos,
@@ -215,16 +223,6 @@ namespace Tabnado.Util
             drawList.AddCircleFilled(originPos, 5f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
             Vector4 lineColor = isVisible ? new Vector4(0, 1, 0, 0.5f) : new Vector4(1, 0, 0, 0.5f);
             drawList.AddLine(originPos, targetPos, ImGui.ColorConvertFloat4ToU32(lineColor), 1.0f);
-            Vector2 hitScreenPos;
-            if (gameGui.WorldToScreen(hit.Point, out hitScreenPos, out bool hitInView) && hitInView)
-            {
-                drawList.AddCircleFilled(hitScreenPos, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
-            }
-            /*
-            Vector2 textPos = Vector2.Lerp(originPos, targetPos, 0.5f);
-            string distanceText = $"{hit.Distance:F1}";
-            drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
-            */
         }
 
         public unsafe bool IsObjectAllianceOrGroup(GameObject* ob)

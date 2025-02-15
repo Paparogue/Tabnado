@@ -131,8 +131,6 @@ namespace Tabnado
                  (currentTime - lastClearTime).TotalMilliseconds > (double)config.DrawRefreshRate)
                 || clearTargetUpdate)
             {
-                pluginLog.Warning(clearTargetUpdate.ToString());
-                pluginLog.Warning((currentTime - lastClearTime).TotalMilliseconds.ToString());
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 lastClearTime = currentTime;
