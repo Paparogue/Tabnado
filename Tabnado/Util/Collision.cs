@@ -11,7 +11,7 @@ namespace Tabnado.Util
 {
     internal static class Collision
     {
-        public static bool TryRaycastDetailed(Vector3 start, Vector3 direction, out RaycastHit hitInfo, float maxDistance = 1000f, bool useSphere = false)
+        public static bool TryRaycastDetailed(Vector3 start, Vector3 direction, out RaycastHit hitInfo, float maxDistance = 10000f, bool useSphere = false)
         {
             return useSphere
                 ? BGCollisionModule.SweepSphereMaterialFilter(start, direction, out hitInfo, maxDistance)

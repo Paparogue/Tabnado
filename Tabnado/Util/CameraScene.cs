@@ -131,18 +131,19 @@ namespace Tabnado.Util
             Vector2 npcFeetScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
             GameObject* npcObject = (GameObject*)npc.Address;
+            Character* npcCharacter = (Character *)npcObject;
 
             Vector3 npcHead = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + (npcObject->Height + 0.5f),
+                Y = npc.Position.Y + npcCharacter->ModelContainer.CalculateHeight(),
                 Z = npc.Position.Z
             };
-
+            pluginLog.Warning(npc.Name.TextValue.ToString() + " " + npcCharacter->Mount.Flags.ToString());
             Vector3 npcFeet = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + 0.2f,
+                Y = npc.Position.Y + 0.25f,
                 Z = npc.Position.Z
             };
 
@@ -161,17 +162,13 @@ namespace Tabnado.Util
                 if (distance <= 0f)
                     return false;
                 Vector3 direction = delta / distance;
-
-                if (Collision.TryRaycastDetailed(edgeWorldPos, direction, out RaycastHit hit))
+                Collision.TryRaycastDetailed(edgeWorldPos, direction, out RaycastHit hit);
+                bool isVisible = hit.Distance + RAYCAST_TOLERANCE >= distance;
+                if (showDebugRaycast)
                 {
-                    bool isVisible = hit.Distance + RAYCAST_TOLERANCE >= distance;
-                    if (showDebugRaycast)
-                    {
-                        DrawDebugRaycast(drawList, screenEdgePoint, targetScreenPos, isVisible, hit, distance);
-                    }
-                    return isVisible;
+                    DrawDebugRaycast(drawList, screenEdgePoint, targetScreenPos, isVisible, hit, distance);
                 }
-                return false;
+                return isVisible;
             }
 
             for (int i = 0; i < screenEdgePoints.Length; i++)
