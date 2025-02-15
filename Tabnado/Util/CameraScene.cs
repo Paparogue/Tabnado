@@ -139,7 +139,7 @@ namespace Tabnado.Util
                 Y = npc.Position.Y + npcCharacter->ModelContainer.CalculateHeight(),
                 Z = npc.Position.Z
             };
-            pluginLog.Warning(npc.Name.TextValue.ToString() + " " + npcCharacter->Mount.Flags.ToString());
+
             Vector3 npcFeet = new Vector3
             {
                 X = npc.Position.X,
