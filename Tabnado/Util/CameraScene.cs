@@ -6,7 +6,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Dalamud.Game.ClientState.Objects.Enums;
-using static Tabnado.Util.CameraUtil;
+using static Tabnado.Util.CameraScene;
 using Dalamud.Utility;
 using Tabnado.UI;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -20,7 +20,7 @@ using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace Tabnado.Util
 {
-    public unsafe class CameraUtil
+    public unsafe class CameraScene
     {
         private readonly IObjectTable objectTable;
         private readonly IGameGui gameGui;
@@ -36,7 +36,7 @@ namespace Tabnado.Util
         private Matrix4x4 lastViewMatrix;
         const float RAYCAST_TOLERANCE = 0.1f;
 
-        public CameraUtil(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
+        public CameraScene(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
             this.objectTable = objectTable;
             this.gameGui = gameGui;
@@ -123,9 +123,11 @@ namespace Tabnado.Util
 
         private bool IsVisibleFromAnyEdge(ICharacter npc, Vector2[] screenEdgePoints)
         {
-            bool isVisibleFromAny = false;
+            int successfulRays = 0;
+            int totalRays = screenEdgePoints.Length * 2;
             bool showDebugRaycast = config.ShowDebugRaycast;
             var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
+
             Vector2 npcScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
             gameGui.WorldToScreen(npc.Position, out npcScreenPos, out npcInView);
@@ -133,50 +135,79 @@ namespace Tabnado.Util
             Vector3 npcHead = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + (npcObject->Height*1.5f),
+                Y = npc.Position.Y + (npcObject->Height * 1.5f),
                 Z = npc.Position.Z
             };
             gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
+
             Vector3[] edgeWorldPositions = GetCameraCornerPositions();
+
+            float requiredPercentage = config.VisibilityPercent / 100f;
+            int requiredSuccessCount = (int)Math.Ceiling(requiredPercentage * totalRays);
+
+            bool RaycastAndDraw(Vector3 edgeWorldPos, Vector3 target, Vector2 screenEdgePoint, Vector2 targetScreenPos)
+            {
+                Vector3 delta = target - edgeWorldPos;
+                float distance = delta.Length();
+                if (distance <= 0f)
+                    return false;
+                Vector3 direction = delta / distance;
+
+                if (Collision.TryRaycastDetailed(edgeWorldPos, direction, out RaycastHit hit))
+                {
+                    bool isVisible = hit.Distance + RAYCAST_TOLERANCE >= distance;
+                    if (showDebugRaycast)
+                    {
+                        DrawDebugRaycast(drawList, screenEdgePoint, targetScreenPos, isVisible, hit, distance);
+                    }
+                    return isVisible;
+                }
+                return false;
+            }
+
             for (int i = 0; i < screenEdgePoints.Length; i++)
             {
                 Vector3 edgeWorldPos = edgeWorldPositions[i];
-                var directionToBody = Vector3.Normalize(npc.Position - edgeWorldPos);
-                float distanceToBody = Vector3.Distance(edgeWorldPos, npc.Position);
-                var directionToHead = Vector3.Normalize(npcHead - edgeWorldPos);
-                float distanceToHead = Vector3.Distance(edgeWorldPos, npcHead);
-                bool bodyVisible = false;
-                bool headVisible = false;
-                RaycastHit hitBody, hitHead;
-                if (Collision.TryRaycastDetailed(edgeWorldPos, directionToBody, out hitBody))
-                    bodyVisible = hitBody.Distance + RAYCAST_TOLERANCE >= distanceToBody;
-                if (Collision.TryRaycastDetailed(edgeWorldPos, directionToHead, out hitHead))
-                    headVisible = hitHead.Distance + RAYCAST_TOLERANCE >= distanceToHead;
-                if (showDebugRaycast)
+
+                if (RaycastAndDraw(edgeWorldPos, npc.Position, screenEdgePoints[i], npcScreenPos))
+                    successfulRays++;
+                if (RaycastAndDraw(edgeWorldPos, npcHead, screenEdgePoints[i], npcHeadScreenPos))
+                    successfulRays++;
+
+                if (!showDebugRaycast)
                 {
-                    DrawDebugRaycast(drawList, screenEdgePoints[i], npcScreenPos, bodyVisible, hitBody, distanceToBody);
-                    DrawDebugRaycast(drawList, screenEdgePoints[i], npcHeadScreenPos, headVisible, hitHead, distanceToHead);
-                }
-                if (bodyVisible || headVisible)
-                {
-                    isVisibleFromAny = true;
-                    if (!showDebugRaycast)
+                    int raysDone = (i + 1) * 2;
+                    int raysLeft = totalRays - raysDone;
+                    if (successfulRays >= requiredSuccessCount)
                         return true;
+                    if (successfulRays + raysLeft < requiredSuccessCount)
+                        return false;
                 }
             }
+
             if (showDebugRaycast)
             {
                 if (npcInView)
                 {
-                    drawList.AddCircleFilled(npcScreenPos, 5f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f)));
+                    drawList.AddCircleFilled(npcScreenPos, 5f,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f)));
                 }
                 if (npcHeadInView)
                 {
-                    drawList.AddCircleFilled(npcHeadScreenPos, 5f, ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)));
+                    drawList.AddCircleFilled(npcHeadScreenPos, 5f,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)));
                 }
+
+                Vector2 textPos = new Vector2(npcScreenPos.X, npcScreenPos.Y - 20);
+                float visibilityPercentage = (successfulRays * 100f) / totalRays;
+                string percentageText = $"{visibilityPercentage:F1}%";
+                drawList.AddText(textPos,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), percentageText);
             }
-            return isVisibleFromAny;
+
+            return (successfulRays / (float)totalRays) >= requiredPercentage;
         }
+
 
         private void DrawDebugRaycast(ImDrawListPtr drawList, Vector2 originPos, Vector2 targetPos, bool isVisible, RaycastHit hit, float distance)
         {
@@ -188,9 +219,11 @@ namespace Tabnado.Util
             {
                 drawList.AddCircleFilled(hitScreenPos, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
             }
+            /*
             Vector2 textPos = Vector2.Lerp(originPos, targetPos, 0.5f);
             string distanceText = $"{hit.Distance:F1}";
             drawList.AddText(textPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
+            */
         }
 
         public unsafe bool IsObjectAllianceOrGroup(GameObject* ob)
@@ -236,7 +269,7 @@ namespace Tabnado.Util
                     bool inView;
                     if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
                     {
-                        float unitDistance = Vector3.Distance(state.LocalPlayer.Position, npc.Position);
+                        float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
                         if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
@@ -276,18 +309,6 @@ namespace Tabnado.Util
         public void UpdateEnemyList()
         {
             Update();
-        }
-
-        public List<ScreenMonsterObject> GetFullEnemyList()
-        {
-            return screenMonsterObjects;
-        }
-
-        public ScreenMonsterObject? GetClosestCameraEnemy()
-        {
-            var monsters = screenMonsterObjects;
-            if (monsters == null || monsters.Count == 0) return null;
-            return monsters.MinBy(m => m.CameraDistance);
         }
 
         public List<ScreenMonsterObject> GetEnemiesWithinCameraRadius(float radius)

@@ -91,23 +91,33 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                int rayMultiplier = config.RaycastMultiplier;
-                if (ImGui.SliderInt("Raycast Multiplier", ref rayMultiplier, 1, 16))
-                {
-                    config.RaycastMultiplier = rayMultiplier;
-                    configChanged = true;
-                }
+                if(config.OnlyVisibleObjects) {
 
-                int rayPercent = config.RayCastPercent;
-                if (ImGui.SliderInt("Raycast Percent", ref rayPercent, 1, 100))
-                {
-                    config.RayCastPercent = rayPercent;
-                    configChanged = true;
-                }
+                    int visibilityPercent = config.VisibilityPercent;
+                    if (ImGui.SliderInt("Visibility Check Percent", ref visibilityPercent, 1, 100))
+                    {
+                        config.VisibilityPercent = visibilityPercent;
+                        configChanged = true;
+                    }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
-                ImGui.PopStyleColor();
+                    int rayMultiplier = config.RaycastMultiplier;
+                    if (ImGui.SliderInt("Raycast Multiplier", ref rayMultiplier, 1, 16))
+                    {
+                        config.RaycastMultiplier = rayMultiplier;
+                        configChanged = true;
+                    }
+
+                    int rayPercent = config.RayCastPercent;
+                    if (ImGui.SliderInt("Raycast Percent", ref rayPercent, 1, 100))
+                    {
+                        config.RayCastPercent = rayPercent;
+                        configChanged = true;
+                    }
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
+                    ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
+                    ImGui.PopStyleColor();
+                }
 
                 ImGui.Spacing();
 
@@ -232,13 +242,12 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                /*
                 int drawRefreshRate = config.DrawRefreshRate;
                 if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
                 {
                     config.DrawRefreshRate = drawRefreshRate;
                     configChanged = true;
-                }*/
+                }
 
                 if (configChanged)
                     config.Save();

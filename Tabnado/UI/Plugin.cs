@@ -32,7 +32,7 @@ namespace Tabnado.UI
         private PluginConfig PluginConfig;
         private Tabnado tabnado;
         private TabnadoUI tabnadoUI;
-        private CameraUtil cameraUtil;
+        private CameraScene cameraUtil;
         private KeyDetection keyDetection;
 
         public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commandManager)
@@ -44,7 +44,7 @@ namespace Tabnado.UI
             PluginConfig.Initialize(PluginInterface);
 
             keyDetection = new KeyDetection();
-            cameraUtil = new CameraUtil(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
+            cameraUtil = new CameraScene(ObjectTable, gameGui, ClientState, PluginConfig, pluginLog);
             tabnado = new Tabnado(ClientState, ObjectTable, TargetManager, ChatGui, PluginConfig, cameraUtil, gameGui, pluginLog, keyDetection);
             tabnadoUI = new TabnadoUI(PluginInterface, PluginConfig, tabnado, keyDetection);
             CommandManager.AddHandler("/tabnado", new CommandInfo(OnToggleUI)

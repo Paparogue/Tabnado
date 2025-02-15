@@ -9,7 +9,7 @@ using Dalamud.Plugin.Services;
 using Tabnado.UI;
 using ImGuiNET;
 using static FFXIVClientStructs.ThisAssembly;
-using static Tabnado.Util.CameraUtil;
+using static Tabnado.Util.CameraScene;
 using Tabnado.Util;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
@@ -25,7 +25,7 @@ namespace Tabnado
         private ITargetManager targetManager;
         private IChatGui chatGui;
         private PluginConfig config;
-        private CameraUtil cameraUtil;
+        private CameraScene cameraUtil;
         private IGameGui gameGui;
         private IPluginLog pluginLog;
         private KeyDetection keyDetection;
@@ -39,7 +39,7 @@ namespace Tabnado
         private bool circlePointsInitialized = false;
 
         public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager,
-                      IChatGui chatGui, PluginConfig config, CameraUtil cameraUtil, IGameGui gameGui,
+                      IChatGui chatGui, PluginConfig config, CameraScene cameraUtil, IGameGui gameGui,
                       IPluginLog pluginLog, KeyDetection keyDetection)
         {
             this.clientState = clientState;
@@ -124,12 +124,19 @@ namespace Tabnado
 
             List<ScreenMonsterObject> enemies = null!;
             var currentTime = DateTime.Now;
-            bool clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
-            if ((config.ShowDebugRaycast || config.ShowDebugSelection && (currentTime - lastClearTime).TotalMilliseconds > 1) || clearTargetUpdate)
+            bool clearTargetUpdate = config.ClearTargetTable &&
+                                     (currentTime - lastClearTime).TotalMilliseconds > (double)config.ClearDeadTable;
+
+            if (((config.ShowDebugRaycast || config.ShowDebugSelection) &&
+                 (currentTime - lastClearTime).TotalMilliseconds > (double)config.DrawRefreshRate)
+                || clearTargetUpdate)
             {
+                pluginLog.Warning(clearTargetUpdate.ToString());
+                pluginLog.Warning((currentTime - lastClearTime).TotalMilliseconds.ToString());
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 lastClearTime = currentTime;
+
                 if (enemies.Count <= 0)
                 {
                     currentEnemyIndex = -1;
@@ -137,6 +144,7 @@ namespace Tabnado
                     previousClosestTargetId = 0;
                 }
             }
+
 
             if (keyDetection.IsKeyPressed())
             {
