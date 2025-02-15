@@ -100,17 +100,17 @@ namespace Tabnado.UI
                         configChanged = true;
                     }
 
-                    int rayMultiplier = config.RaycastMultiplier;
-                    if (ImGui.SliderInt("Raycast Multiplier", ref rayMultiplier, 1, 16))
-                    {
-                        config.RaycastMultiplier = rayMultiplier;
-                        configChanged = true;
-                    }
-
                     int rayPercent = config.RayCastPercent;
                     if (ImGui.SliderInt("Raycast Percent", ref rayPercent, 1, 100))
                     {
                         config.RayCastPercent = rayPercent;
+                        configChanged = true;
+                    }
+
+                    int rayMultiplier = config.RaycastMultiplier;
+                    if (ImGui.SliderInt("Raycast Multiplier", ref rayMultiplier, 1, 16))
+                    {
+                        config.RaycastMultiplier = rayMultiplier;
                         configChanged = true;
                     }
 
@@ -197,10 +197,6 @@ namespace Tabnado.UI
                 ImGui.TextDisabled("Other Options");
                 ImGui.Separator();
 
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("Warning: Enabling this option may significantly impact performance!");
-                ImGui.PopStyleColor();
-
                 bool clearTargetTable = config.ClearTargetTable;
                 if (ImGui.Checkbox("Periodically Clear Dead Target Table (PvE/PvP)", ref clearTargetTable))
                 {
@@ -241,6 +237,10 @@ namespace Tabnado.UI
                     config.ShowDebugSelection = showDebug;
                     configChanged = true;
                 }
+
+                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
+                ImGui.TextWrapped("Warning: Enabling these options may significantly impact performance!");
+                ImGui.PopStyleColor();
 
                 int drawRefreshRate = config.DrawRefreshRate;
                 if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))

@@ -143,7 +143,7 @@ namespace Tabnado.Util
             Vector3 npcFeet = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + 0.25f,
+                Y = npc.Position.Y + 0.5f,
                 Z = npc.Position.Z
             };
 
@@ -265,12 +265,13 @@ namespace Tabnado.Util
                     bool inView;
                     if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
                     {
+                        
                         float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
                         if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
                             continue;
-                        if (config.OnlyBattleNPCs && obj.ObjectKind == ObjectKind.EventNpc)
+                        if (config.OnlyBattleNPCs && obj.ObjectKind == ObjectKind.EventNpc || npc.Name.Equals("Carbuncle") || npc.Name.Equals("Eos") || npc.Name.Equals("Eos"))
                             continue;
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
                             if (!IsVisibleFromAnyEdge(npc, screenEdgePoints))
