@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<VersionPrefix>1.2.2</VersionPrefix>
+		<VersionPrefix>1.2.3</VersionPrefix>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<Platforms>x64</Platforms>
 		<Nullable>enable</Nullable>
@@ -37,10 +37,6 @@
 			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Others\" />
 	</ItemGroup>
 
 	<Import Project="$(DalamudLibPath)/targets/Dalamud.Plugin.targets" />

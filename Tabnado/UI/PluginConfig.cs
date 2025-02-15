@@ -29,7 +29,7 @@ namespace Tabnado.UI
         public int RaycastMultiplier { get; set; } = 4;
         public int RayCastPercent { get; set; } = 80;
         public int VisibilityPercent { get; set; } = 30;
-        public int DrawRefreshRate { get; set; } = 10;
+        public int DrawRefreshRate { get; set; } = 5;
         public bool OnlyHostilePlayers { get; set; } = true;
         public bool UseCameraRotationReset { get; set; } = true;
         public bool UseCombatantReset { get; set; } = false;
