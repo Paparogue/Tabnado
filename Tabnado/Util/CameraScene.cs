@@ -128,6 +128,7 @@ namespace Tabnado.Util
             bool showDebugRaycast = config.ShowDebugRaycast;
             var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
 
+
             Vector2 npcScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
             gameGui.WorldToScreen(npc.Position, out npcScreenPos, out npcInView);
