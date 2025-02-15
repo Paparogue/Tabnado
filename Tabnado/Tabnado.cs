@@ -32,7 +32,6 @@ namespace Tabnado
         private bool wasTabPressed = false;
         private int currentEnemyIndex;
         private List<ScreenMonsterObject> lastEnemyList;
-        private DateTime lastUpdateTime;
         private DateTime lastClearTime;
         private ulong previousClosestTargetId;
         private const int CIRCLE_SEGMENTS = 16;
@@ -52,7 +51,6 @@ namespace Tabnado
             this.gameGui = gameGui;
             this.pluginLog = pluginLog;
             this.keyDetection = keyDetection;
-            lastUpdateTime = DateTime.Now;
             lastClearTime = DateTime.Now;
             currentEnemyIndex = -1;
             lastEnemyList = new();
@@ -124,11 +122,10 @@ namespace Tabnado
             if (cameraUtil == null)
                 return;
 
-            List<ScreenMonsterObject> enemies = null;
+            List<ScreenMonsterObject> enemies = null!;
             var currentTime = DateTime.Now;
-            bool clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > 1000;
-
-            if (config.ShowDebugRaycast || config.ShowDebugSelection || clearTargetUpdate)
+            bool clearTargetUpdate = config.ClearTargetTable && (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
+            if ((config.ShowDebugRaycast || config.ShowDebugSelection && (currentTime - lastClearTime).TotalMilliseconds > 1) || clearTargetUpdate)
             {
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);

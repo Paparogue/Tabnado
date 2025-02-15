@@ -98,6 +98,13 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
+                int rayPercent = config.RayCastPercent;
+                if (ImGui.SliderInt("Raycast Percent", ref rayPercent, 1, 100))
+                {
+                    config.RayCastPercent = rayPercent;
+                    configChanged = true;
+                }
+
                 ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
                 ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
                 ImGui.PopStyleColor();
@@ -180,6 +187,10 @@ namespace Tabnado.UI
                 ImGui.TextDisabled("Other Options");
                 ImGui.Separator();
 
+                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
+                ImGui.TextWrapped("Warning: Enabling this option may significantly impact performance!");
+                ImGui.PopStyleColor();
+
                 bool clearTargetTable = config.ClearTargetTable;
                 if (ImGui.Checkbox("Periodically Clear Dead Target Table (PvE/PvP)", ref clearTargetTable))
                 {
@@ -187,14 +198,17 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                ImGui.Spacing();
+                if(clearTargetTable)
+                {
 
-                ImGui.TextDisabled("Debug Options");
-                ImGui.Separator();
+                    int clearDeadTable = config.ClearDeadTable;
+                    if (ImGui.SliderInt("Clear Dead Table every (ms)", ref clearDeadTable, 1, 2000))
+                    {
+                        config.ClearDeadTable = clearDeadTable;
+                        configChanged = true;
+                    }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("Warning: Enabling this option may significantly impact performance!");
-                ImGui.PopStyleColor();
+                }
 
                 /*
                 bool drawSelection = config.DrawSelection;

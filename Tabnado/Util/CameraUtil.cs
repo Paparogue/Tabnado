@@ -73,26 +73,37 @@ namespace Tabnado.Util
             int segments = config.RaycastMultiplier;
             int pointsPerEdge = segments + 1;
             List<Vector2> points = new List<Vector2>();
+
+            float scaleFactor = config.RayCastPercent / 100f;
+            float leftX = screenWidth * (1 - scaleFactor) / 2;
+            float rightX = screenWidth * (1 + scaleFactor) / 2;
+            float topY = screenHeight * (1 - scaleFactor) / 2;
+            float bottomY = screenHeight * (1 + scaleFactor) / 2;
+
             for (int i = 0; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(Lerp(0, screenWidth, t), 0));
+                points.Add(new Vector2(Lerp(leftX, rightX, t), topY));
             }
+
             for (int i = 1; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(screenWidth, Lerp(0, screenHeight, t)));
+                points.Add(new Vector2(rightX, Lerp(topY, bottomY, t)));
             }
+
             for (int i = 1; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(Lerp(screenWidth, 0, t), screenHeight));
+                points.Add(new Vector2(Lerp(rightX, leftX, t), bottomY));
             }
+
             for (int i = 1; i < pointsPerEdge - 1; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(0, Lerp(screenHeight, 0, t)));
+                points.Add(new Vector2(leftX, Lerp(bottomY, topY, t)));
             }
+
             return points.ToArray();
         }
 
@@ -122,7 +133,7 @@ namespace Tabnado.Util
             Vector3 npcHead = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + npcObject->Height,
+                Y = npc.Position.Y + (npcObject->Height*1.5f),
                 Z = npc.Position.Z
             };
             gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
@@ -219,7 +230,7 @@ namespace Tabnado.Util
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             foreach (var obj in objectTable)
             {
-                if (obj is ICharacter npc && IsSanitized(npc) && state.LocalPlayer != null)
+                if ( obj is ICharacter npc && IsSanitized(npc))
                 {
                     Vector2 screenPos;
                     bool inView;
@@ -240,7 +251,7 @@ namespace Tabnado.Util
                         {
                             GameObjectId = npc.GameObjectId,
                             GameObject = obj,
-                            NameNKind = npc.Name.ToString() + " " + obj.ObjectKind.ToString(),
+                            NameNKind = $"{npc.Name} {obj.ObjectKind}",
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
                             WorldDistance = unitDistance
@@ -254,11 +265,10 @@ namespace Tabnado.Util
         private bool IsSanitized(ICharacter npc)
         {
             return npc != null &&
-                   npc.IsValid() &&
                    npc.CurrentHp > 0 &&
                    !npc.Name.TextValue.IsNullOrEmpty() &&
                    !npc.IsDead &&
-                   state.LocalPlayer is not null &&
+                   state.LocalPlayer != null &&
                    npc.Address != state.LocalPlayer.Address &&
                    npc.IsTargetable;
         }
