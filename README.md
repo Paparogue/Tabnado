@@ -69,7 +69,6 @@ Tabnado is a targeting plugin that lets you customize how you target enemies in 
 - **Reset Target Table**: Clears and rebuilds target list
   - WARNING: Performance impact when enabled
   - Adjustable refresh rate in milliseconds
-  - WARNING: Moderate performance impact
   
 - **Show Raycast Info**: Displays visibility check visualization
   - WARNING: High performance impact
