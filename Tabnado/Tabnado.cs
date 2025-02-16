@@ -152,11 +152,15 @@ namespace Tabnado
 
                 if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation())
                 {
+                    if (config.ShowDebugSelection)
+                        pluginLog.Warning("CameraExceedsRotationReset triggered.");
                     resetTarget = true;
                 }
 
                 if (config.UseCombatantReset && !IsListEqual(lastEnemyList, enemies))
                 {
+                    if (config.ShowDebugSelection)
+                        pluginLog.Warning("UseCombatantReset triggered.");
                     resetTarget = true;
                     lastEnemyList = new List<ScreenMonsterObject>(enemies);
                 }
@@ -166,6 +170,8 @@ namespace Tabnado
                     var closestEnemy = enemies[0];
                     if (closestEnemy.GameObjectId != previousClosestTargetId)
                     {
+                        if (config.ShowDebugSelection)
+                            pluginLog.Warning("UseNewTargetReset triggered.");
                         resetTarget = true;
                         previousClosestTargetId = closestEnemy.GameObjectId;
                     }
@@ -199,13 +205,10 @@ namespace Tabnado
             if (list1.Count != list2.Count)
                 return false;
 
-            for (int i = 0; i < list1.Count; i++)
-            {
-                if (list1[i].GameObjectId != list2[i].GameObjectId)
-                    return false;
-            }
+            var ids1 = new HashSet<ulong>(list1.Select(x => x.GameObjectId));
+            var ids2 = new HashSet<ulong>(list2.Select(x => x.GameObjectId));
 
-            return true;
+            return ids1.SetEquals(ids2);
         }
 
         private void ShowDebugSelection()
