@@ -64,11 +64,6 @@ namespace Tabnado.Util
             public required float CameraDistance { get; set; }
         }
 
-        private static float Lerp(float a, float b, float t)
-        {
-            return a + (b - a) * t;
-        }
-
         private Vector2[] GetScreenEdgePoints()
         {
             int segments = config.RaycastMultiplier;
@@ -84,25 +79,25 @@ namespace Tabnado.Util
             for (int i = 0; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(Lerp(leftX, rightX, t), topY));
+                points.Add(new Vector2(TabMath.Lerp(leftX, rightX, t), topY));
             }
 
             for (int i = 1; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(rightX, Lerp(topY, bottomY, t)));
+                points.Add(new Vector2(rightX, TabMath.Lerp(topY, bottomY, t)));
             }
 
             for (int i = 1; i < pointsPerEdge; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(Lerp(rightX, leftX, t), bottomY));
+                points.Add(new Vector2(TabMath.Lerp(rightX, leftX, t), bottomY));
             }
 
             for (int i = 1; i < pointsPerEdge - 1; i++)
             {
                 float t = i / (float)segments;
-                points.Add(new Vector2(leftX, Lerp(bottomY, topY, t)));
+                points.Add(new Vector2(leftX, TabMath.Lerp(bottomY, topY, t)));
             }
 
             return points.ToArray();
@@ -254,13 +249,6 @@ namespace Tabnado.Util
             return false;
         }
 
-        private float NormalizeDistance(float currentDistance, float maxDistance, float curve = 1.0f)
-        {
-            float clampedDistance = Math.Min(Math.Max(currentDistance, 0), maxDistance);
-            float normalized = 1 - (clampedDistance / maxDistance);
-            return (float)Math.Pow(normalized, curve);
-        }
-
         private void Update()
         {
             var results = new List<ScreenMonsterObject>();
@@ -284,7 +272,7 @@ namespace Tabnado.Util
                     Vector3 npcBody = new Vector3
                     {
                         X = npc.Position.X,
-                        Y = Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f), NormalizeDistance(unitDistance, config.MaxTargetDistance, 2f)),
+                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, 2f)),
                         Z = npc.Position.Z
                     };
 
