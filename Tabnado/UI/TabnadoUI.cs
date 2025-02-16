@@ -91,7 +91,7 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                if(config.OnlyVisibleObjects) {
+                if (config.OnlyVisibleObjects) {
 
                     int visibilityPercent = config.VisibilityPercent;
                     if (ImGui.SliderInt("Visibility Check Percent", ref visibilityPercent, 1, 100))
@@ -246,6 +246,13 @@ namespace Tabnado.UI
                 if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
                 {
                     config.DrawRefreshRate = drawRefreshRate;
+                    configChanged = true;
+                }
+
+                float cameraDepth = config.CameraDepth;
+                if (ImGui.SliderFloat("Camera Depth", ref cameraDepth, 1f, 10f, "%.1f"))
+                {
+                    config.CameraDepth = cameraDepth;
                     configChanged = true;
                 }
 

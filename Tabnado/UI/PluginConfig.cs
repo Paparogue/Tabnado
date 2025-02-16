@@ -27,8 +27,9 @@ namespace Tabnado.UI
         public int CameraRadius { get; set; } = 400;
         public int RotationPercent { get; set; } = 5;
         public int RaycastMultiplier { get; set; } = 4;
-        public int RayCastPercent { get; set; } = 80;
-        public int VisibilityPercent { get; set; } = 30;
+        public int RayCastPercent { get; set; } = 100;
+        public int VisibilityPercent { get; set; } = 35;
+        public float CameraDepth { get; set; } = 1f;
         public int DrawRefreshRate { get; set; } = 5;
         public bool OnlyHostilePlayers { get; set; } = true;
         public bool UseCameraRotationReset { get; set; } = true;

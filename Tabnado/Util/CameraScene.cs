@@ -150,7 +150,7 @@ namespace Tabnado.Util
             gameGui.WorldToScreen(npcFeet, out npcFeetScreenPos, out npcInView);
             gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
 
-            Vector3[] edgeWorldPositions = GetCameraCornerPositions();
+            Vector3[] edgeWorldPositions = GetCameraCornerPositions((config.CameraDepth-1f));
 
             float requiredPercentage = config.VisibilityPercent / 100f;
             int requiredSuccessCount = (int)Math.Ceiling(requiredPercentage * totalRays);
