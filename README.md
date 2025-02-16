@@ -1,64 +1,84 @@
 # Tabnado
-> A sophisticated tab-targeting enhancement plugin for Final Fantasy XIV using Dalamud
+
+> A tab-targeting plugin for Final Fantasy XIV that provides customizable targeting options
 
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
 
-Tabnado enhances FFXIV's default tab-targeting system through intelligent algorithms, advanced visibility checks, and customizable targeting preferences for both PvE and PvP.
+Tabnado is a targeting plugin that lets you customize how you target enemies in FFXIV. It includes options for visibility checks, distance limitations, and specific target filtering for both PvE and PvP situations.
 
 ## Features
 
-### Core Targeting
-- **Line of Sight**: Advanced raycast calculations with configurable precision and visibility thresholds ensure targets are actually visible
-- **Distance Management**: 
-  - Configurable maximum range (up to 55 yalms)
-  - Adjustable camera radius for selection area (1-1000)
-  - Dynamic filtering based on screen center distance
-- **Smart Selection**:
-  - Camera-centric targeting priority
-  - Optional reset based on camera rotation percentage
-  - New combatant detection reset
-  - Nearest target change detection
+### Core Functionality
+- Customizable targeting key
+- Distance-based targeting (up to 55 yalms)
+- Visibility-based target selection
+- Camera-based targeting area
 
-### Advanced Visibility System
-- **Raycast Configuration**:
-  - Adjustable visibility percentage threshold
-  - Customizable raycast transformation percentage
-  - Configurable raycast multiplier (1-16x)
-- **Performance Options**:
-  - Adjustable draw refresh rate
-  - Camera depth settings
-  - Debug visualization toggles
+### PvP Features
+- Option to target only hostile players
+- Alliance and party member filtering
 
-## Configuration
+### PvE Features
+- Option to target only battle NPCs
+- Filters out non-combat NPCs and pets
+
+## Configuration Guide
 
 ![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/f015b95d9023a7109a9a20c5ec14edcb1245ef82/tabnado_1.2.5.png)
 
 ### Targeting Settings
-- **Key Binding**: Customizable targeting key with conflict warnings
-- **Range Settings**:
-  - Maximum target distance (1-55 yalms)
-  - Camera search radius (1-1000)
-  - Visibility percentage requirements
-- **Reset Options**:
-  - Camera rotation threshold
-  - New combatant detection
-  - Nearest target changes
 
-### Target Filters
-- **PvP Mode**: Option to target only hostile players
-- **PvE Mode**: Battle NPC-only targeting
-- **Visibility**: Configurable minimum visibility requirements
+#### Target Key
+- Select your preferred targeting key
 
-### Debug Features
-- Target table reset intervals
-- Raycast visualization
-- Selection process information
-- Performance monitoring
-- Camera depth adjustment
+#### Range Settings
+- **Max Target Distance (yalms)**: Sets targeting range from 1-55 yalms
+  - Controls maximum distance for valid targets
+  
+- **Camera Search Radius**: Sets the targeting area size
+  - Determines the radius around your camera's center where targets can be selected
+  
+- **Minimum Visibility (%)**: Required visibility percentage for targeting
+  - Controls how visible an object must be to become a valid target
 
-## Installation & Usage
-1. Install via FFXIV Dalamud plugin installer
-2. Type `/tabnado` to access configuration
-3. Set your preferred targeting key
-4. If using Tab, unbind FFXIV's default target key to avoid conflicts
-5. Adjust settings to match your performance needs and targeting preferences
+### Target Reset Options
+
+- **Reset target on camera rotation**: Resets target when camera moves beyond threshold
+  - Rotation threshold: Set percentage of camera movement that triggers reset
+  
+- **Reset target when a new combatant appears**: Resets when targets enter camera area
+  
+- **Reset target on new nearest entity**: Resets when a closer valid target is available
+
+### Target Filtering
+
+- **Target Only Hostile Players**: PvP targeting mode
+  - Targets only enemy players
+  - Excludes party members and alliance
+  
+- **Target Only Battle NPCs**: PvE targeting mode
+  - Targets combat NPCs
+  - Excludes vendors, quest NPCs, and pets
+  
+- **Target Only Visible Objects**: Enables visibility checking system
+  - Uses raycast system to verify target visibility
+  - Checks both head and feet positions of targets
+
+### Debug Options
+
+- **Reset Target Table**: Clears and rebuilds target list
+  - WARNING: Performance impact when enabled
+  - Adjustable refresh rate in milliseconds
+  - WARNING: Moderate performance impact
+  
+- **Show Raycast Info**: Displays visibility check visualization
+  - WARNING: High performance impact
+  
+- **Show Selection Info**: Shows targeting area and valid targets
+  - WARNING: High performance impact
+  
+- **Draw Refresh Rate**: Controls debug visualization updates
+  - Adjustable from 1-100
+  
+- **Camera Depth**: Controls visibility check depth
+  - Adjustable from 1.0-10.0
