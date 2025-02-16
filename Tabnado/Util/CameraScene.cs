@@ -265,13 +265,13 @@ namespace Tabnado.Util
                     bool inView;
                     if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
                     {
-                        
+                        var lazyFix = npc.Name.ToString().Equals("Carbuncle") || npc.Name.ToString().Equals("Eos") || npc.Name.ToString().Equals("Selene");
                         float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
                         if (unitDistance > config.MaxTargetDistance)
                             continue;
                         if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
                             continue;
-                        if (config.OnlyBattleNPCs && obj.ObjectKind == ObjectKind.EventNpc || npc.Name.Equals("Carbuncle") || npc.Name.Equals("Eos") || npc.Name.Equals("Eos"))
+                        if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || lazyFix))
                             continue;
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
                             if (!IsVisibleFromAnyEdge(npc, screenEdgePoints))
