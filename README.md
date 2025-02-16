@@ -1,49 +1,83 @@
 # Tabnado
 
-> A sophisticated tab-targeting enhancement plugin for Final Fantasy XIV using Dalamud
+> A tab-targeting plugin for Final Fantasy XIV that provides customizable targeting options
 
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
 
-Tabnado enhances FFXIV's default tab-targeting system through intelligent algorithms, advanced visibility checks, and customizable targeting preferences for both PvE and PvP.
+Tabnado is a targeting plugin that lets you customize how you target enemies in FFXIV. It includes options for visibility checks, distance limitations, and specific target filtering for both PvE and PvP situations.
 
 ## Features
 
-### Core Targeting
-- **Line of Sight**: Advanced raycast calculations ensure targets are actually visible
-- **Distance Management**: 
-  - Configurable maximum range (up to 55 yalms)
-  - Adjustable camera radius for selection
-  - Dynamic filtering based on screen center distance
-- **Smart Selection**:
-  - Camera-centric targeting priority
-  - Optional reset based on camera rotation
-  - Configurable target table cleanup
+### Core Functionality
+- Customizable targeting key
+- Distance-based targeting (up to 55 yalms)
+- Visibility-based target selection
+- Camera-based targeting area
 
-## Configuration
+### PvP Features
+- Option to target only hostile players
+- Alliance and party member filtering
 
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/345c70ed176ac83051a922e59002944206b4d55b/tabnado_config.png)
+### PvE Features
+- Option to target only battle NPCs
+- Filters out non-combat NPCs and pets
 
-### Key Settings
-- **Distance**: Maximum targeting range (1-55 yalms)
-- **Camera**: Search radius from screen center
-- **Raycast**: Precision multiplier (higher = more accurate but more demanding)
-- **Reset Triggers**:
-  - Camera rotation threshold
-  - New combatant detection
-  - Nearest target changes
-- **Filters**:
-  - PvP: Hostile players only
-  - PvE: Battle NPCs only
-  - Visibility requirements
+## Configuration Guide
 
-### Others
-- Dead target clearing
-- Line-of-sight visualization
-- Selection process information
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/f015b95d9023a7109a9a20c5ec14edcb1245ef82/tabnado_1.2.5.png)
 
-## Installation & Usage
+### Targeting Settings
 
-1. Install via FFXIV Dalamud plugin installer
-2. Type `/tabnado` to configure
-3. Set targeting key (default: Tab)
-4. Unbind FFXIV's default target key if using Tab
+#### Target Key
+- Select your preferred targeting key
+
+#### Range Settings
+- **Max Target Distance (yalms)**: Sets targeting range from 1-55 yalms
+  - Controls maximum distance for valid targets
+  
+- **Camera Search Radius**: Sets the targeting area size
+  - Determines the radius around your camera's center where targets can be selected
+  
+- **Minimum Visibility (%)**: Required visibility percentage for targeting
+  - Controls how visible an object must be to become a valid target
+
+### Target Reset Options
+
+- **Reset target on camera rotation**: Resets target when camera moves beyond threshold
+  - Rotation threshold: Set percentage of camera movement that triggers reset
+  
+- **Reset target when a new combatant appears**: Resets when targets enter camera area
+  
+- **Reset target on new nearest entity**: Resets when a closer valid target is available
+
+### Target Filtering
+
+- **Target Only Hostile Players**: PvP targeting mode
+  - Targets only enemy players
+  - Excludes party members and alliance
+  
+- **Target Only Battle NPCs**: PvE targeting mode
+  - Targets combat NPCs
+  - Excludes vendors, quest NPCs, and pets
+  
+- **Target Only Visible Objects**: Enables visibility checking system
+  - Uses raycast system to verify target visibility
+  - Checks both head and feet positions of targets
+
+### Debug Options
+
+- **Reset Target Table**: Clears and rebuilds target list
+  - WARNING: Performance impact when enabled
+  - Adjustable refresh rate in milliseconds
+  
+- **Show Raycast Info**: Displays visibility check visualization
+  - WARNING: High performance impact
+  
+- **Show Selection Info**: Shows targeting area and valid targets
+  - WARNING: High performance impact
+  
+- **Draw Refresh Rate**: Controls debug visualization updates
+  - Adjustable from 1-100
+  
+- **Camera Depth**: Controls visibility check depth
+  - Adjustable from 1.0-10.0
