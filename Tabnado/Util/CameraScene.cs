@@ -263,7 +263,15 @@ namespace Tabnado.Util
                 {
                     Vector2 screenPos;
                     bool inView;
-                    if (gameGui.WorldToScreen(npc.Position, out screenPos, out inView) && inView)
+
+                    Vector3 npcBody = new Vector3
+                    {
+                        X = npc.Position.X,
+                        Y = npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight()/2f),
+                        Z = npc.Position.Z
+                    };
+
+                    if (gameGui.WorldToScreen(npcBody, out screenPos, out inView) && inView)
                     {
                         var lazyFix = npc.Name.ToString().Equals("Carbuncle") || npc.Name.ToString().Equals("Eos") || npc.Name.ToString().Equals("Selene");
                         float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
