@@ -17,6 +17,7 @@ using System.Collections.Specialized;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 
 namespace Tabnado.Util
 {
@@ -253,6 +254,13 @@ namespace Tabnado.Util
             return false;
         }
 
+        private float NormalizeDistance(float currentDistance, float maxDistance, float curve = 1.0f)
+        {
+            float clampedDistance = Math.Min(Math.Max(currentDistance, 0), maxDistance);
+            float normalized = 1 - (clampedDistance / maxDistance);
+            return (float)Math.Pow(normalized, curve);
+        }
+
         private void Update()
         {
             var results = new List<ScreenMonsterObject>();
@@ -263,23 +271,26 @@ namespace Tabnado.Util
                 {
                     Vector2 screenPos;
                     bool inView;
+                    float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
+
+                    if (unitDistance > config.MaxTargetDistance)
+                        continue;
+
+                    var lazyFix = npc.Name.ToString().Equals("Carbuncle") || npc.Name.ToString().Equals("Eos") || npc.Name.ToString().Equals("Selene");
+
+                    if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || obj.ObjectKind == ObjectKind.Companion || lazyFix))
+                        continue;
 
                     Vector3 npcBody = new Vector3
                     {
                         X = npc.Position.X,
-                        Y = npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight()/2f),
+                        Y = Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f), NormalizeDistance(unitDistance, config.MaxTargetDistance, 2f)),
                         Z = npc.Position.Z
                     };
 
                     if (gameGui.WorldToScreen(npcBody, out screenPos, out inView) && inView)
                     {
-                        var lazyFix = npc.Name.ToString().Equals("Carbuncle") || npc.Name.ToString().Equals("Eos") || npc.Name.ToString().Equals("Selene");
-                        float unitDistance = Vector3.Distance(state.LocalPlayer!.Position, npc.Position);
-                        if (unitDistance > config.MaxTargetDistance)
-                            continue;
                         if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
-                            continue;
-                        if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || lazyFix))
                             continue;
                         if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
                             if (!IsVisibleFromAnyEdge(npc, screenEdgePoints))
@@ -303,12 +314,11 @@ namespace Tabnado.Util
         private bool IsSanitized(ICharacter npc)
         {
             return npc != null &&
-                   npc.CurrentHp > 0 &&
+                    npc.IsTargetable &&
                    !npc.Name.TextValue.IsNullOrEmpty() &&
                    !npc.IsDead &&
                    state.LocalPlayer != null &&
-                   npc.Address != state.LocalPlayer.Address &&
-                   npc.IsTargetable;
+                   npc.Address != state.LocalPlayer.Address;
         }
 
         public void UpdateEnemyList()
