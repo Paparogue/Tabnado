@@ -67,9 +67,12 @@ namespace Tabnado.UI
 
                 if (config.SelectedKey == "Tab")
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                    ImGui.TextWrapped("Note: If using Tab, make sure to unbind the default target key in your game settings!");
-                    ImGui.PopStyleColor();
+                    ImGui.SameLine();
+                    ImGui.TextDisabled("(?)");
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Note: Using 'Tab' requires unbinding the default target key in your game settings to avoid conflicts.");
+                    }
                 }
 
                 ImGui.Spacing();
@@ -113,10 +116,6 @@ namespace Tabnado.UI
                         config.RaycastMultiplier = rayMultiplier;
                         configChanged = true;
                     }
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, NoteColor);
-                    ImGui.TextWrapped("Higher multiplier values increase targeting accuracy but may reduce performance.");
-                    ImGui.PopStyleColor();
                 }
 
                 ImGui.Spacing();
@@ -125,46 +124,52 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool useCameraRotationReset = config.UseCameraRotationReset;
-                if (ImGui.Checkbox("Camera rotation resets selection", ref useCameraRotationReset))
+                if (ImGui.Checkbox("Reset target on camera rotation", ref useCameraRotationReset))
                 {
                     config.UseCameraRotationReset = useCameraRotationReset;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Automatically resets the target selection if the camera rotates beyond a certain threshold.");
+                }
 
-                if(useCameraRotationReset) {
+                if (useCameraRotationReset)
+                {
                     int rotationPercent = config.RotationPercent;
-                    if (ImGui.SliderInt("% camera movement until reset", ref rotationPercent, 1, 100))
+                    if (ImGui.SliderInt("Rotation threshold (% movement)", ref rotationPercent, 1, 100))
                     {
                         config.RotationPercent = rotationPercent;
                         configChanged = true;
                     }
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                    ImGui.TextWrapped("Target selection resets when camera rotation exceeding this threshold.");
-                    ImGui.PopStyleColor();
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Set the percentage of camera rotation that will trigger a target reset.");
+                    }
                 }
 
                 bool useCombatantReset = config.UseCombatantReset;
-                if (ImGui.Checkbox("Combatants resets selection", ref useCombatantReset))
+                if (ImGui.Checkbox("Reset target when a new combatant appears", ref useCombatantReset))
                 {
                     config.UseCombatantReset = useCombatantReset;
                     configChanged = true;
                 }
-
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("Target selection resets when new entity enters the specified camera search radius."); ;
-                ImGui.PopStyleColor();
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Resets the target selection when a new combatant enters the camera's search area.");
+                }
 
                 bool useNewTargetReset = config.UseNewTargetReset;
-                if (ImGui.Checkbox("Use new main target as reset", ref useNewTargetReset))
+                if (ImGui.Checkbox("Reset target on new nearest entity", ref useNewTargetReset))
                 {
                     config.UseNewTargetReset = useNewTargetReset;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Resets the target selection when a closer valid target is detected.");
+                }
 
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("Target selection resets when a new entity becomes the nearest valid target.");
-                ImGui.PopStyleColor();
 
                 ImGui.Spacing();
 
@@ -194,7 +199,7 @@ namespace Tabnado.UI
 
                 ImGui.Spacing();
 
-                ImGui.TextDisabled("Other Options");
+                ImGui.TextDisabled("Debug Options");
                 ImGui.Separator();
 
                 bool clearTargetTable = config.ClearTargetTable;
@@ -203,32 +208,40 @@ namespace Tabnado.UI
                     config.ClearTargetTable = clearTargetTable;
                     configChanged = true;
                 }
-
-                if(clearTargetTable)
+                if (ImGui.IsItemHovered())
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
+                }
 
+                if (clearTargetTable)
+                {
                     int clearDeadTable = config.ClearDeadTable;
                     if (ImGui.SliderInt("Clear Dead Table every (ms)", ref clearDeadTable, 1, 2000))
                     {
                         config.ClearDeadTable = clearDeadTable;
                         configChanged = true;
                     }
-
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
+                    }
                 }
-
-                /*
-                bool drawSelection = config.DrawSelection;
-                if (ImGui.Checkbox("Draw the Object that would be selected (PvE/PvP)", ref drawSelection))
-                {
-                    config.DrawSelection = drawSelection;
-                    configChanged = true;
-                }*/
 
                 bool showDebugRaycast = config.ShowDebugRaycast;
                 if (ImGui.Checkbox("Show Debug Raycast Info (PvE/PvP)", ref showDebugRaycast))
                 {
                     config.ShowDebugRaycast = showDebugRaycast;
                     configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
                 }
 
                 bool showDebug = config.ShowDebugSelection;
@@ -237,10 +250,12 @@ namespace Tabnado.UI
                     config.ShowDebugSelection = showDebug;
                     configChanged = true;
                 }
-
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("Warning: Enabling these options may significantly impact performance!");
-                ImGui.PopStyleColor();
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
+                }
 
                 int drawRefreshRate = config.DrawRefreshRate;
                 if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
@@ -248,12 +263,24 @@ namespace Tabnado.UI
                     config.DrawRefreshRate = drawRefreshRate;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
+                }
 
                 float cameraDepth = config.CameraDepth;
                 if (ImGui.SliderFloat("Camera Depth", ref cameraDepth, 1f, 10f, "%.1f"))
                 {
                     config.CameraDepth = cameraDepth;
                     configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
                 }
 
                 if (configChanged)
