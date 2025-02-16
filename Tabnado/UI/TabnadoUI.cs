@@ -86,6 +86,10 @@ namespace Tabnado.UI
                     config.MaxTargetDistance = maxTargetDistance;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Only targets within this distance (in yalms) are considered.");
+                }
 
                 int cameraRadius = config.CameraRadius;
                 if (ImGui.SliderInt("Camera Search Radius", ref cameraRadius, 1, 1000))
@@ -93,21 +97,33 @@ namespace Tabnado.UI
                     config.CameraRadius = cameraRadius;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Defines the radius around the middle of the camera in which objects are checked for targeting.");
+                }
 
-                if (config.OnlyVisibleObjects) {
-
+                if (config.OnlyVisibleObjects)
+                {
                     int visibilityPercent = config.VisibilityPercent;
-                    if (ImGui.SliderInt("Visibility Check Percent", ref visibilityPercent, 1, 100))
+                    if (ImGui.SliderInt("Minimum Visibility (%)", ref visibilityPercent, 1, 100))
                     {
                         config.VisibilityPercent = visibilityPercent;
                         configChanged = true;
                     }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Specifies the minimum visibility percentage required for an object to be a valid target.");
+                    }
 
                     int rayPercent = config.RayCastPercent;
-                    if (ImGui.SliderInt("Raycast Percent", ref rayPercent, 1, 100))
+                    if (ImGui.SliderInt("Raycast Transformation (%)", ref rayPercent, 1, 100))
                     {
                         config.RayCastPercent = rayPercent;
                         configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Adjusts the raycast points toward the center of the camera, refining the detection area.");
                     }
 
                     int rayMultiplier = config.RaycastMultiplier;
@@ -115,6 +131,10 @@ namespace Tabnado.UI
                     {
                         config.RaycastMultiplier = rayMultiplier;
                         configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Multiplies the base number of raycasts by 4.");
                     }
                 }
 
@@ -177,24 +197,36 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool onlyAttackable = config.OnlyHostilePlayers;
-                if (ImGui.Checkbox("Target Only Hostile Players (PvP)", ref onlyAttackable))
+                if (ImGui.Checkbox("Target Only Hostile Players", ref onlyAttackable))
                 {
                     config.OnlyHostilePlayers = onlyAttackable;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("When enabled, only hostile players will be targeted in PvP, excluding teammates and alliance members.");
+                }
 
                 bool onlyBattleNPCs = config.OnlyBattleNPCs;
-                if (ImGui.Checkbox("Target Only Battle NPCs (PvE)", ref onlyBattleNPCs))
+                if (ImGui.Checkbox("Target Only Battle NPCs", ref onlyBattleNPCs))
                 {
                     config.OnlyBattleNPCs = onlyBattleNPCs;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("When enabled, only Battle NPCs will be targeted, ignoring event NPCs, traders, and pets.");
+                }
 
                 bool onlyVisibleObjects = config.OnlyVisibleObjects;
-                if (ImGui.Checkbox("Target Only Visible Objects (PvE/PvP)", ref onlyVisibleObjects))
+                if (ImGui.Checkbox("Target Only Visible Objects", ref onlyVisibleObjects))
                 {
                     config.OnlyVisibleObjects = onlyVisibleObjects;
                     configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("When enabled, only objects that meet the defined visibility threshold will be considered for targeting.");
                 }
 
                 ImGui.Spacing();
@@ -203,7 +235,7 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool clearTargetTable = config.ClearTargetTable;
-                if (ImGui.Checkbox("Periodically Clear Dead Target Table (PvE/PvP)", ref clearTargetTable))
+                if (ImGui.Checkbox("Reset Target Table", ref clearTargetTable))
                 {
                     config.ClearTargetTable = clearTargetTable;
                     configChanged = true;
@@ -218,7 +250,7 @@ namespace Tabnado.UI
                 if (clearTargetTable)
                 {
                     int clearDeadTable = config.ClearDeadTable;
-                    if (ImGui.SliderInt("Clear Dead Table every (ms)", ref clearDeadTable, 1, 2000))
+                    if (ImGui.SliderInt("Reset Target Table every (ms)", ref clearDeadTable, 1, 2000))
                     {
                         config.ClearDeadTable = clearDeadTable;
                         configChanged = true;
@@ -232,7 +264,7 @@ namespace Tabnado.UI
                 }
 
                 bool showDebugRaycast = config.ShowDebugRaycast;
-                if (ImGui.Checkbox("Show Debug Raycast Info (PvE/PvP)", ref showDebugRaycast))
+                if (ImGui.Checkbox("Show Raycast Info", ref showDebugRaycast))
                 {
                     config.ShowDebugRaycast = showDebugRaycast;
                     configChanged = true;
@@ -245,7 +277,7 @@ namespace Tabnado.UI
                 }
 
                 bool showDebug = config.ShowDebugSelection;
-                if (ImGui.Checkbox("Show Debug Selection Info (PvE/PvP)", ref showDebug))
+                if (ImGui.Checkbox("Show Selection Info", ref showDebug))
                 {
                     config.ShowDebugSelection = showDebug;
                     configChanged = true;

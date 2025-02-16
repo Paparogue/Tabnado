@@ -24,7 +24,7 @@ namespace Tabnado.UI
 
         public int MaxTargetDistance { get; set; } = 55;
         public int ClearDeadTable { get; set; } = 1000;
-        public int CameraRadius { get; set; } = 400;
+        public int CameraRadius { get; set; } = 420;
         public int RotationPercent { get; set; } = 5;
         public int RaycastMultiplier { get; set; } = 4;
         public int RayCastPercent { get; set; } = 100;
