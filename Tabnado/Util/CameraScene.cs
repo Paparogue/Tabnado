@@ -45,9 +45,6 @@ namespace Tabnado.Util
             this.config = config;
             this.pluginLog = pluginLog;
             groupManager = GroupManager.Instance();
-            screenWidth = ImGui.GetIO().DisplaySize.X;
-            screenHeight = ImGui.GetIO().DisplaySize.Y;
-            screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
@@ -66,6 +63,10 @@ namespace Tabnado.Util
 
         private Vector2[] GetScreenEdgePoints()
         {
+            screenWidth = ImGui.GetIO().DisplaySize.X;
+            screenHeight = ImGui.GetIO().DisplaySize.Y;
+            screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
+
             int segments = config.RaycastMultiplier;
             int pointsPerEdge = segments + 1;
             List<Vector2> points = new List<Vector2>();
@@ -251,6 +252,10 @@ namespace Tabnado.Util
 
         private void Update()
         {
+            if (camera is null || groupManager is null) {
+                pluginLog.Error("The Camera or GroupManager was not initilized. Please contact the developer.");
+            }
+
             var results = new List<ScreenMonsterObject>();
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             foreach (var obj in objectTable)
