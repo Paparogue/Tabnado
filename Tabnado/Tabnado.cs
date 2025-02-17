@@ -149,75 +149,92 @@ namespace Tabnado
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 bool resetTarget = false;
                 bool[] triggers = new bool[3] { false, false, false };
+                string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
+                string resetReason = "";
 
-                if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation())
+                if (cameraUtil.CameraExceedsRotation())
                 {
-                    if (config.ShowDebugSelection)
-                        pluginLog.Warning("CameraExceedsRotationReset triggered.");
                     triggers[0] = true;
                 }
 
-                if (config.UseCombatantReset && !IsListEqual(lastEnemyList, enemies))
+                if (!IsListEqual(lastEnemyList, enemies))
                 {
-                    if (config.ShowDebugSelection)
-                        pluginLog.Warning("UseCombatantReset triggered.");
                     triggers[1] = true;
                     lastEnemyList = new List<ScreenMonsterObject>(enemies);
                 }
 
-                if (config.UseNewTargetReset && enemies.Count > 0)
+                if (enemies.Count > 0)
                 {
                     var closestEnemy = enemies[0];
                     if (closestEnemy.GameObjectId != previousClosestTargetId)
                     {
-                        if (config.ShowDebugSelection)
-                            pluginLog.Warning("UseNewTargetReset triggered.");
                         triggers[2] = true;
                         previousClosestTargetId = closestEnemy.GameObjectId;
                     }
                 }
 
-                for (int i = 0; i < 3; i++)
+                if (config.UseCameraRotationReset && triggers[0])
                 {
-                    if (!triggers[i]) continue;
+                    resetTarget = true;
+                    resetReason = $"Standalone: {triggerNames[0]}";
+                }
+                else if (config.UseCombatantReset && triggers[1])
+                {
+                    resetTarget = true;
+                    resetReason = $"Standalone: {triggerNames[1]}";
+                }
+                else if (config.UseNewTargetReset && triggers[2])
+                {
+                    resetTarget = true;
+                    resetReason = $"Standalone: {triggerNames[2]}";
+                }
 
-                    bool hasCombinations = false;
-                    for (int j = 0; j < 3; j++)
+                if (!resetTarget)
+                {
+                    for (int i = 0; i < 3; i++)
                     {
-                        if (j != i && config.ResetCombinations[i, j])
-                        {
-                            hasCombinations = true;
-                            break;
-                        }
-                    }
+                        if (!triggers[i]) continue;
 
-                    if (!hasCombinations)
-                    {
-                        if (config.ShowDebugSelection)
-                            pluginLog.Warning($"Condition {i} triggered reset (no combinations)");
-                        resetTarget = true;
-                        break;
-                    }
-                    else
-                    {
-                        bool allCombinationsMet = true;
+                        var activeCombinations = new List<string>();
+                        bool hasCombinations = false;
+
                         for (int j = 0; j < 3; j++)
                         {
-                            if (j != i && config.ResetCombinations[i, j] && !triggers[j])
+                            if (j != i && config.ResetCombinations[i, j])
                             {
-                                allCombinationsMet = false;
-                                break;
+                                hasCombinations = true;
+                                if (triggers[j])
+                                {
+                                    activeCombinations.Add(triggerNames[j]);
+                                }
                             }
                         }
 
-                        if (allCombinationsMet)
+                        if (hasCombinations)
                         {
-                            if (config.ShowDebugSelection)
-                                pluginLog.Warning($"Condition {i} triggered reset (all combinations met)");
-                            resetTarget = true;
-                            break;
+                            bool allCombinationsMet = activeCombinations.Count > 0;
+                            for (int j = 0; j < 3; j++)
+                            {
+                                if (j != i && config.ResetCombinations[i, j] && !triggers[j])
+                                {
+                                    allCombinationsMet = false;
+                                    break;
+                                }
+                            }
+
+                            if (allCombinationsMet)
+                            {
+                                resetTarget = true;
+                                resetReason = $"Combination: {triggerNames[i]} + {string.Join(" + ", activeCombinations)}";
+                                break;
+                            }
                         }
                     }
+                }
+
+                if (config.ShowDebugSelection && resetTarget)
+                {
+                    pluginLog.Warning($"Reset triggered by: {resetReason}");
                 }
 
                 if (enemies.Count > 0)
@@ -271,16 +288,28 @@ namespace Tabnado
                 drawList.AddCircle(
                     screenCenter,
                     rotationLength * ImGui.GetIO().DisplaySize.Y,
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1f)),
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1f)),
                     32
                 );
 
-                drawList.AddCircle(
-                    screenCenter,
-                    maxThreshold * ImGui.GetIO().DisplaySize.Y,
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 0.5f)),
-                    32
-                );
+                if (rotationLength >= maxThreshold)
+                {
+                    drawList.AddCircle(
+                        screenCenter,
+                        maxThreshold * ImGui.GetIO().DisplaySize.Y,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0.65f, 0, 1f)),
+                        32
+                    );
+                }
+                else
+                {
+                    drawList.AddCircle(
+                        screenCenter,
+                        maxThreshold * ImGui.GetIO().DisplaySize.Y,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 0.5f)),
+                        32
+                    );
+                }
             }
 
             drawList.AddCircle(

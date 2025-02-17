@@ -172,14 +172,14 @@ namespace Tabnado.UI
                         config.ResetCombinations[0, 2] = combineWithNewTarget;
                         configChanged = true;
                     }
-
-                    int rotationPercent = config.RotationPercent;
-                    if (ImGui.SliderInt("Rotation threshold (% movement)", ref rotationPercent, 1, 100))
-                    {
-                        config.RotationPercent = rotationPercent;
-                        configChanged = true;
-                    }
                     ImGui.Unindent();
+                }
+
+                int rotationPercent = config.RotationPercent;
+                if (ImGui.SliderInt("Rotation threshold (% movement)", ref rotationPercent, 1, 100))
+                {
+                    config.RotationPercent = rotationPercent;
+                    configChanged = true;
                 }
 
                 bool useCombatantReset = config.UseCombatantReset;
