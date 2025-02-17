@@ -41,6 +41,8 @@ namespace Tabnado.UI
         public bool DrawSelection { get; set; } = false;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
+        public bool ChainResetLogic { get; set; } = false;
+        public bool[] ChainedConditions { get; set; } = new bool[3] { false, false, false };
         public string SelectedKey { get; set; } = "Tab";
     }
 }

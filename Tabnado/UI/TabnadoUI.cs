@@ -156,6 +156,19 @@ namespace Tabnado.UI
 
                 if (useCameraRotationReset)
                 {
+                    ImGui.Indent();
+                    bool isChainedCamera = config.ChainedConditions[0];
+                    if (ImGui.Checkbox("Chain with other conditions##camera", ref isChainedCamera))
+                    {
+                        config.ChainedConditions[0] = isChainedCamera;
+                        if (isChainedCamera) config.ChainResetLogic = true;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                    }
+
                     int rotationPercent = config.RotationPercent;
                     if (ImGui.SliderInt("Rotation threshold (% movement)", ref rotationPercent, 1, 100))
                     {
@@ -166,6 +179,7 @@ namespace Tabnado.UI
                     {
                         ImGui.SetTooltip("Set the percentage of camera rotation that will trigger a target reset.");
                     }
+                    ImGui.Unindent();
                 }
 
                 bool useCombatantReset = config.UseCombatantReset;
@@ -179,6 +193,23 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("Resets the target selection when a new combatant enters the camera's search area.");
                 }
 
+                if (useCombatantReset)
+                {
+                    ImGui.Indent();
+                    bool isChainedCombatant = config.ChainedConditions[1];
+                    if (ImGui.Checkbox("Chain with other conditions##combatant", ref isChainedCombatant))
+                    {
+                        config.ChainedConditions[1] = isChainedCombatant;
+                        if (isChainedCombatant) config.ChainResetLogic = true;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                    }
+                    ImGui.Unindent();
+                }
+
                 bool useNewTargetReset = config.UseNewTargetReset;
                 if (ImGui.Checkbox("Reset target on new nearest entity", ref useNewTargetReset))
                 {
@@ -190,6 +221,22 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("Resets the target selection when a closer valid target is detected.");
                 }
 
+                if (useNewTargetReset)
+                {
+                    ImGui.Indent();
+                    bool isChainedNewTarget = config.ChainedConditions[2];
+                    if (ImGui.Checkbox("Chain with other conditions##newtarget", ref isChainedNewTarget))
+                    {
+                        config.ChainedConditions[2] = isChainedNewTarget;
+                        if (isChainedNewTarget) config.ChainResetLogic = true;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                    }
+                    ImGui.Unindent();
+                }
 
                 ImGui.Spacing();
 

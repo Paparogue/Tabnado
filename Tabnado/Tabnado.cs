@@ -143,25 +143,25 @@ namespace Tabnado
                 }
             }
 
-
             if (keyDetection.IsKeyPressed())
             {
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 bool resetTarget = false;
+                bool[] triggers = new bool[3] { false, false, false };
 
                 if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation())
                 {
                     if (config.ShowDebugSelection)
                         pluginLog.Warning("CameraExceedsRotationReset triggered.");
-                    resetTarget = true;
+                    triggers[0] = true;
                 }
 
                 if (config.UseCombatantReset && !IsListEqual(lastEnemyList, enemies))
                 {
                     if (config.ShowDebugSelection)
                         pluginLog.Warning("UseCombatantReset triggered.");
-                    resetTarget = true;
+                    triggers[1] = true;
                     lastEnemyList = new List<ScreenMonsterObject>(enemies);
                 }
 
@@ -172,8 +172,49 @@ namespace Tabnado
                     {
                         if (config.ShowDebugSelection)
                             pluginLog.Warning("UseNewTargetReset triggered.");
-                        resetTarget = true;
+                        triggers[2] = true;
                         previousClosestTargetId = closestEnemy.GameObjectId;
+                    }
+                }
+
+                bool hasNonChainedTrigger = false;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (triggers[i] && !config.ChainedConditions[i])
+                    {
+                        if (config.ShowDebugSelection)
+                            pluginLog.Warning($"Non chained condition triggered reset.");
+                        resetTarget = true;
+                        hasNonChainedTrigger = true;
+                        break;
+                    }
+                }
+
+                if (!hasNonChainedTrigger && config.ChainResetLogic)
+                {
+                    int chainedCount = 0;
+                    int triggeredChainCount = 0;
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (config.ChainedConditions[i])
+                        {
+                            chainedCount++;
+                            if (triggers[i])
+                            {
+                                triggeredChainCount++;
+                            }
+                        }
+                    }
+
+                    if (config.ShowDebugSelection)
+                        pluginLog.Warning($"Active chains: {chainedCount} --- Config chains: {triggeredChainCount}");
+
+                    if (chainedCount > 0 && chainedCount == triggeredChainCount)
+                    {
+                        if (config.ShowDebugSelection)
+                            pluginLog.Warning($"All {chainedCount} chained conditions triggered reset.");
+                        resetTarget = true;
                     }
                 }
 
