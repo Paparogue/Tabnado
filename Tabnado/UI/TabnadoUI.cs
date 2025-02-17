@@ -157,16 +157,20 @@ namespace Tabnado.UI
                 if (useCameraRotationReset)
                 {
                     ImGui.Indent();
-                    bool isChainedCamera = config.ChainedConditions[0];
-                    if (ImGui.Checkbox("Chain with other conditions##camera", ref isChainedCamera))
+                    ImGui.Text("Combine with:");
+
+                    bool combineWithCombatant = config.ResetCombinations[0, 1];
+                    if (ImGui.Checkbox("New Combatant##camera_combatant", ref combineWithCombatant))
                     {
-                        config.ChainedConditions[0] = isChainedCamera;
-                        if (isChainedCamera) config.ChainResetLogic = true;
+                        config.ResetCombinations[0, 1] = combineWithCombatant;
                         configChanged = true;
                     }
-                    if (ImGui.IsItemHovered())
+
+                    bool combineWithNewTarget = config.ResetCombinations[0, 2];
+                    if (ImGui.Checkbox("New Nearest Target##camera_target", ref combineWithNewTarget))
                     {
-                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                        config.ResetCombinations[0, 2] = combineWithNewTarget;
+                        configChanged = true;
                     }
 
                     int rotationPercent = config.RotationPercent;
@@ -174,10 +178,6 @@ namespace Tabnado.UI
                     {
                         config.RotationPercent = rotationPercent;
                         configChanged = true;
-                    }
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip("Set the percentage of camera rotation that will trigger a target reset.");
                     }
                     ImGui.Unindent();
                 }
@@ -188,24 +188,23 @@ namespace Tabnado.UI
                     config.UseCombatantReset = useCombatantReset;
                     configChanged = true;
                 }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Resets the target selection when a new combatant enters the camera's search area.");
-                }
-
                 if (useCombatantReset)
                 {
                     ImGui.Indent();
-                    bool isChainedCombatant = config.ChainedConditions[1];
-                    if (ImGui.Checkbox("Chain with other conditions##combatant", ref isChainedCombatant))
+                    ImGui.Text("Combine with:");
+
+                    bool combineWithCamera = config.ResetCombinations[1, 0];
+                    if (ImGui.Checkbox("Camera Rotation##combatant_camera", ref combineWithCamera))
                     {
-                        config.ChainedConditions[1] = isChainedCombatant;
-                        if (isChainedCombatant) config.ChainResetLogic = true;
+                        config.ResetCombinations[1, 0] = combineWithCamera;
                         configChanged = true;
                     }
-                    if (ImGui.IsItemHovered())
+
+                    bool combineWithNewTarget = config.ResetCombinations[1, 2];
+                    if (ImGui.Checkbox("New Nearest Target##combatant_target", ref combineWithNewTarget))
                     {
-                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                        config.ResetCombinations[1, 2] = combineWithNewTarget;
+                        configChanged = true;
                     }
                     ImGui.Unindent();
                 }
@@ -216,24 +215,23 @@ namespace Tabnado.UI
                     config.UseNewTargetReset = useNewTargetReset;
                     configChanged = true;
                 }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Resets the target selection when a closer valid target is detected.");
-                }
-
                 if (useNewTargetReset)
                 {
                     ImGui.Indent();
-                    bool isChainedNewTarget = config.ChainedConditions[2];
-                    if (ImGui.Checkbox("Chain with other conditions##newtarget", ref isChainedNewTarget))
+                    ImGui.Text("Combine with:");
+
+                    bool combineWithCamera = config.ResetCombinations[2, 0];
+                    if (ImGui.Checkbox("Camera Rotation##target_camera", ref combineWithCamera))
                     {
-                        config.ChainedConditions[2] = isChainedNewTarget;
-                        if (isChainedNewTarget) config.ChainResetLogic = true;
+                        config.ResetCombinations[2, 0] = combineWithCamera;
                         configChanged = true;
                     }
-                    if (ImGui.IsItemHovered())
+
+                    bool combineWithCombatant = config.ResetCombinations[2, 1];
+                    if (ImGui.Checkbox("New Combatant##target_combatant", ref combineWithCombatant))
                     {
-                        ImGui.SetTooltip("When chained, this condition must trigger along with other chained conditions to reset the target.");
+                        config.ResetCombinations[2, 1] = combineWithCombatant;
+                        configChanged = true;
                     }
                     ImGui.Unindent();
                 }

@@ -177,44 +177,46 @@ namespace Tabnado
                     }
                 }
 
-                bool hasNonChainedTrigger = false;
                 for (int i = 0; i < 3; i++)
                 {
-                    if (triggers[i] && !config.ChainedConditions[i])
-                    {
-                        if (config.ShowDebugSelection)
-                            pluginLog.Warning($"Non chained condition triggered reset.");
-                        resetTarget = true;
-                        hasNonChainedTrigger = true;
-                        break;
-                    }
-                }
+                    if (!triggers[i]) continue;
 
-                if (!hasNonChainedTrigger && config.ChainResetLogic)
-                {
-                    int chainedCount = 0;
-                    int triggeredChainCount = 0;
-
-                    for (int i = 0; i < 3; i++)
+                    bool hasCombinations = false;
+                    for (int j = 0; j < 3; j++)
                     {
-                        if (config.ChainedConditions[i])
+                        if (j != i && config.ResetCombinations[i, j])
                         {
-                            chainedCount++;
-                            if (triggers[i])
-                            {
-                                triggeredChainCount++;
-                            }
+                            hasCombinations = true;
+                            break;
                         }
                     }
 
-                    if (config.ShowDebugSelection)
-                        pluginLog.Warning($"Active chains: {chainedCount} --- Config chains: {triggeredChainCount}");
-
-                    if (chainedCount > 0 && chainedCount == triggeredChainCount)
+                    if (!hasCombinations)
                     {
                         if (config.ShowDebugSelection)
-                            pluginLog.Warning($"All {chainedCount} chained conditions triggered reset.");
+                            pluginLog.Warning($"Condition {i} triggered reset (no combinations)");
                         resetTarget = true;
+                        break;
+                    }
+                    else
+                    {
+                        bool allCombinationsMet = true;
+                        for (int j = 0; j < 3; j++)
+                        {
+                            if (j != i && config.ResetCombinations[i, j] && !triggers[j])
+                            {
+                                allCombinationsMet = false;
+                                break;
+                            }
+                        }
+
+                        if (allCombinationsMet)
+                        {
+                            if (config.ShowDebugSelection)
+                                pluginLog.Warning($"Condition {i} triggered reset (all combinations met)");
+                            resetTarget = true;
+                            break;
+                        }
                     }
                 }
 
@@ -260,6 +262,26 @@ namespace Tabnado
             var drawList = ImGui.GetForegroundDrawList();
 
             drawList.AddCircleFilled(screenCenter, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
+
+            if (config.UseCameraRotationReset)
+            {
+                float rotationLength = cameraUtil.getRotationLength();
+                float maxThreshold = ((float)config.RotationPercent / 100f);
+
+                drawList.AddCircle(
+                    screenCenter,
+                    rotationLength * ImGui.GetIO().DisplaySize.Y,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1f)),
+                    32
+                );
+
+                drawList.AddCircle(
+                    screenCenter,
+                    maxThreshold * ImGui.GetIO().DisplaySize.Y,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 0.5f)),
+                    32
+                );
+            }
 
             drawList.AddCircle(
                 screenCenter,

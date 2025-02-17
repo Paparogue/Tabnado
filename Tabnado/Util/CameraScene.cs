@@ -36,6 +36,7 @@ namespace Tabnado.Util
         private Vector2 screenCenter;
         private Matrix4x4 lastViewMatrix;
         const float RAYCAST_TOLERANCE = 0.1f;
+        private float rotationPercentage = 0f;
 
         public CameraScene(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -49,6 +50,11 @@ namespace Tabnado.Util
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
             lastViewMatrix = camera->ViewMatrix;
+        }
+
+        public float getRotationLength()
+        {
+            return rotationPercentage;
         }
 
         public class ScreenMonsterObject
@@ -239,7 +245,7 @@ namespace Tabnado.Util
             float forwardAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastForward), Vector3.Normalize(currentForward)));
             float upAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastUp), Vector3.Normalize(currentUp)));
 
-            float rotationPercentage = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
+            rotationPercentage = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
 
             if (rotationPercentage >= ((float)config.RotationPercent/100f))
             {
