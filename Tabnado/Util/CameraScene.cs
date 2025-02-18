@@ -65,11 +65,6 @@ namespace Tabnado.Util
             return 0f;
         }
 
-        public float getRotationLength()
-        {
-            return rotationPercentage;
-        }
-
         public class ScreenMonsterObject
         {
             public required ulong GameObjectId { get; set; }

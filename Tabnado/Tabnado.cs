@@ -125,10 +125,10 @@ namespace Tabnado
             List<ScreenMonsterObject> enemies = null!;
             var currentTime = DateTime.Now;
             bool clearTargetUpdate = config.ClearTargetTable &&
-                                     (currentTime - lastClearTime).TotalMilliseconds > (double)config.ClearDeadTable;
+                                        (currentTime - lastClearTime).TotalMilliseconds > (double)config.ClearDeadTable;
 
             if (((config.ShowDebugRaycast || config.ShowDebugSelection) &&
-                 (currentTime - lastClearTime).TotalMilliseconds > (double)config.DrawRefreshRate)
+                    (currentTime - lastClearTime).TotalMilliseconds > (double)config.DrawRefreshRate)
                 || clearTargetUpdate)
             {
                 cameraUtil.UpdateEnemyList();
@@ -148,9 +148,10 @@ namespace Tabnado
                 cameraUtil.UpdateEnemyList();
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 bool resetTarget = false;
+                string resetReason = "";
+
                 bool[] triggers = new bool[3] { false, false, false };
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
-                string resetReason = "";
 
                 if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation(config.RotationPercent[0], 0))
                 {
@@ -173,75 +174,89 @@ namespace Tabnado
                     }
                 }
 
-                if (config.UseCameraRotationReset && triggers[0])
+                for (int i = 0; i < triggers.Length; i++)
                 {
-                    resetTarget = true;
-                    resetReason = $"Standalone: {triggerNames[0]}";
-                }
-                else if (config.UseCombatantReset && triggers[1])
-                {
-                    resetTarget = true;
-                    resetReason = $"Standalone: {triggerNames[1]}";
-                }
-                else if (config.UseNewTargetReset && triggers[2])
-                {
-                    resetTarget = true;
-                    resetReason = $"Standalone: {triggerNames[2]}";
-                }
+                    if (!triggers[i]) continue;
 
-                if (!resetTarget)
-                {
-                    for (int i = 0; i < 3; i++)
+                    bool hasCombinations = false;
+                    bool isEnabled = false;
+
+                    switch (i)
                     {
-                        if (!triggers[i]) continue;
+                        case 0:
+                            isEnabled = config.UseCameraRotationReset;
+                            hasCombinations = config.ResetCombinations[i, 1] || config.ResetCombinations[i, 2];
+                            break;
+                        case 1:
+                            isEnabled = config.UseCombatantReset;
+                            hasCombinations = config.ResetCombinations[i, 0] || config.ResetCombinations[i, 2];
+                            break;
+                        case 2:
+                            isEnabled = config.UseNewTargetReset;
+                            hasCombinations = config.ResetCombinations[i, 0] || config.ResetCombinations[i, 1];
+                            break;
+                    }
 
+                    if (!isEnabled) continue;
+
+                    if (hasCombinations)
+                    {
+                        bool allCombinationsMet = true;
                         var activeCombinations = new List<string>();
-                        bool hasCombinations = false;
 
-                        for (int j = 0; j < 3; j++)
+                        for (int j = 0; j < triggers.Length; j++)
                         {
-                            if (j != i && config.ResetCombinations[i, j])
+                            if (j == i) continue;
+
+                            if (config.ResetCombinations[i, j])
                             {
-                                hasCombinations = true;
-                                if (triggers[j])
+                                if (j == 0)
                                 {
-                                    activeCombinations.Add(triggerNames[j]);
+                                    bool rotationValid = false;
+                                    switch (i)
+                                    {
+                                        case 1:
+                                            rotationValid = cameraUtil.CameraExceedsRotation(config.RotationPercent[1], 1);
+                                            break;
+                                        case 2:
+                                            rotationValid = cameraUtil.CameraExceedsRotation(config.RotationPercent[2], 2);
+                                            break;
+                                    }
+                                    if (!rotationValid)
+                                    {
+                                        allCombinationsMet = false;
+                                    }
+                                    else
+                                    {
+                                        activeCombinations.Add(triggerNames[j]);
+                                    }
+                                }
+                                else
+                                {
+                                    if (!triggers[j])
+                                    {
+                                        allCombinationsMet = false;
+                                    }
+                                    else
+                                    {
+                                        activeCombinations.Add(triggerNames[j]);
+                                    }
                                 }
                             }
                         }
 
-                        if (hasCombinations)
+                        if (allCombinationsMet && activeCombinations.Count > 0)
                         {
-                            bool allCombinationsMet = activeCombinations.Count > 0;
-
-                            if (i == 0 && config.ResetCombinations[i, 1] && !triggers[1])
-                                allCombinationsMet = false;
-                            if (i == 0 && config.ResetCombinations[i, 2] && !triggers[2])
-                                allCombinationsMet = false;
-
-                            if (i == 1 && config.ResetCombinations[i, 0])
-                            {
-                                if (!cameraUtil.CameraExceedsRotation(config.RotationPercent[1], 1))
-                                    allCombinationsMet = false;
-                            }
-                            if (i == 1 && config.ResetCombinations[i, 2] && !triggers[2])
-                                allCombinationsMet = false;
-
-                            if (i == 2 && config.ResetCombinations[i, 0])
-                            {
-                                if (!cameraUtil.CameraExceedsRotation(config.RotationPercent[2], 2))
-                                    allCombinationsMet = false;
-                            }
-                            if (i == 2 && config.ResetCombinations[i, 1] && !triggers[1])
-                                allCombinationsMet = false;
-
-                            if (allCombinationsMet)
-                            {
-                                resetTarget = true;
-                                resetReason = $"Combination: {triggerNames[i]} + {string.Join(" + ", activeCombinations)}";
-                                break;
-                            }
+                            resetTarget = true;
+                            resetReason = $"Combination: {triggerNames[i]} + {string.Join(" + ", activeCombinations)}";
+                            break;
                         }
+                    }
+                    else
+                    {
+                        resetTarget = true;
+                        resetReason = $"Standalone: {triggerNames[i]}";
+                        break;
                     }
                 }
 
@@ -294,7 +309,7 @@ namespace Tabnado
 
             if (config.UseCameraRotationReset)
             {
-                float rotationLength = cameraUtil.getRotationLength();
+                float rotationLength = cameraUtil.GetRotationPercentage(0);
                 float maxThreshold = ((float)config.RotationPercent[0] / 100f);
 
                 drawList.AddCircle(
@@ -347,7 +362,7 @@ namespace Tabnado
                         5f,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
                     );
-                    string distanceText = $"Details: {enemy.NameNKind + " " + enemy.WorldDistance:F1}";
+                    string distanceText = $"Details: {enemy.NameNKind} {enemy.WorldDistance:F1}";
                     drawList.AddText(enemy.ScreenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
                 }
             }

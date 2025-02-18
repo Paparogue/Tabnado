@@ -25,7 +25,7 @@ namespace Tabnado.UI
         public int MaxTargetDistance { get; set; } = 55;
         public int ClearDeadTable { get; set; } = 1000;
         public int CameraRadius { get; set; } = 420;
-        public int[] RotationPercent { get; set; } = new int[3] { 5, 5, 3 };
+        public int[] RotationPercent { get; set; } = new int[3] { 5, 5, 3};
         public int RaycastMultiplier { get; set; } = 4;
         public int RayCastPercent { get; set; } = 100;
         public int VisibilityPercent { get; set; } = 35;
@@ -45,7 +45,7 @@ namespace Tabnado.UI
         public bool[,] ResetCombinations { get; set; } = new bool[3, 3] {
         { false, false, false },
         { false, false, false },
-        { false, false, false }
+        { true, false, false }
         };
         public string SelectedKey { get; set; } = "Tab";
     }
