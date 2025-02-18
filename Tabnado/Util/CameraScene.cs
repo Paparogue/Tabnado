@@ -37,6 +37,8 @@ namespace Tabnado.Util
         private Matrix4x4 lastViewMatrix;
         const float RAYCAST_TOLERANCE = 0.1f;
         private float rotationPercentage = 0f;
+        private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
+        private float[] rotationPercentages = new float[3];
 
         public CameraScene(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
         {
@@ -49,7 +51,18 @@ namespace Tabnado.Util
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
                 camera = cameraManager->CurrentCamera;
-            lastViewMatrix = camera->ViewMatrix;
+
+            for (int i = 0; i < 3; i++)
+            {
+                lastViewMatrices[i] = camera->ViewMatrix;
+            }
+        }
+
+        public float GetRotationPercentage(int index)
+        {
+            if (index >= 0 && index < 3)
+                return rotationPercentages[index];
+            return 0f;
         }
 
         public float getRotationLength()
@@ -233,11 +246,13 @@ namespace Tabnado.Util
             return isAlliance || isGroup;
         }
 
-        public bool CameraExceedsRotation()
+        public bool CameraExceedsRotation(int percent, int index)
         {
+            if (index < 0 || index >= 3) return false;
+
             Matrix4x4 currentViewMatrix = camera->ViewMatrix;
-            Vector3 lastForward = new Vector3(lastViewMatrix.M13, lastViewMatrix.M23, lastViewMatrix.M33);
-            Vector3 lastUp = new Vector3(lastViewMatrix.M12, lastViewMatrix.M22, lastViewMatrix.M32);
+            Vector3 lastForward = new Vector3(lastViewMatrices[index].M13, lastViewMatrices[index].M23, lastViewMatrices[index].M33);
+            Vector3 lastUp = new Vector3(lastViewMatrices[index].M12, lastViewMatrices[index].M22, lastViewMatrices[index].M32);
 
             Vector3 currentForward = new Vector3(currentViewMatrix.M13, currentViewMatrix.M23, currentViewMatrix.M33);
             Vector3 currentUp = new Vector3(currentViewMatrix.M12, currentViewMatrix.M22, currentViewMatrix.M32);
@@ -245,11 +260,11 @@ namespace Tabnado.Util
             float forwardAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastForward), Vector3.Normalize(currentForward)));
             float upAngle = (float)Math.Acos(Vector3.Dot(Vector3.Normalize(lastUp), Vector3.Normalize(currentUp)));
 
-            rotationPercentage = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
+            rotationPercentages[index] = Math.Max(forwardAngle / (float)Math.PI, upAngle / (float)Math.PI);
 
-            if (rotationPercentage >= ((float)config.RotationPercent/100f))
+            if (rotationPercentages[index] >= ((float)percent / 100f))
             {
-                lastViewMatrix = currentViewMatrix;
+                lastViewMatrices[index] = currentViewMatrix;
                 return true;
             }
 

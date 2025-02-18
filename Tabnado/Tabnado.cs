@@ -152,7 +152,7 @@ namespace Tabnado
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 string resetReason = "";
 
-                if (cameraUtil.CameraExceedsRotation())
+                if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation(config.RotationPercent[0], 0))
                 {
                     triggers[0] = true;
                 }
@@ -213,14 +213,27 @@ namespace Tabnado
                         if (hasCombinations)
                         {
                             bool allCombinationsMet = activeCombinations.Count > 0;
-                            for (int j = 0; j < 3; j++)
+
+                            if (i == 0 && config.ResetCombinations[i, 1] && !triggers[1])
+                                allCombinationsMet = false;
+                            if (i == 0 && config.ResetCombinations[i, 2] && !triggers[2])
+                                allCombinationsMet = false;
+
+                            if (i == 1 && config.ResetCombinations[i, 0])
                             {
-                                if (j != i && config.ResetCombinations[i, j] && !triggers[j])
-                                {
+                                if (!cameraUtil.CameraExceedsRotation(config.RotationPercent[1], 1))
                                     allCombinationsMet = false;
-                                    break;
-                                }
                             }
+                            if (i == 1 && config.ResetCombinations[i, 2] && !triggers[2])
+                                allCombinationsMet = false;
+
+                            if (i == 2 && config.ResetCombinations[i, 0])
+                            {
+                                if (!cameraUtil.CameraExceedsRotation(config.RotationPercent[2], 2))
+                                    allCombinationsMet = false;
+                            }
+                            if (i == 2 && config.ResetCombinations[i, 1] && !triggers[1])
+                                allCombinationsMet = false;
 
                             if (allCombinationsMet)
                             {
@@ -249,7 +262,6 @@ namespace Tabnado
                         if (currentEnemyIndex >= enemies.Count)
                             currentEnemyIndex = 0;
                     }
-
                     targetManager.Target = enemies[currentEnemyIndex].GameObject;
                 }
             }
@@ -283,7 +295,7 @@ namespace Tabnado
             if (config.UseCameraRotationReset)
             {
                 float rotationLength = cameraUtil.getRotationLength();
-                float maxThreshold = ((float)config.RotationPercent / 100f);
+                float maxThreshold = ((float)config.RotationPercent[0] / 100f);
 
                 drawList.AddCircle(
                     screenCenter,
