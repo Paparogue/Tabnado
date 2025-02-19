@@ -77,11 +77,8 @@ namespace Tabnado.UI
         }
         private void OnDraw()
         {
-            if (ClientState.LocalPlayer != null)
-            {
-                tabnado.Draw();
-                tabnadoUI.Draw();
-            }
+            tabnado.Draw();
+            tabnadoUI.Draw();
         }
     }
 }

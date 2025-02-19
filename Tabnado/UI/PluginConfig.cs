@@ -42,10 +42,10 @@ namespace Tabnado.UI
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
         public bool ChainResetLogic { get; set; } = false;
-        public bool[,] ResetCombinations { get; set; } = new bool[3, 3] {
-        { false, false, false },
-        { false, false, false },
-        { true, false, false }
+        public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
+        { false, false },
+        { false, false },
+        { true, false }
         };
         public string SelectedKey { get; set; } = "Tab";
     }

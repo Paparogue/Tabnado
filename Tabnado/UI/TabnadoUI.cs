@@ -166,17 +166,17 @@ namespace Tabnado.UI
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
-                    bool combineWithCombatant = config.ResetCombinations[0, 1];
+                    bool combineWithCombatant = config.ResetCombinations[0, 0];
                     if (ImGui.Checkbox("(C1) New Combatant##camera_combatant", ref combineWithCombatant))
                     {
-                        config.ResetCombinations[0, 1] = combineWithCombatant;
+                        config.ResetCombinations[0, 0] = combineWithCombatant;
                         configChanged = true;
                     }
 
-                    bool combineWithNewTarget = config.ResetCombinations[0, 2];
+                    bool combineWithNewTarget = config.ResetCombinations[0, 1];
                     if (ImGui.Checkbox("(C1) New Nearest Target##camera_target", ref combineWithNewTarget))
                     {
-                        config.ResetCombinations[0, 2] = combineWithNewTarget;
+                        config.ResetCombinations[0, 1] = combineWithNewTarget;
                         configChanged = true;
                     }
                     ImGui.Unindent();
@@ -210,10 +210,10 @@ namespace Tabnado.UI
                         }
                     }
 
-                    bool combineWithNewTarget = config.ResetCombinations[1, 2];
+                    bool combineWithNewTarget = config.ResetCombinations[1, 1];
                     if (ImGui.Checkbox("(C2) New Nearest Target##combatant_target", ref combineWithNewTarget))
                     {
-                        config.ResetCombinations[1, 2] = combineWithNewTarget;
+                        config.ResetCombinations[1, 1] = combineWithNewTarget;
                         configChanged = true;
                     }
                     ImGui.Unindent();

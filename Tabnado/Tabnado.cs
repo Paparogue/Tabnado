@@ -29,18 +29,15 @@ namespace Tabnado
         private IGameGui gameGui;
         private IPluginLog pluginLog;
         private KeyDetection keyDetection;
-        private bool wasTabPressed = false;
+        private bool wasTabPressed;
         private int currentEnemyIndex;
         private List<ScreenMonsterObject> lastEnemyList;
         private DateTime lastClearTime;
         private ulong previousClosestTargetId;
-        private const int CIRCLE_SEGMENTS = 16;
         private Vector3[] circlePoints;
-        private bool circlePointsInitialized = false;
+        private const int CIRCLE_SEGMENTS = 16;
 
-        public Tabnado(IClientState clientState, IObjectTable objectTable, ITargetManager targetManager,
-                      IChatGui chatGui, PluginConfig config, CameraScene cameraUtil, IGameGui gameGui,
-                      IPluginLog pluginLog, KeyDetection keyDetection)
+        public Tabnado(Plugin plugin)
         {
             this.clientState = clientState;
             this.objectTable = objectTable;
@@ -53,11 +50,12 @@ namespace Tabnado
             this.keyDetection = keyDetection;
             lastClearTime = DateTime.Now;
             currentEnemyIndex = -1;
+            wasTabPressed = false;
             lastEnemyList = new();
-            InitializeCirclePoints();
+            InitCirclePoints();
         }
 
-        private void InitializeCirclePoints()
+        private void InitCirclePoints()
         {
             circlePoints = new Vector3[CIRCLE_SEGMENTS];
             for (int i = 0; i < CIRCLE_SEGMENTS; i++)
@@ -69,13 +67,10 @@ namespace Tabnado
                     MathF.Sin(angle)
                 );
             }
-            circlePointsInitialized = true;
         }
 
         private void Draw3DSelectionCircle(Character* character)
         {
-            if (!circlePointsInitialized) return;
-
             var cameraManager = CameraManager.Instance();
             if (cameraManager == null || cameraManager->CurrentCamera == null) return;
 
@@ -125,10 +120,10 @@ namespace Tabnado
             List<ScreenMonsterObject> enemies = null!;
             var currentTime = DateTime.Now;
             bool clearTargetUpdate = config.ClearTargetTable &&
-                                        (currentTime - lastClearTime).TotalMilliseconds > (double)config.ClearDeadTable;
+                                     (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
 
             if (((config.ShowDebugRaycast || config.ShowDebugSelection) &&
-                    (currentTime - lastClearTime).TotalMilliseconds > (double)config.DrawRefreshRate)
+                 (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate)
                 || clearTargetUpdate)
             {
                 cameraUtil.UpdateEnemyList();
@@ -149,113 +144,65 @@ namespace Tabnado
                 enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 bool resetTarget = false;
                 string resetReason = "";
-
-                bool[] triggers = new bool[3] { false, false, false };
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
-
-                if (config.UseCameraRotationReset && cameraUtil.CameraExceedsRotation(config.RotationPercent[0], 0))
+                bool[] triggers = new bool[3]
                 {
-                    triggers[0] = true;
-                }
+            cameraUtil.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
+            !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
+            enemies.Count > 0 && (enemies[0].GameObjectId != previousClosestTargetId), //Trigger Base (New Targeting)
+                };
 
-                if (!IsListEqual(lastEnemyList, enemies))
+                bool[,] configCheck = new bool[3, 3]
                 {
-                    triggers[1] = true;
-                    lastEnemyList = new List<ScreenMonsterObject>(enemies);
-                }
+            {
+                config.UseCameraRotationReset, //BASE COMBO (Camera Rotation)
+                config.ResetCombinations[0, 0], // Sub Combo B (Combatant List)
+                config.ResetCombinations[0, 1] // Sub Combo C (New Targeting)
+            },
+            {
+                config.UseCombatantReset, //BASE COMBO (Combatant List)
+                config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation)
+                config.ResetCombinations[1, 1] // Sub Combo (New Targeting)
+            },
+            {
+                config.UseNewTargetReset, //BASE COMBO (New Targeting)
+                config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation)
+                config.ResetCombinations[2, 1] // Sub Combo (Combatant List)
+            }
+                };
 
-                if (enemies.Count > 0)
+                for (int baseIndex = 0; baseIndex < 3; baseIndex++)
                 {
-                    var closestEnemy = enemies[0];
-                    if (closestEnemy.GameObjectId != previousClosestTargetId)
+                    if (!configCheck[baseIndex, 0]) continue;
+
+                    if (!triggers[baseIndex]) continue;
+
+                    bool subComboRequired = false;
+                    bool subComboMet = true;
+                    List<string> activeSubCombos = new List<string>();
+
+                    for (int subIndex = 1; subIndex < 3; subIndex++)
                     {
-                        triggers[2] = true;
-                        previousClosestTargetId = closestEnemy.GameObjectId;
-                    }
-                }
-
-                for (int i = 0; i < triggers.Length; i++)
-                {
-                    if (!triggers[i]) continue;
-
-                    bool hasCombinations = false;
-                    bool isEnabled = false;
-
-                    switch (i)
-                    {
-                        case 0:
-                            isEnabled = config.UseCameraRotationReset;
-                            hasCombinations = config.ResetCombinations[i, 1] || config.ResetCombinations[i, 2];
-                            break;
-                        case 1:
-                            isEnabled = config.UseCombatantReset;
-                            hasCombinations = config.ResetCombinations[i, 0] || config.ResetCombinations[i, 2];
-                            break;
-                        case 2:
-                            isEnabled = config.UseNewTargetReset;
-                            hasCombinations = config.ResetCombinations[i, 0] || config.ResetCombinations[i, 1];
-                            break;
-                    }
-
-                    if (!isEnabled) continue;
-
-                    if (hasCombinations)
-                    {
-                        bool allCombinationsMet = true;
-                        var activeCombinations = new List<string>();
-
-                        for (int j = 0; j < triggers.Length; j++)
+                        if (configCheck[baseIndex, subIndex])
                         {
-                            if (j == i) continue;
-
-                            if (config.ResetCombinations[i, j])
+                            subComboRequired = true;
+                            int triggerIndex = (subIndex == 1) ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
+                            if (triggers[triggerIndex])
                             {
-                                if (j == 0)
-                                {
-                                    bool rotationValid = false;
-                                    switch (i)
-                                    {
-                                        case 1:
-                                            rotationValid = cameraUtil.CameraExceedsRotation(config.RotationPercent[1], 1);
-                                            break;
-                                        case 2:
-                                            rotationValid = cameraUtil.CameraExceedsRotation(config.RotationPercent[2], 2);
-                                            break;
-                                    }
-                                    if (!rotationValid)
-                                    {
-                                        allCombinationsMet = false;
-                                    }
-                                    else
-                                    {
-                                        activeCombinations.Add(triggerNames[j]);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!triggers[j])
-                                    {
-                                        allCombinationsMet = false;
-                                    }
-                                    else
-                                    {
-                                        activeCombinations.Add(triggerNames[j]);
-                                    }
-                                }
+                                activeSubCombos.Add(triggerNames[triggerIndex]);
                             }
-                        }
-
-                        if (allCombinationsMet && activeCombinations.Count > 0)
-                        {
-                            resetTarget = true;
-                            resetReason = $"Combination: {triggerNames[i]} + {string.Join(" + ", activeCombinations)}";
-                            break;
+                            subComboMet &= triggers[triggerIndex];
                         }
                     }
-                    else
+
+                    if (!subComboRequired || subComboMet)
                     {
                         resetTarget = true;
-                        resetReason = $"Standalone: {triggerNames[i]}";
+                        resetReason = $"Base: {triggerNames[baseIndex]}";
+                        if (subComboRequired)
+                        {
+                            resetReason += $" with subcombos: {string.Join(" + ", activeSubCombos)}";
+                        }
                         break;
                     }
                 }
@@ -279,6 +226,12 @@ namespace Tabnado
                     }
                     targetManager.Target = enemies[currentEnemyIndex].GameObject;
                 }
+
+                if (enemies != null && enemies.Count > 0)
+                {
+                    lastEnemyList = new List<ScreenMonsterObject>(enemies);
+                    previousClosestTargetId = enemies[0].GameObjectId;
+                }
             }
 
             if (config.ShowDebugSelection)
@@ -286,6 +239,7 @@ namespace Tabnado
                 ShowDebugSelection();
             }
         }
+
 
         private bool IsListEqual(List<ScreenMonsterObject> list1, List<ScreenMonsterObject> list2)
         {
