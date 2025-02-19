@@ -29,7 +29,7 @@ namespace Tabnado.Util
         private readonly PluginConfig config;
         private readonly IPluginLog log;
         private readonly Camera* camera;
-        private List<ScreenMonsterObject> screenMonsterObjects;
+        private List<ScreenObject> screenMonsterObjects;
         private GroupManager* groupManager;
         private float screenWidth;
         private float screenHeight;
@@ -68,16 +68,6 @@ namespace Tabnado.Util
             if (index >= 0 && index < 3)
                 return rotationPercentages[index];
             return 0f;
-        }
-
-        public class ScreenMonsterObject
-        {
-            public required ulong GameObjectId { get; set; }
-            public required IGameObject? GameObject { get; set; }
-            public required string NameNKind { get; set; }
-            public required Vector2 ScreenPos { get; set; }
-            public required float WorldDistance { get; set; }
-            public required float CameraDistance { get; set; }
         }
 
         private Vector2[] GetScreenEdgePoints()
@@ -277,7 +267,7 @@ namespace Tabnado.Util
                 log.Error("The Camera or GroupManager was not initilized. Please contact the developer.");
             }
 
-            var results = new List<ScreenMonsterObject>();
+            var results = new List<ScreenObject>();
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             foreach (var obj in objectTable)
             {
@@ -291,7 +281,7 @@ namespace Tabnado.Util
                         continue;
 
                     //all I want is a method that checks if we can attack the target
-                    var petNames = new[] { "Carbuncle", "Eos", "Selene", "Automaton Queen" };
+                    var petNames = new[] { "Topaz Carbuncle", "Emerald Carbuncle", "Ruby Carbuncle", "Carbuncle", "Eos", "Selene", "Automaton Queen" };
                     var lazyFix = petNames.Contains(npc.Name.ToString());
 
                     if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || obj.ObjectKind == ObjectKind.Companion || lazyFix))
@@ -308,11 +298,10 @@ namespace Tabnado.Util
                     {
                         if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
                             continue;
-                        if (config.OnlyVisibleObjects || config.ShowDebugRaycast)
-                            if (!IsVisibleFromAnyEdge(npc, screenEdgePoints))
-                                continue;
+                        if (!IsVisibleFromAnyEdge(npc, screenEdgePoints) && config.OnlyVisibleObjects)
+                            continue;
 
-                        results.Add(new ScreenMonsterObject
+                        results.Add(new ScreenObject
                         {
                             GameObjectId = npc.GameObjectId,
                             GameObject = obj,
@@ -342,17 +331,17 @@ namespace Tabnado.Util
             Update();
         }
 
-        public List<ScreenMonsterObject> GetObjectInsideRadius(float radius)
+        public List<ScreenObject> GetObjectInsideRadius(float radius)
         {
             if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
-                return new List<ScreenMonsterObject>();
+                return new List<ScreenObject>();
             return screenMonsterObjects
                 .Where(monster => monster.CameraDistance <= radius)
                 .OrderBy(monster => monster.CameraDistance)
                 .ToList();
         }
 
-        public ScreenMonsterObject? GetClosestEnemyInCircle()
+        public ScreenObject? GetClosestEnemyInCircle()
         {
             if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
                 return null;

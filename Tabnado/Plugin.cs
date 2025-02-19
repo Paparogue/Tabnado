@@ -4,9 +4,10 @@ using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Tabnado.UI;
 using Tabnado.Util;
 
-namespace Tabnado.UI
+namespace Tabnado
 {
     public class Plugin : IDalamudPlugin
     {
@@ -30,7 +31,7 @@ namespace Tabnado.UI
         public IPluginLog Log { get; set; } = null!;
 
         public PluginConfig PluginConfig;
-        public Tabnado Tabnado;
+        public TargetingController TabController;
         public TabnadoUI TabnadoUI;
         public CameraScene CameraScene;
         public KeyDetection KeyDetection;
@@ -45,7 +46,7 @@ namespace Tabnado.UI
 
             KeyDetection = new KeyDetection();
             CameraScene = new CameraScene(this);
-            Tabnado = new Tabnado(this);
+            TabController = new TargetingController(this);
             TabnadoUI = new TabnadoUI(this);
             CommandManager.AddHandler("/tabnado", new CommandInfo(OnToggleUI)
             {
@@ -77,8 +78,9 @@ namespace Tabnado.UI
         }
         private void OnDraw()
         {
-            if (ClientState is not null && ClientState.LocalPlayer is not null) {
-                Tabnado.Draw();
+            if (ClientState is not null && ClientState.LocalPlayer is not null)
+            {
+                TabController.Draw();
                 TabnadoUI.Draw();
             }
         }

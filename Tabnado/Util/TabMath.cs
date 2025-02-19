@@ -12,7 +12,6 @@ namespace Tabnado.Util
         {
             return a + (b - a) * t;
         }
-
         public static float NormalizeDistance(float currentDistance, float maxDistance, float curve = 1.0f)
         {
             float clampedDistance = Math.Min(Math.Max(currentDistance, 0), maxDistance);

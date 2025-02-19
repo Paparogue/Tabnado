@@ -10,47 +10,45 @@ using Tabnado.UI;
 using ImGuiNET;
 using static FFXIVClientStructs.ThisAssembly;
 using static Tabnado.Util.CameraScene;
-using Tabnado.Util;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
-namespace Tabnado
+namespace Tabnado.Util
 {
-    public unsafe class Tabnado
+    public unsafe class TargetingController
     {
-        private IClientState clientState;
-        private IObjectTable objectTable;
-        private ITargetManager targetManager;
-        private IChatGui chatGui;
-        private PluginConfig config;
-        private CameraScene cameraScene;
-        private IGameGui gameGui;
-        private IPluginLog log;
-        private KeyDetection keyDetection;
-        private bool wasTabPressed;
+        private readonly IClientState clientState;
+        private readonly IObjectTable objectTable;
+        private readonly ITargetManager targetManager;
+        private readonly IChatGui chatGui;
+        private readonly PluginConfig config;
+        private readonly CameraScene cameraScene;
+        private readonly IGameGui gameGui;
+        private readonly IPluginLog log;
+        private readonly KeyDetection keyDetection;
         private int currentEnemyIndex;
-        private List<ScreenMonsterObject> lastEnemyList;
+        private List<ScreenObject> lastEnemyList;
         private DateTime lastClearTime;
         private ulong previousClosestTargetId;
         private Vector3[] circlePoints;
         private const int CIRCLE_SEGMENTS = 16;
 
-        public Tabnado(Plugin plugin)
+        public TargetingController(Plugin plugin)
         {
-            this.clientState = plugin.ClientState;
-            this.objectTable = plugin.ObjectTable;
-            this.targetManager = plugin.TargetManager;
-            this.chatGui = plugin.ChatGUI;
-            this.config = plugin.PluginConfig;
-            this.cameraScene = plugin.CameraScene;
-            this.gameGui = plugin.GameGUI;
-            this.log = plugin.Log;
-            this.keyDetection = plugin.KeyDetection;
+            clientState = plugin.ClientState;
+            objectTable = plugin.ObjectTable;
+            targetManager = plugin.TargetManager;
+            chatGui = plugin.ChatGUI;
+            config = plugin.PluginConfig;
+            cameraScene = plugin.CameraScene;
+            gameGui = plugin.GameGUI;
+            log = plugin.Log;
+            keyDetection = plugin.KeyDetection;
             lastClearTime = DateTime.Now;
+            circlePoints = new Vector3[CIRCLE_SEGMENTS];
             currentEnemyIndex = -1;
-            wasTabPressed = false;
             lastEnemyList = new();
             InitCirclePoints();
         }
@@ -117,14 +115,14 @@ namespace Tabnado
             if (cameraScene == null)
                 return;
 
-            List<ScreenMonsterObject> enemies = null!;
+            List<ScreenObject> enemies = null!;
             var buttonPressed = keyDetection.IsKeyPressed();
             var currentTime = DateTime.Now;
             bool clearTargetUpdate = config.ClearTargetTable &&
                                      (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
 
-            if (((config.ShowDebugRaycast || config.ShowDebugSelection && !buttonPressed) &&
-                 (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate)
+            if ((config.ShowDebugRaycast || config.ShowDebugSelection && !buttonPressed) &&
+                 (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate
                 || clearTargetUpdate)
             {
                 cameraScene.UpdateSceneList();
@@ -150,7 +148,7 @@ namespace Tabnado
                 {
                     cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
                     !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
-                    enemies.Count > 0 && (enemies[0].GameObjectId != previousClosestTargetId), //Trigger Base (New Targeting)
+                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //Trigger Base (New Targeting)
                 };
 
                 bool[,] configCheck = new bool[3, 3]
@@ -187,7 +185,7 @@ namespace Tabnado
                         if (configCheck[baseIndex, subIndex])
                         {
                             subComboRequired = true;
-                            int triggerIndex = (subIndex == 1) ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
+                            int triggerIndex = subIndex == 1 ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
                             if (triggers[triggerIndex])
                             {
                                 activeSubCombos.Add(triggerNames[triggerIndex]);
@@ -230,7 +228,7 @@ namespace Tabnado
 
                 if (enemies != null && enemies.Count > 0)
                 {
-                    lastEnemyList = new List<ScreenMonsterObject>(enemies);
+                    lastEnemyList = new List<ScreenObject>(enemies);
                     previousClosestTargetId = enemies[0].GameObjectId;
                 }
             }
@@ -242,7 +240,7 @@ namespace Tabnado
         }
 
 
-        private bool IsListEqual(List<ScreenMonsterObject> list1, List<ScreenMonsterObject> list2)
+        private bool IsListEqual(List<ScreenObject> list1, List<ScreenObject> list2)
         {
             if (list1.Count != list2.Count)
                 return false;
@@ -265,7 +263,7 @@ namespace Tabnado
             if (config.UseCameraRotationReset)
             {
                 float rotationLength = cameraScene.GetRotationPercentage(0);
-                float maxThreshold = ((float)config.RotationPercent[0] / 100f);
+                float maxThreshold = config.RotationPercent[0] / 100f;
 
                 drawList.AddCircle(
                     screenCenter,

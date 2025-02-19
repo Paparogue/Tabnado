@@ -12,7 +12,6 @@ namespace Tabnado.UI
 
         private bool settingsVisible = false;
         private readonly PluginConfig config;
-        private readonly Tabnado tabnado;
         private readonly IDalamudPluginInterface pluginInterface;
         private readonly KeyDetection keyDetection;
 
@@ -20,7 +19,6 @@ namespace Tabnado.UI
         {
             this.pluginInterface = plugin.PluginInterface;
             this.config = plugin.PluginConfig;
-            this.tabnado = plugin.Tabnado;
             this.keyDetection = plugin.KeyDetection;
         }
 

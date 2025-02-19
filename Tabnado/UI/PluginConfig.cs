@@ -31,17 +31,15 @@ namespace Tabnado.UI
         public int VisibilityPercent { get; set; } = 35;
         public float CameraDepth { get; set; } = 1f;
         public int DrawRefreshRate { get; set; } = 5;
-        public bool OnlyHostilePlayers { get; set; } = true;
         public bool UseCameraRotationReset { get; set; } = true;
         public bool UseCombatantReset { get; set; } = false;
         public bool UseNewTargetReset { get; set; } = true;
+        public bool OnlyHostilePlayers { get; set; } = true;
         public bool OnlyBattleNPCs { get; set; } = true;
         public bool OnlyVisibleObjects { get; set; } = true;
         public bool ClearTargetTable { get; set; } = false;
-        public bool DrawSelection { get; set; } = false;
         public bool ShowDebugSelection { get; set; } = false;
         public bool ShowDebugRaycast { get; set; } = false;
-        public bool ChainResetLogic { get; set; } = false;
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
         { false, false },
         { false, false },
