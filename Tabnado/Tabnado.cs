@@ -25,9 +25,9 @@ namespace Tabnado
         private ITargetManager targetManager;
         private IChatGui chatGui;
         private PluginConfig config;
-        private CameraScene cameraUtil;
+        private CameraScene cameraScene;
         private IGameGui gameGui;
-        private IPluginLog pluginLog;
+        private IPluginLog log;
         private KeyDetection keyDetection;
         private bool wasTabPressed;
         private int currentEnemyIndex;
@@ -39,15 +39,16 @@ namespace Tabnado
 
         public Tabnado(Plugin plugin)
         {
-            this.clientState = clientState;
-            this.objectTable = objectTable;
-            this.targetManager = targetManager;
-            this.chatGui = chatGui;
-            this.config = config;
-            this.cameraUtil = cameraUtil;
-            this.gameGui = gameGui;
-            this.pluginLog = pluginLog;
-            this.keyDetection = keyDetection;
+            this.clientState = plugin.ClientState;
+            this.objectTable = plugin.ObjectTable;
+            this.targetManager = plugin.TargetManager;
+            this.chatGui = plugin.ChatGUI;
+            this.config = plugin.PluginConfig;
+            this.cameraScene = plugin.CameraScene;
+            this.gameGui = plugin.GameGUI;
+            this.log = plugin.Log;
+            this.keyDetection = plugin.KeyDetection;
+            circlePoints = new Vector3[CIRCLE_SEGMENTS];
             lastClearTime = DateTime.Now;
             currentEnemyIndex = -1;
             wasTabPressed = false;
@@ -57,7 +58,6 @@ namespace Tabnado
 
         private void InitCirclePoints()
         {
-            circlePoints = new Vector3[CIRCLE_SEGMENTS];
             for (int i = 0; i < CIRCLE_SEGMENTS; i++)
             {
                 float angle = (float)(2 * Math.PI * i / CIRCLE_SEGMENTS);
@@ -114,7 +114,7 @@ namespace Tabnado
 
         public void Draw()
         {
-            if (cameraUtil == null)
+            if (cameraScene == null)
                 return;
 
             List<ScreenMonsterObject> enemies = null!;
@@ -126,8 +126,8 @@ namespace Tabnado
                  (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate)
                 || clearTargetUpdate)
             {
-                cameraUtil.UpdateEnemyList();
-                enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                cameraScene.UpdateEnemyList();
+                enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 lastClearTime = currentTime;
 
                 if (enemies.Count <= 0)
@@ -140,14 +140,14 @@ namespace Tabnado
 
             if (keyDetection.IsKeyPressed())
             {
-                cameraUtil.UpdateEnemyList();
-                enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                cameraScene.UpdateEnemyList();
+                enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
                 bool resetTarget = false;
                 string resetReason = "";
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool[] triggers = new bool[3]
                 {
-            cameraUtil.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
+            cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
             !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
             enemies.Count > 0 && (enemies[0].GameObjectId != previousClosestTargetId), //Trigger Base (New Targeting)
                 };
@@ -209,7 +209,7 @@ namespace Tabnado
 
                 if (config.ShowDebugSelection && resetTarget)
                 {
-                    pluginLog.Warning($"Reset triggered by: {resetReason}");
+                    log.Warning($"Reset triggered by: {resetReason}");
                 }
 
                 if (enemies.Count > 0)
@@ -263,7 +263,7 @@ namespace Tabnado
 
             if (config.UseCameraRotationReset)
             {
-                float rotationLength = cameraUtil.GetRotationPercentage(0);
+                float rotationLength = cameraScene.GetRotationPercentage(0);
                 float maxThreshold = ((float)config.RotationPercent[0] / 100f);
 
                 drawList.AddCircle(
@@ -300,7 +300,7 @@ namespace Tabnado
                 32
             );
 
-            var enemies = cameraUtil.GetEnemiesWithinCameraRadius(config.CameraRadius);
+            var enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)

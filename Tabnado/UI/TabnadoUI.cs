@@ -16,12 +16,12 @@ namespace Tabnado.UI
         private readonly IDalamudPluginInterface pluginInterface;
         private readonly KeyDetection keyDetection;
 
-        public TabnadoUI(IDalamudPluginInterface pluginInterface, PluginConfig config, Tabnado targetingManager, KeyDetection keyDetector)
+        public TabnadoUI(Plugin plugin)
         {
-            this.pluginInterface = pluginInterface;
-            this.config = config;
-            this.tabnado = targetingManager;
-            this.keyDetection = keyDetector;
+            this.pluginInterface = plugin.PluginInterface;
+            this.config = plugin.PluginConfig;
+            this.tabnado = plugin.Tabnado;
+            this.keyDetection = plugin.KeyDetection;
         }
 
         public void ToggleVisibility()

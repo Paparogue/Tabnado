@@ -27,7 +27,7 @@ namespace Tabnado.Util
         private readonly IGameGui gameGui;
         private readonly IClientState state;
         private readonly PluginConfig config;
-        private readonly IPluginLog pluginLog;
+        private readonly IPluginLog log;
         private readonly Camera* camera;
         private List<ScreenMonsterObject> screenMonsterObjects;
         private GroupManager* groupManager;
@@ -40,13 +40,14 @@ namespace Tabnado.Util
         private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
         private float[] rotationPercentages = new float[3];
 
-        public CameraScene(IObjectTable objectTable, IGameGui gameGui, IClientState state, PluginConfig config, IPluginLog pluginLog)
+        public CameraScene(Plugin plugin)
         {
-            this.objectTable = objectTable;
-            this.gameGui = gameGui;
-            this.state = state;
-            this.config = config;
-            this.pluginLog = pluginLog;
+            this.objectTable = plugin.ObjectTable;
+            this.gameGui = plugin.GameGUI;
+            this.state = plugin.ClientState;
+            this.config = plugin.PluginConfig;
+            this.log = plugin.Log;
+            screenMonsterObjects = new();
             groupManager = GroupManager.Instance();
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
@@ -269,7 +270,7 @@ namespace Tabnado.Util
         private void Update()
         {
             if (camera is null || groupManager is null) {
-                pluginLog.Error("The Camera or GroupManager was not initilized. Please contact the developer.");
+                log.Error("The Camera or GroupManager was not initilized. Please contact the developer.");
             }
 
             var results = new List<ScreenMonsterObject>();
