@@ -142,9 +142,9 @@ namespace Tabnado
             {
                 cameraScene.UpdateEnemyList();
                 enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool resetTarget = false;
                 string resetReason = "";
-                string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool[] triggers = new bool[3]
                 {
             cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
