@@ -51,11 +51,15 @@ namespace Tabnado.Util
             groupManager = GroupManager.Instance();
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
-                camera = cameraManager->CurrentCamera;
-
-            for (int i = 0; i < 3; i++)
             {
-                lastViewMatrices[i] = camera->ViewMatrix;
+                camera = cameraManager->CurrentCamera;
+                for (int i = 0; i < 3; i++)
+                {
+                    lastViewMatrices[i] = camera->ViewMatrix;
+                }
+            } else
+            {
+                log.Error("CameraManager->CurrentCamera is null");
             }
         }
 
@@ -286,7 +290,9 @@ namespace Tabnado.Util
                     if (unitDistance > config.MaxTargetDistance)
                         continue;
 
-                    var lazyFix = npc.Name.ToString().Equals("Carbuncle") || npc.Name.ToString().Equals("Eos") || npc.Name.ToString().Equals("Selene");
+                    //all I want is a method that checks if we can attack the target
+                    var petNames = new[] { "Carbuncle", "Eos", "Selene", "Automaton Queen" };
+                    var lazyFix = petNames.Contains(npc.Name.ToString());
 
                     if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || obj.ObjectKind == ObjectKind.Companion || lazyFix))
                         continue;

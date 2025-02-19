@@ -147,28 +147,28 @@ namespace Tabnado
                 string resetReason = "";
                 bool[] triggers = new bool[3]
                 {
-            cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
-            !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
-            enemies.Count > 0 && (enemies[0].GameObjectId != previousClosestTargetId), //Trigger Base (New Targeting)
+                    cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
+                    !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
+                    enemies.Count > 0 && (enemies[0].GameObjectId != previousClosestTargetId), //Trigger Base (New Targeting)
                 };
 
                 bool[,] configCheck = new bool[3, 3]
                 {
-            {
-                config.UseCameraRotationReset, //BASE COMBO (Camera Rotation)
-                config.ResetCombinations[0, 0], // Sub Combo B (Combatant List)
-                config.ResetCombinations[0, 1] // Sub Combo C (New Targeting)
-            },
-            {
-                config.UseCombatantReset, //BASE COMBO (Combatant List)
-                config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation)
-                config.ResetCombinations[1, 1] // Sub Combo (New Targeting)
-            },
-            {
-                config.UseNewTargetReset, //BASE COMBO (New Targeting)
-                config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation)
-                config.ResetCombinations[2, 1] // Sub Combo (Combatant List)
-            }
+                    {
+                        config.UseCameraRotationReset, //BASE COMBO (Camera Rotation)
+                        config.ResetCombinations[0, 0], // Sub Combo B (Combatant List)
+                        config.ResetCombinations[0, 1] // Sub Combo C (New Targeting)
+                    },
+                    {
+                        config.UseCombatantReset, //BASE COMBO (Combatant List)
+                        config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation)
+                        config.ResetCombinations[1, 1] // Sub Combo (New Targeting)
+                    },
+                    {
+                        config.UseNewTargetReset, //BASE COMBO (New Targeting)
+                        config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation)
+                        config.ResetCombinations[2, 1] // Sub Combo (Combatant List)
+                    }
                 };
 
                 for (int baseIndex = 0; baseIndex < 3; baseIndex++)
