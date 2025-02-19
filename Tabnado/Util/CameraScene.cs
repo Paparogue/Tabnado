@@ -142,7 +142,7 @@ namespace Tabnado.Util
             int successfulRays = 0;
             int totalRays = screenEdgePoints.Length * 2;
             bool showDebugRaycast = config.ShowDebugRaycast;
-            var drawList = showDebugRaycast ? ImGui.GetForegroundDrawList() : null;
+            var drawList = showDebugRaycast ? ImGui.GetBackgroundDrawList() : null;
 
             Vector2 npcFeetScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
@@ -337,12 +337,12 @@ namespace Tabnado.Util
                    npc.Address != state.LocalPlayer.Address;
         }
 
-        public void UpdateEnemyList()
+        public void UpdateSceneList()
         {
             Update();
         }
 
-        public List<ScreenMonsterObject> GetEnemiesWithinCameraRadius(float radius)
+        public List<ScreenMonsterObject> GetObjectInsideRadius(float radius)
         {
             if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
                 return new List<ScreenMonsterObject>();

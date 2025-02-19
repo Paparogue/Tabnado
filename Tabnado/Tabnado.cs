@@ -48,7 +48,6 @@ namespace Tabnado
             this.gameGui = plugin.GameGUI;
             this.log = plugin.Log;
             this.keyDetection = plugin.KeyDetection;
-            circlePoints = new Vector3[CIRCLE_SEGMENTS];
             lastClearTime = DateTime.Now;
             currentEnemyIndex = -1;
             wasTabPressed = false;
@@ -58,6 +57,7 @@ namespace Tabnado
 
         private void InitCirclePoints()
         {
+            circlePoints = new Vector3[CIRCLE_SEGMENTS];
             for (int i = 0; i < CIRCLE_SEGMENTS; i++)
             {
                 float angle = (float)(2 * Math.PI * i / CIRCLE_SEGMENTS);
@@ -77,7 +77,7 @@ namespace Tabnado
             float radius = character->Height * 0.5f;
             Vector3 characterPos = new(character->Position.X, character->Position.Y, character->Position.Z);
 
-            var drawList = ImGui.GetForegroundDrawList();
+            var drawList = ImGui.GetBackgroundDrawList();
             Vector2 lastScreenPos = new();
             bool lastInView = false;
 
@@ -118,16 +118,17 @@ namespace Tabnado
                 return;
 
             List<ScreenMonsterObject> enemies = null!;
+            var buttonPressed = keyDetection.IsKeyPressed();
             var currentTime = DateTime.Now;
             bool clearTargetUpdate = config.ClearTargetTable &&
                                      (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
 
-            if (((config.ShowDebugRaycast || config.ShowDebugSelection) &&
+            if (((config.ShowDebugRaycast || config.ShowDebugSelection && !buttonPressed) &&
                  (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate)
                 || clearTargetUpdate)
             {
-                cameraScene.UpdateEnemyList();
-                enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                cameraScene.UpdateSceneList();
+                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
                 lastClearTime = currentTime;
 
                 if (enemies.Count <= 0)
@@ -138,10 +139,10 @@ namespace Tabnado
                 }
             }
 
-            if (keyDetection.IsKeyPressed())
+            if (buttonPressed)
             {
-                cameraScene.UpdateEnemyList();
-                enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
+                cameraScene.UpdateSceneList();
+                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool resetTarget = false;
                 string resetReason = "";
@@ -257,7 +258,7 @@ namespace Tabnado
             if (!config.ShowDebugSelection) return;
 
             var screenCenter = new Vector2(ImGui.GetIO().DisplaySize.X / 2, ImGui.GetIO().DisplaySize.Y / 2);
-            var drawList = ImGui.GetForegroundDrawList();
+            var drawList = ImGui.GetBackgroundDrawList();
 
             drawList.AddCircleFilled(screenCenter, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
 
@@ -300,7 +301,7 @@ namespace Tabnado
                 32
             );
 
-            var enemies = cameraScene.GetEnemiesWithinCameraRadius(config.CameraRadius);
+            var enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)
