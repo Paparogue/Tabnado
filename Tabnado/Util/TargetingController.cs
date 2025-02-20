@@ -144,9 +144,17 @@ namespace Tabnado.Util
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool resetTarget = false;
                 string resetReason = "";
+
+                bool[] rotationChecks = new bool[3]
+{
+                    cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0),
+                    cameraScene.CameraExceedsRotation(config.RotationPercent[1], 1),
+                    cameraScene.CameraExceedsRotation(config.RotationPercent[2], 2)
+};
+
                 bool[] triggers = new bool[3]
                 {
-                    cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0), //Trigger Base (Camera Rotation)
+                    rotationChecks[0], //Trigger Base (Camera Rotation)
                     !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
                     enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //Trigger Base (New Targeting)
                 };
@@ -186,11 +194,22 @@ namespace Tabnado.Util
                         {
                             subComboRequired = true;
                             int triggerIndex = subIndex == 1 ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
-                            if (triggers[triggerIndex])
+
+                            bool triggerValue;
+                            if (triggerIndex == 0)
+                            {
+                                triggerValue = rotationChecks[baseIndex];
+                            }
+                            else
+                            {
+                                triggerValue = triggers[triggerIndex];
+                            }
+
+                            if (triggerValue)
                             {
                                 activeSubCombos.Add(triggerNames[triggerIndex]);
                             }
-                            subComboMet &= triggers[triggerIndex];
+                            subComboMet &= triggerValue;
                         }
                     }
 
