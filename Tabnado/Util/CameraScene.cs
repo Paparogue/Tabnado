@@ -290,7 +290,7 @@ namespace Tabnado.Util
                     Vector3 npcBody = new Vector3
                     {
                         X = npc.Position.X,
-                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, 2f)),
+                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f + 0.3f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp)),
                         Z = npc.Position.Z
                     };
 

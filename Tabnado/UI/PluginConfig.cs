@@ -30,6 +30,7 @@ namespace Tabnado.UI
         public int RayCastPercent { get; set; } = 100;
         public int VisibilityPercent { get; set; } = 35;
         public float CameraDepth { get; set; } = 1f;
+        public float DistanceLerp { get; set; } = 1.5f;
         public int DrawRefreshRate { get; set; } = 5;
         public bool UseCameraRotationReset { get; set; } = true;
         public bool UseCombatantReset { get; set; } = false;

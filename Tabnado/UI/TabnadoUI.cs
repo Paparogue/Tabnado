@@ -392,6 +392,19 @@ namespace Tabnado.UI
                     ImGui.PopStyleColor();
                 }
 
+                float distanceLerp = config.DistanceLerp;
+                if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0.1f, 5f, "%.1f"))
+                {
+                    config.DistanceLerp = distanceLerp;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.PopStyleColor();
+                }
+
                 if (configChanged)
                     config.Save();
             }
