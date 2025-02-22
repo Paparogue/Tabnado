@@ -142,7 +142,7 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool useCameraRotationReset = config.UseCameraRotationReset;
-                if (ImGui.Checkbox("(C1) Reset target on camera rotation", ref useCameraRotationReset))
+                if (ImGui.Checkbox("Reset target on camera rotation", ref useCameraRotationReset))
                 {
                     config.UseCameraRotationReset = useCameraRotationReset;
                     configChanged = true;
@@ -154,25 +154,28 @@ namespace Tabnado.UI
 
                 if (useCameraRotationReset)
                 {
-                    int rotationPercent = config.RotationPercent[0];
-                    if (ImGui.SliderInt("(C1) Rotation threshold (% movement)", ref rotationPercent, 1, 100))
-                    {
-                        config.RotationPercent[0] = rotationPercent;
-                        configChanged = true;
-                    }
-
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
                     bool combineWithCombatant = config.ResetCombinations[0, 0];
-                    if (ImGui.Checkbox("(C1) New Combatant##camera_combatant", ref combineWithCombatant))
+                    if (ImGui.Checkbox("New Combatant##camera_combatant", ref combineWithCombatant))
                     {
                         config.ResetCombinations[0, 0] = combineWithCombatant;
                         configChanged = true;
                     }
 
+                    if(combineWithCombatant)
+                    {
+                        int rotationPercent = config.RotationPercent[0];
+                        if (ImGui.SliderInt("Rotation threshold (% movement)##1", ref rotationPercent, 1, 100))
+                        {
+                            config.RotationPercent[0] = rotationPercent;
+                            configChanged = true;
+                        }
+                    }
+
                     bool combineWithNewTarget = config.ResetCombinations[0, 1];
-                    if (ImGui.Checkbox("(C1) New Nearest Target##camera_target", ref combineWithNewTarget))
+                    if (ImGui.Checkbox("New Nearest Target##camera_target", ref combineWithNewTarget))
                     {
                         config.ResetCombinations[0, 1] = combineWithNewTarget;
                         configChanged = true;
@@ -181,7 +184,7 @@ namespace Tabnado.UI
                 }
 
                 bool useCombatantReset = config.UseCombatantReset;
-                if (ImGui.Checkbox("(C2) Reset target when a new combatant appears", ref useCombatantReset))
+                if (ImGui.Checkbox("Reset target when a new combatant appears", ref useCombatantReset))
                 {
                     config.UseCombatantReset = useCombatantReset;
                     configChanged = true;
@@ -192,7 +195,7 @@ namespace Tabnado.UI
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[1, 0];
-                    if (ImGui.Checkbox("(C2) Camera Rotation##combatant_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation##combatant_camera", ref combineWithCamera))
                     {
                         config.ResetCombinations[1, 0] = combineWithCamera;
                         configChanged = true;
@@ -201,7 +204,7 @@ namespace Tabnado.UI
                     if(combineWithCamera)
                     {
                         int rotationPercent = config.RotationPercent[1];
-                        if (ImGui.SliderInt("(C2) Rotation threshold (% movement)", ref rotationPercent, 1, 100))
+                        if (ImGui.SliderInt("Rotation threshold (% movement)##2", ref rotationPercent, 1, 100))
                         {
                             config.RotationPercent[1] = rotationPercent;
                             configChanged = true;
@@ -209,7 +212,7 @@ namespace Tabnado.UI
                     }
 
                     bool combineWithNewTarget = config.ResetCombinations[1, 1];
-                    if (ImGui.Checkbox("(C2) New Nearest Target##combatant_target", ref combineWithNewTarget))
+                    if (ImGui.Checkbox("New Nearest Target##combatant_target", ref combineWithNewTarget))
                     {
                         config.ResetCombinations[1, 1] = combineWithNewTarget;
                         configChanged = true;
@@ -218,7 +221,7 @@ namespace Tabnado.UI
                 }
 
                 bool useNewTargetReset = config.UseNewTargetReset;
-                if (ImGui.Checkbox("(C3) Reset target on new nearest entity", ref useNewTargetReset))
+                if (ImGui.Checkbox("Reset target on new nearest entity", ref useNewTargetReset))
                 {
                     config.UseNewTargetReset = useNewTargetReset;
                     configChanged = true;
@@ -229,7 +232,7 @@ namespace Tabnado.UI
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[2, 0];
-                    if (ImGui.Checkbox("(C3) Camera Rotation##target_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation##target_camera", ref combineWithCamera))
                     {
                         config.ResetCombinations[2, 0] = combineWithCamera;
                         configChanged = true;
@@ -238,7 +241,7 @@ namespace Tabnado.UI
                     if (combineWithCamera)
                     {
                         int rotationPercent = config.RotationPercent[2];
-                        if (ImGui.SliderInt("(C3) Rotation threshold (% movement)", ref rotationPercent, 1, 100))
+                        if (ImGui.SliderInt("Rotation threshold (% movement)##3", ref rotationPercent, 1, 100))
                         {
                             config.RotationPercent[2] = rotationPercent;
                             configChanged = true;
@@ -246,7 +249,7 @@ namespace Tabnado.UI
                     }
 
                     bool combineWithCombatant = config.ResetCombinations[2, 1];
-                    if (ImGui.Checkbox("(C3) New Combatant##target_combatant", ref combineWithCombatant))
+                    if (ImGui.Checkbox("New Combatant##target_combatant", ref combineWithCombatant))
                     {
                         config.ResetCombinations[2, 1] = combineWithCombatant;
                         configChanged = true;
@@ -258,6 +261,17 @@ namespace Tabnado.UI
 
                 ImGui.TextDisabled("Target Filtering Options");
                 ImGui.Separator();
+
+                bool stickyTargets = config.StickyTargetOnReset;
+                if (ImGui.Checkbox("Sticky Target On Reset", ref stickyTargets))
+                {
+                    config.StickyTargetOnReset = stickyTargets;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("When enabled, the target system will maintain its current target when a reset mechanism is triggered.");
+                }
 
                 bool onlyAttackable = config.OnlyHostilePlayers;
                 if (ImGui.Checkbox("Target Only Hostile Players", ref onlyAttackable))

@@ -232,7 +232,9 @@ namespace Tabnado.Util
 
                 if (enemies.Count > 0)
                 {
-                    if (resetTarget)
+                    if (resetTarget && (config.StickyTargetOnReset || 
+                        (!config.StickyTargetOnReset || 
+                        enemies[currentEnemyIndex].GameObject?.Address != targetManager.Target?.Address)))
                     {
                         currentEnemyIndex = 0;
                     }
