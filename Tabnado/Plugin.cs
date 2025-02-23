@@ -42,8 +42,10 @@ namespace Tabnado
             CommandManager = commandManager;
 
             PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
+            if (PluginInterface.GetPluginConfig() != null && PluginConfig.Version != 2)
+                PluginConfig = new PluginConfig();
             PluginConfig.Initialize(PluginInterface);
-
+            PluginConfig.Save();
             KeyDetection = new KeyDetection();
             CameraScene = new CameraScene(this);
             TabController = new TargetingController(this);
