@@ -224,6 +224,16 @@ namespace Tabnado.UI
 
                 if (useCameraRotationReset)
                 {
+                    int rotationPercent = config.RotationPercent[0];
+                    if (ImGui.SliderInt("Rotation threshold (% movement)##1", ref rotationPercent, 1, 100))
+                    {
+                        config.RotationPercent[0] = rotationPercent;
+                        configChanged = true;
+                    }
+                }
+
+                if (useCameraRotationReset)
+                {
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
@@ -232,16 +242,6 @@ namespace Tabnado.UI
                     {
                         config.ResetCombinations[0, 0] = combineWithNewEntity;
                         configChanged = true;
-                    }
-
-                    if (combineWithNewEntity)
-                    {
-                        int rotationPercent = config.RotationPercent[0];
-                        if (ImGui.SliderInt("Rotation threshold (% movement)##1", ref rotationPercent, 1, 100))
-                        {
-                            config.RotationPercent[0] = rotationPercent;
-                            configChanged = true;
-                        }
                     }
 
                     bool combineWithProximity = config.ResetCombinations[0, 1];
