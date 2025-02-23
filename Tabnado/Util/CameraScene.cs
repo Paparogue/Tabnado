@@ -18,6 +18,8 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Lumina.Data.Parsing;
+using Microsoft.VisualBasic;
 
 namespace Tabnado.Util
 {
@@ -71,11 +73,33 @@ namespace Tabnado.Util
             return 0f;
         }
 
-        private Vector2[] GetScreenEdgePoints()
+        public Vector2 GetPositionFromMonitor()
         {
             screenWidth = ImGui.GetIO().DisplaySize.X;
             screenHeight = ImGui.GetIO().DisplaySize.Y;
-            screenCenter = new Vector2(screenWidth / 2, screenHeight / 2);
+            float normalizedX = config.MonitorX / 100f;
+            float normalizedY = config.MonitorY / 100f;
+            float baseX = screenWidth * normalizedX;
+            float baseY = screenHeight * normalizedY;
+
+            if (config.UseCameraLerp)
+            {
+                CameraEx* cam = (CameraEx*)camera;
+                float currentFoV = cam->currentZoom;
+                float maxFoV = cam->maxZoom;
+                float minFoV = cam->minZoom;
+                float cameraLerp = config.CameraLerp;
+                currentFoV = Math.Clamp(currentFoV, minFoV, maxFoV);
+                float fovT = (currentFoV - minFoV) / (maxFoV - minFoV);
+                baseY = TabMath.Lerp(baseY, 0, fovT * cameraLerp);
+            }
+
+            return new Vector2(baseX, baseY);
+        }
+
+        private Vector2[] GetScreenEdgePoints()
+        {
+            screenCenter = GetPositionFromMonitor();
 
             int segments = config.RaycastMultiplier;
             int pointsPerEdge = segments + 1;
@@ -139,18 +163,20 @@ namespace Tabnado.Util
             bool npcInView, npcHeadInView;
             GameObject* npcObject = (GameObject*)npc.Address;
             Character* npcCharacter = (Character *)npcObject;
+            float npcHeadFloat = npcCharacter->ModelContainer.CalculateHeight();
+            float npcFeetFloat = npcHeadFloat * 0.2f;
 
             Vector3 npcHead = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + npcCharacter->ModelContainer.CalculateHeight(),
+                Y = npc.Position.Y + npcHeadFloat,
                 Z = npc.Position.Z
             };
 
             Vector3 npcFeet = new Vector3
             {
                 X = npc.Position.X,
-                Y = npc.Position.Y + 0.5f,
+                Y = npc.Position.Y + npcFeetFloat,
                 Z = npc.Position.Z
             };
 
@@ -265,7 +291,8 @@ namespace Tabnado.Util
         private void Update()
         {
             if (camera is null || groupManager is null) {
-                log.Error("The Camera or GroupManager was not initilized. Please contact the developer.");
+                log.Error("The Camera or GroupManager was not initilized.");
+                return;
             }
 
             var results = new List<ScreenObject>();
@@ -289,22 +316,27 @@ namespace Tabnado.Util
                     bool isTraderNPC = obj.ObjectKind == ObjectKind.EventNpc;
                     bool isPlayer = obj.ObjectKind == ObjectKind.Player;
 
-                    if (config.OnlyBattleNPCs && (isTraderNPC || isMinion || isPetOrCompanion))
+                    if (config.OnlyAttackableObjects &&
+                        (isTraderNPC || isMinion || isPetOrCompanion ||
+                        (!isPlayer && !isHostile && !isNeutral) ||
+                        (isPlayer && IsObjectAllianceOrGroup((GameObject*)obj.Address))))
                         continue;
+
+                    float npcBodyY;
+                    if(config.UseDistanceLerp)
+                        npcBodyY = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (structCharacter->ModelContainer.CalculateHeight() / 2f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp));
+                    else
+                        npcBodyY = npc.Position.Y;
 
                     Vector3 npcBody = new Vector3
                     {
                         X = npc.Position.X,
-                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (structCharacter->ModelContainer.CalculateHeight() / 2f + 0.3f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp)),
+                        Y = npcBodyY,
                         Z = npc.Position.Z
                     };
 
                     if (gameGui.WorldToScreen(npcBody, out screenPos, out inView) && inView)
                     {
-                        if (config.OnlyHostilePlayers && !isPlayer && !isHostile && !isNeutral)
-                            continue;
-                        if(config.OnlyHostilePlayers && isPlayer && IsObjectAllianceOrGroup((GameObject*)obj.Address))
-                            continue;
                         if (!IsVisibleFromAnyEdge(npc, screenEdgePoints) && config.OnlyVisibleObjects)
                             continue;
 
@@ -329,6 +361,7 @@ namespace Tabnado.Util
                     npc.IsTargetable &&
                    !npc.Name.TextValue.IsNullOrEmpty() &&
                    !npc.IsDead &&
+                   npc.CurrentHp > 0 &&
                    state.LocalPlayer != null &&
                    npc.Address != state.LocalPlayer.Address;
         }

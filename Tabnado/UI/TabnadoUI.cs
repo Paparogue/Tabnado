@@ -78,6 +78,28 @@ namespace Tabnado.UI
                 ImGui.TextDisabled("Targeting Range Settings");
                 ImGui.Separator();
 
+                float monitorX = config.MonitorX;
+                if (ImGui.SliderFloat("Monitor X (%)", ref monitorX, 0, 100, "%.1f"))
+                {
+                    config.MonitorX = monitorX;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("ADD TEXT HERE Changes Monitor X Percent of middle");
+                }
+
+                float monitorY = config.MonitorY;
+                if (ImGui.SliderFloat("Monitor Y (%)", ref monitorY, 0, 100, "%.1f"))
+                {
+                    config.MonitorY = monitorY;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("ADD TEXT HERE Changes Monitor Y Percent of middle");
+                }
+
                 int maxTargetDistance = config.MaxTargetDistance;
                 if (ImGui.SliderInt("Max Target Distance (yalms)", ref maxTargetDistance, 1, 55))
                 {
@@ -133,6 +155,50 @@ namespace Tabnado.UI
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.SetTooltip("Multiplies the base number of raycasts by 4.");
+                    }
+                }
+
+                bool useCameraLerp = config.UseCameraLerp;
+                if (ImGui.Checkbox("Camera Lerp", ref useCameraLerp))
+                {
+                    config.UseCameraLerp = useCameraLerp;
+                    configChanged = true;
+                }
+
+                if(useCameraLerp) {
+                    float cameraLerp = config.CameraLerp;
+                    if (ImGui.SliderFloat("Camera Lerp", ref cameraLerp, 0.01f, 1f, "%.2f"))
+                    {
+                        config.CameraLerp = cameraLerp;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
+                    }
+                }
+
+                bool useDistanceLerp = config.UseDistanceLerp;
+                if (ImGui.Checkbox("Distance Lerp", ref useDistanceLerp))
+                {
+                    config.UseDistanceLerp = useDistanceLerp;
+                    configChanged = true;
+                }
+
+                if(useDistanceLerp) {
+                    float distanceLerp = config.DistanceLerp;
+                    if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0.01f, 10f, "%.2f"))
+                    {
+                        config.DistanceLerp = distanceLerp;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
                     }
                 }
 
@@ -273,17 +339,18 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("When enabled, the target system will maintain its current target when a reset mechanism is triggered.");
                 }
 
-                bool onlyAttackable = config.OnlyHostilePlayers;
-                if (ImGui.Checkbox("Target Only Hostile Players", ref onlyAttackable))
+                bool onlyAttackable = config.OnlyAttackableObjects;
+                if (ImGui.Checkbox("Target Only Attackable Objects", ref onlyAttackable))
                 {
-                    config.OnlyHostilePlayers = onlyAttackable;
+                    config.OnlyAttackableObjects = onlyAttackable;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("When enabled, only hostile players will be targeted in PvP, excluding teammates and alliance members.");
+                    ImGui.SetTooltip("When enabled, only attackable Objects will be targeted.");
                 }
 
+                /*
                 bool onlyBattleNPCs = config.OnlyBattleNPCs;
                 if (ImGui.Checkbox("Target Only Battle NPCs", ref onlyBattleNPCs))
                 {
@@ -293,7 +360,7 @@ namespace Tabnado.UI
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.SetTooltip("When enabled, only Battle NPCs will be targeted, ignoring event NPCs, traders, and pets.");
-                }
+                }*/
 
                 bool onlyVisibleObjects = config.OnlyVisibleObjects;
                 if (ImGui.Checkbox("Target Only Visible Objects", ref onlyVisibleObjects))
@@ -383,19 +450,6 @@ namespace Tabnado.UI
                 if (ImGui.SliderFloat("Camera Depth", ref cameraDepth, 1f, 10f, "%.1f"))
                 {
                     config.CameraDepth = cameraDepth;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                    ImGui.PopStyleColor();
-                }
-
-                float distanceLerp = config.DistanceLerp;
-                if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0f, 10f, "%.1f"))
-                {
-                    config.DistanceLerp = distanceLerp;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())

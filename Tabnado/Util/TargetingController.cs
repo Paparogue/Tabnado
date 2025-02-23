@@ -276,7 +276,7 @@ namespace Tabnado.Util
         {
             if (!config.ShowDebugSelection) return;
 
-            var screenCenter = new Vector2(ImGui.GetIO().DisplaySize.X / 2, ImGui.GetIO().DisplaySize.Y / 2);
+            Vector2 screenCenter = cameraScene.GetPositionFromMonitor();
             var drawList = ImGui.GetBackgroundDrawList();
 
             drawList.AddCircleFilled(screenCenter, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
