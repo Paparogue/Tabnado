@@ -393,7 +393,7 @@ namespace Tabnado.UI
                 }
 
                 float distanceLerp = config.DistanceLerp;
-                if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0.1f, 5f, "%.1f"))
+                if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0f, 10f, "%.1f"))
                 {
                     config.DistanceLerp = distanceLerp;
                     configChanged = true;

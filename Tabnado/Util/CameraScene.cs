@@ -39,6 +39,7 @@ namespace Tabnado.Util
         private float rotationPercentage = 0f;
         private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
         private float[] rotationPercentages = new float[3];
+        private readonly uint OWNER_IS_WORLD = 3758096384;
 
         public CameraScene(Plugin plugin)
         {
@@ -280,23 +281,29 @@ namespace Tabnado.Util
                     if (unitDistance > config.MaxTargetDistance)
                         continue;
 
-                    //all I want is a method that checks if we can attack the target
-                    var petNames = new[] { "Topaz Carbuncle", "Emerald Carbuncle", "Ruby Carbuncle", "Carbuncle", "Eos", "Selene", "Automaton Queen" };
-                    var lazyFix = petNames.Contains(npc.Name.ToString());
+                    Character* structCharacter = ((Character*)npc.Address);
+                    bool isPetOrCompanion = structCharacter-> CompanionOwnerId != OWNER_IS_WORLD;
+                    bool isHostile = structCharacter->IsHostile;
+                    bool isNeutral = structCharacter->Battalion == 4;
+                    bool isMinion = obj.ObjectKind == ObjectKind.Companion;
+                    bool isTraderNPC = obj.ObjectKind == ObjectKind.EventNpc;
+                    bool isPlayer = obj.ObjectKind == ObjectKind.Player;
 
-                    if (config.OnlyBattleNPCs && (obj.ObjectKind == ObjectKind.EventNpc || obj.ObjectKind == ObjectKind.Companion || lazyFix))
+                    if (config.OnlyBattleNPCs && (isTraderNPC || isMinion || isPetOrCompanion))
                         continue;
 
                     Vector3 npcBody = new Vector3
                     {
                         X = npc.Position.X,
-                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (((Character*)npc.Address)->ModelContainer.CalculateHeight() / 2f + 0.3f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp)),
+                        Y = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (structCharacter->ModelContainer.CalculateHeight() / 2f + 0.3f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp)),
                         Z = npc.Position.Z
                     };
 
                     if (gameGui.WorldToScreen(npcBody, out screenPos, out inView) && inView)
                     {
-                        if (config.OnlyHostilePlayers && IsObjectAllianceOrGroup((GameObject*)npc.Address))
+                        if (config.OnlyHostilePlayers && !isPlayer && !isHostile && !isNeutral)
+                            continue;
+                        if(config.OnlyHostilePlayers && isPlayer && IsObjectAllianceOrGroup((GameObject*)obj.Address))
                             continue;
                         if (!IsVisibleFromAnyEdge(npc, screenEdgePoints) && config.OnlyVisibleObjects)
                             continue;
@@ -305,7 +312,7 @@ namespace Tabnado.Util
                         {
                             GameObjectId = npc.GameObjectId,
                             GameObject = obj,
-                            NameNKind = $"{npc.Name} {obj.ObjectKind}",
+                            GlobalInfo = $"Battalion: {structCharacter->Battalion} Hostile: {isHostile} Neutral: {isNeutral} Player: {isPlayer} Name: {npc.Name} Kind: {obj.ObjectKind}",
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
                             WorldDistance = unitDistance

@@ -336,7 +336,7 @@ namespace Tabnado.Util
                         5f,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
                     );
-                    string distanceText = $"Details: {enemy.NameNKind} {enemy.WorldDistance:F1}";
+                    string distanceText = $"Details: {enemy.GlobalInfo} {enemy.WorldDistance:F1}";
                     drawList.AddText(enemy.ScreenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
                 }
             }
