@@ -348,7 +348,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Keeps current target when reset occurs, instead of cycling to next target.");
+                    ImGui.SetTooltip("When reset occurs, keeps current target only if it matches the reset target otherwise cycles to next target.");
                 }
 
                 bool onlyAttackable = config.OnlyAttackableObjects;
