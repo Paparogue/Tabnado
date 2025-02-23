@@ -4,6 +4,10 @@
 
 Tabnado is a targeting plugin that lets you customize how you target enemies in FFXIV. It includes options for visibility checks, distance limitations, and advanced targeting behavior controls.
 
+   ```
+   https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.json
+   ```
+
 ## Features
 
 ### Core Functionality
@@ -84,4 +88,3 @@ Tabnado is a targeting plugin that lets you customize how you target enemies in 
 
 - If your selected targeting key conflicts with game keybinds, unbind it in the game's settings
 - Debug options may significantly impact performance when enabled
-- Visibility checks use raycast system for accurate target detection
