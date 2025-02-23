@@ -1,5 +1,4 @@
 # Tabnado
-> A tab-targeting plugin for Final Fantasy XIV that provides customizable targeting options
 
 ![Tabnado Icon](https://raw.githubusercontent.com/Paparogue/Tabnado/2579f4200a6ba0e60bd12eb6acd31be341e08490/tabnado.png)
 
