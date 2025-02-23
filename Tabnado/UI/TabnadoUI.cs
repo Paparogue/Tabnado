@@ -79,25 +79,25 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 float monitorX = config.MonitorX;
-                if (ImGui.SliderFloat("Monitor X (%)", ref monitorX, 0, 100, "%.1f"))
+                if (ImGui.SliderFloat("Target Point X (%)", ref monitorX, 0, 100, "%.1f"))
                 {
                     config.MonitorX = monitorX;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("ADD TEXT HERE Changes Monitor X Percent of middle");
+                    ImGui.SetTooltip("Adjusts horizontal position of targeting center. lower shifts left, higher shifts right.");
                 }
 
                 float monitorY = config.MonitorY;
-                if (ImGui.SliderFloat("Monitor Y (%)", ref monitorY, 0, 100, "%.1f"))
+                if (ImGui.SliderFloat("Target Point Y (%)", ref monitorY, 0, 100, "%.1f"))
                 {
                     config.MonitorY = monitorY;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("ADD TEXT HERE Changes Monitor Y Percent of middle");
+                    ImGui.SetTooltip("Adjusts vertical position of targeting center. lower shifts up, higher shifts down.");
                 }
 
                 int maxTargetDistance = config.MaxTargetDistance;
@@ -108,7 +108,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Only targets within this distance (in yalms) are considered.");
+                    ImGui.SetTooltip("Sets the maximum targeting range. Objects beyond this distance (in yalms) will be ignored when cycling through targets.");
                 }
 
                 int cameraRadius = config.CameraRadius;
@@ -119,7 +119,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Defines the radius around the middle of the camera in which objects are checked for targeting.");
+                    ImGui.SetTooltip("Defines the circular search area around your target point for detecting targetable objects.");
                 }
 
                 if (config.OnlyVisibleObjects)
@@ -154,7 +154,7 @@ namespace Tabnado.UI
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Multiplies the base number of raycasts by 4.");
+                        ImGui.SetTooltip("Increases raycast density for target detection. Higher values improve accuracy but may impact performance.");
                     }
                 }
 
@@ -164,8 +164,12 @@ namespace Tabnado.UI
                     config.UseCameraLerp = useCameraLerp;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Automatically adjusts target point height based on camera zoom. When zoomed out, targeting shifts upward to maintain accuracy.");
+                }
 
-                if(useCameraLerp) {
+                if (useCameraLerp) {
                     float cameraLerp = config.CameraLerp;
                     if (ImGui.SliderFloat("Camera Lerp", ref cameraLerp, 0.01f, 1f, "%.2f"))
                     {
@@ -174,9 +178,7 @@ namespace Tabnado.UI
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                        ImGui.PopStyleColor();
+                        ImGui.SetTooltip("Controls how quickly the target point adjusts to camera zoom changes. Higher values mean faster adjustment.");
                     }
                 }
 
@@ -186,8 +188,12 @@ namespace Tabnado.UI
                     config.UseDistanceLerp = useDistanceLerp;
                     configChanged = true;
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Automatically raises target point when enemies are closer, making nearby targets easier to select.");
+                }
 
-                if(useDistanceLerp) {
+                if (useDistanceLerp) {
                     float distanceLerp = config.DistanceLerp;
                     if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0.01f, 10f, "%.2f"))
                     {
@@ -196,9 +202,7 @@ namespace Tabnado.UI
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                        ImGui.PopStyleColor();
+                        ImGui.SetTooltip("Controls how quickly the target point adjusts based on enemy distance. Higher values mean faster adjustment.");
                     }
                 }
 
@@ -208,14 +212,14 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool useCameraRotationReset = config.UseCameraRotationReset;
-                if (ImGui.Checkbox("Reset target on camera rotation", ref useCameraRotationReset))
+                if (ImGui.Checkbox("Camera Rotation Reset", ref useCameraRotationReset))
                 {
                     config.UseCameraRotationReset = useCameraRotationReset;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Automatically resets the target selection if the camera rotates beyond a certain threshold.");
+                    ImGui.SetTooltip("Resets to nearest target when camera movement exceeds rotation threshold.");
                 }
 
                 if (useCameraRotationReset)
@@ -223,14 +227,14 @@ namespace Tabnado.UI
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
-                    bool combineWithCombatant = config.ResetCombinations[0, 0];
-                    if (ImGui.Checkbox("New Combatant##camera_combatant", ref combineWithCombatant))
+                    bool combineWithNewEntity = config.ResetCombinations[0, 0];
+                    if (ImGui.Checkbox("New Entity Reset##camera_entity", ref combineWithNewEntity))
                     {
-                        config.ResetCombinations[0, 0] = combineWithCombatant;
+                        config.ResetCombinations[0, 0] = combineWithNewEntity;
                         configChanged = true;
                     }
 
-                    if(combineWithCombatant)
+                    if (combineWithNewEntity)
                     {
                         int rotationPercent = config.RotationPercent[0];
                         if (ImGui.SliderInt("Rotation threshold (% movement)##1", ref rotationPercent, 1, 100))
@@ -240,34 +244,38 @@ namespace Tabnado.UI
                         }
                     }
 
-                    bool combineWithNewTarget = config.ResetCombinations[0, 1];
-                    if (ImGui.Checkbox("New Nearest Target##camera_target", ref combineWithNewTarget))
+                    bool combineWithProximity = config.ResetCombinations[0, 1];
+                    if (ImGui.Checkbox("Proximity Reset##camera_proximity", ref combineWithProximity))
                     {
-                        config.ResetCombinations[0, 1] = combineWithNewTarget;
+                        config.ResetCombinations[0, 1] = combineWithProximity;
                         configChanged = true;
                     }
                     ImGui.Unindent();
                 }
 
-                bool useCombatantReset = config.UseCombatantReset;
-                if (ImGui.Checkbox("Reset target when a new combatant appears", ref useCombatantReset))
+                bool useNewEntityReset = config.UseCombatantReset;
+                if (ImGui.Checkbox("New Entity Reset", ref useNewEntityReset))
                 {
-                    config.UseCombatantReset = useCombatantReset;
+                    config.UseCombatantReset = useNewEntityReset;
                     configChanged = true;
                 }
-                if (useCombatantReset)
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Resets to nearest target when new enemies appear in targeting range.");
+                }
+                if (useNewEntityReset)
                 {
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[1, 0];
-                    if (ImGui.Checkbox("Camera Rotation##combatant_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation Reset##entity_camera", ref combineWithCamera))
                     {
                         config.ResetCombinations[1, 0] = combineWithCamera;
                         configChanged = true;
                     }
 
-                    if(combineWithCamera)
+                    if (combineWithCamera)
                     {
                         int rotationPercent = config.RotationPercent[1];
                         if (ImGui.SliderInt("Rotation threshold (% movement)##2", ref rotationPercent, 1, 100))
@@ -277,28 +285,32 @@ namespace Tabnado.UI
                         }
                     }
 
-                    bool combineWithNewTarget = config.ResetCombinations[1, 1];
-                    if (ImGui.Checkbox("New Nearest Target##combatant_target", ref combineWithNewTarget))
+                    bool combineWithProximity = config.ResetCombinations[1, 1];
+                    if (ImGui.Checkbox("Proximity Reset##entity_proximity", ref combineWithProximity))
                     {
-                        config.ResetCombinations[1, 1] = combineWithNewTarget;
+                        config.ResetCombinations[1, 1] = combineWithProximity;
                         configChanged = true;
                     }
                     ImGui.Unindent();
                 }
 
-                bool useNewTargetReset = config.UseNewTargetReset;
-                if (ImGui.Checkbox("Reset target on new nearest entity", ref useNewTargetReset))
+                bool useProximityReset = config.UseNewTargetReset;
+                if (ImGui.Checkbox("Proximity Reset", ref useProximityReset))
                 {
-                    config.UseNewTargetReset = useNewTargetReset;
+                    config.UseNewTargetReset = useProximityReset;
                     configChanged = true;
                 }
-                if (useNewTargetReset)
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Resets to nearest target when a closer entity becomes available.");
+                }
+                if (useProximityReset)
                 {
                     ImGui.Indent();
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[2, 0];
-                    if (ImGui.Checkbox("Camera Rotation##target_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation Reset##proximity_camera", ref combineWithCamera))
                     {
                         config.ResetCombinations[2, 0] = combineWithCamera;
                         configChanged = true;
@@ -314,10 +326,10 @@ namespace Tabnado.UI
                         }
                     }
 
-                    bool combineWithCombatant = config.ResetCombinations[2, 1];
-                    if (ImGui.Checkbox("New Combatant##target_combatant", ref combineWithCombatant))
+                    bool combineWithNewEntity = config.ResetCombinations[2, 1];
+                    if (ImGui.Checkbox("New Entity Reset##proximity_entity", ref combineWithNewEntity))
                     {
-                        config.ResetCombinations[2, 1] = combineWithCombatant;
+                        config.ResetCombinations[2, 1] = combineWithNewEntity;
                         configChanged = true;
                     }
                     ImGui.Unindent();
@@ -336,7 +348,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("When enabled, the target system will maintain its current target when a reset mechanism is triggered.");
+                    ImGui.SetTooltip("Keeps current target when reset occurs, instead of cycling to next target.");
                 }
 
                 bool onlyAttackable = config.OnlyAttackableObjects;
