@@ -348,7 +348,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("When reset occurs, keeps current target only if it matches the reset target otherwise cycles to next target.");
+                    ImGui.SetTooltip("When enabled, keeps your current target after a reset if that target is still the closest. When disabled, resets to the second closest enemy.");
                 }
 
                 bool onlyAttackable = config.OnlyAttackableObjects;
