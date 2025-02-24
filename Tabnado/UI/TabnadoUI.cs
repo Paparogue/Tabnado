@@ -190,7 +190,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Automatically raises target point when enemies are closer, making nearby targets easier to select.");
+                    ImGui.SetTooltip("Automatically raises target point when valid objects are closer, making nearby targets easier to select.");
                 }
 
                 if (useDistanceLerp) {
