@@ -171,7 +171,7 @@ namespace Tabnado.UI
 
                 if (useCameraLerp) {
                     float cameraLerp = config.CameraLerp;
-                    if (ImGui.SliderFloat("Camera Lerp", ref cameraLerp, 0.01f, 1f, "%.2f"))
+                    if (ImGui.SliderFloat("Camera Lerp", ref cameraLerp, 0.001f, 1f, "%.3f"))
                     {
                         config.CameraLerp = cameraLerp;
                         configChanged = true;
