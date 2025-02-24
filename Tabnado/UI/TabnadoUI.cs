@@ -261,7 +261,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Resets to nearest target when new enemies appear in targeting range.");
+                    ImGui.SetTooltip("Resets to nearest target when new entities appear in targeting range.");
                 }
                 if (useNewEntityReset)
                 {
@@ -467,7 +467,7 @@ namespace Tabnado.UI
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                    ImGui.SetTooltip("Advanced setting: Modify only if you understand the implications.");
                     ImGui.PopStyleColor();
                 }
 
