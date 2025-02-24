@@ -85,13 +85,13 @@ namespace Tabnado.Util
             if (config.UseCameraLerp)
             {
                 CameraEx* cam = (CameraEx*)camera;
-                float currentFoV = cam->currentZoom;
-                float maxFoV = cam->maxZoom;
-                float minFoV = cam->minZoom;
+                float currentZoom = cam->currentZoom;
+                float maxZoom = cam->maxZoom;
+                float minZoom = cam->minZoom;
                 float cameraLerp = config.CameraLerp;
-                currentFoV = Math.Clamp(currentFoV, minFoV, maxFoV);
-                float fovT = (currentFoV - minFoV) / (maxFoV - minFoV);
-                baseY = TabMath.Lerp(baseY, 0, fovT * cameraLerp);
+                currentZoom = Math.Clamp(currentZoom, minZoom, maxZoom);
+                float cameraT = (currentZoom - minZoom) / (maxZoom - minZoom);
+                baseY = TabMath.Lerp(baseY, 0, cameraT * cameraLerp);
             }
 
             return new Vector2(baseX, baseY);
