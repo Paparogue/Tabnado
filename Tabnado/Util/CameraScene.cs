@@ -51,7 +51,6 @@ namespace Tabnado.Util
             this.config = plugin.PluginConfig;
             this.log = plugin.Log;
             screenMonsterObjects = new();
-            InitManagerInstances();
         }
 
         public void InitManagerInstances()
