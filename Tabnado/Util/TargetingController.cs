@@ -112,8 +112,13 @@ namespace Tabnado.Util
 
         public void Draw()
         {
-            if (cameraScene == null)
+            if (cameraScene is null)
+            {
+                log.Error("Camera Scene is null. This should not happen and we are sorry about that!");
                 return;
+            }
+            if (cameraScene.GetCamera() is null || cameraScene.GetGroupManager() is null)
+                cameraScene.InitManagerInstances();
 
             List<ScreenObject> enemies = null!;
             var buttonPressed = keyDetection.IsKeyPressed();

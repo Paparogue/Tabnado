@@ -53,6 +53,16 @@ namespace Tabnado.Util
             screenMonsterObjects = new();
         }
 
+        public GroupManager* GetGroupManager()
+        {
+            return groupManager;
+        }
+
+        public Camera* GetCamera()
+        {
+            return camera;
+        }
+
         public void InitManagerInstances()
         {
             groupManager = GroupManager.Instance();
