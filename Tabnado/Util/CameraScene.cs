@@ -30,7 +30,7 @@ namespace Tabnado.Util
         private readonly IClientState state;
         private readonly PluginConfig config;
         private readonly IPluginLog log;
-        private readonly Camera* camera;
+        private Camera* camera;
         private List<ScreenObject> screenMonsterObjects;
         private GroupManager* groupManager;
         private float screenWidth;
@@ -51,6 +51,11 @@ namespace Tabnado.Util
             this.config = plugin.PluginConfig;
             this.log = plugin.Log;
             screenMonsterObjects = new();
+            InitManagerInstances();
+        }
+
+        public void InitManagerInstances()
+        {
             groupManager = GroupManager.Instance();
             var cameraManager = CameraManager.Instance();
             if (cameraManager != null)
@@ -60,7 +65,8 @@ namespace Tabnado.Util
                 {
                     lastViewMatrices[i] = camera->ViewMatrix;
                 }
-            } else
+            }
+            else
             {
                 log.Error("CameraManager->CurrentCamera is null");
             }
@@ -291,8 +297,8 @@ namespace Tabnado.Util
         private void Update()
         {
             if (camera is null || groupManager is null) {
-                log.Error("The Camera or GroupManager was not initilized.");
-                return;
+                InitManagerInstances();
+                log.Error("The Camera or GroupManager was not initilized, called for it again in Update()");
             }
 
             var results = new List<ScreenObject>();
