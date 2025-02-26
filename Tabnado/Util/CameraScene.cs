@@ -332,9 +332,9 @@ namespace Tabnado.Util
                         continue;
 
                     Character* structCharacter = ((Character*)npc.Address);
-                    bool isPetOrCompanion = structCharacter-> CompanionOwnerId != OWNER_IS_WORLD;
                     bool isHostile = structCharacter->IsHostile;
                     bool isNeutral = structCharacter->Battalion == 4;
+                    bool isPetOrCompanion = structCharacter->CompanionOwnerId != OWNER_IS_WORLD && !isNeutral;
                     bool isMinion = obj.ObjectKind == ObjectKind.Companion;
                     bool isTraderNPC = obj.ObjectKind == ObjectKind.EventNpc;
                     bool isPlayer = obj.ObjectKind == ObjectKind.Player;
@@ -367,7 +367,7 @@ namespace Tabnado.Util
                         {
                             GameObjectId = npc.GameObjectId,
                             GameObject = obj,
-                            GlobalInfo = $"Battalion: {structCharacter->Battalion} Hostile: {isHostile} Neutral: {isNeutral} Player: {isPlayer} Name: {npc.Name} Kind: {obj.ObjectKind}",
+                            GlobalInfo = $"Pet: {isPetOrCompanion} Battalion: {structCharacter->Battalion} Hostile: {isHostile} Neutral: {isNeutral} Player: {isPlayer} Name: {npc.Name} Kind: {obj.ObjectKind}",
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
                             WorldDistance = unitDistance
