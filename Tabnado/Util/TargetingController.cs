@@ -33,6 +33,7 @@ namespace Tabnado.Util
         private DateTime lastClearTime;
         private ulong previousClosestTargetId;
         private Vector3[] circlePoints;
+        private bool[] cameraFlag;
         private const int CIRCLE_SEGMENTS = 16;
 
         public TargetingController(Plugin plugin)
@@ -51,6 +52,7 @@ namespace Tabnado.Util
             currentEnemyIndex = 0;
             previousClosestTargetId = 0;
             lastEnemyList = new();
+            cameraFlag = new bool[] { false, false, false };
             InitCirclePoints();
         }
 
@@ -137,21 +139,18 @@ namespace Tabnado.Util
 
                 if (enemies.Count <= 0 && config.ClearTargetTable)
                 {
-                    currentEnemyIndex = -1;
+                    currentEnemyIndex = 0;
                     lastEnemyList.Clear();
                     previousClosestTargetId = 0;
 
                 }
             }
 
-            //this needs to change to trigger a global flag when a reset occured and set it false again when a tab check was used
-            //this also needs to calculate the absolute path moved instead of relative to the last point
-            bool[] rotationChecks = new bool[3]
+            for (int i = 0; i < 3; i++)
             {
-                cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0),
-                cameraScene.CameraExceedsRotation(config.RotationPercent[1], 1),
-                cameraScene.CameraExceedsRotation(config.RotationPercent[2], 2)
-            };
+                if (cameraScene.CameraExceedsRotation(config.RotationPercent[i], i, false))
+                    cameraFlag[i] = true;
+            }
 
             if (buttonPressed)
             {
@@ -161,29 +160,30 @@ namespace Tabnado.Util
                 bool resetTarget = false;
                 string resetReason = "";
 
+                //dont touch if not broken i guess
                 bool[] triggers = new bool[3]
                 {
-                    rotationChecks[0], //Trigger Base (Camera Rotation)
-                    !IsListEqual(lastEnemyList, enemies), //Trigger Base (Combatant List)
-                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //Trigger Base (New Targeting)
+                    cameraFlag[0], //BASE COMBO (Camera Rotation) 0
+                    !IsListEqual(lastEnemyList, enemies), //BASE COMBO (Combatant List) 1 
+                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //BASE COMBO (New Targeting) 2
                 };
 
                 bool[,] configCheck = new bool[3, 3]
                 {
                     {
-                        config.UseCameraRotationReset, //BASE COMBO (Camera Rotation)
-                        config.ResetCombinations[0, 0], // Sub Combo B (Combatant List)
-                        config.ResetCombinations[0, 1] // Sub Combo C (New Targeting)
+                        config.BaseCameraReset, //BASE COMBO (Camera Rotation) 0
+                        config.ResetCombinations[0, 0], // Sub Combo B (Combatant List) 1
+                        config.ResetCombinations[0, 1] // Sub Combo C (New Targeting) 2
                     },
                     {
-                        config.UseCombatantReset, //BASE COMBO (Combatant List)
-                        config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation)
-                        config.ResetCombinations[1, 1] // Sub Combo (New Targeting)
+                        config.BaseCombatantReset, //BASE COMBO (Combatant List) 1
+                        config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation) 0
+                        config.ResetCombinations[1, 1] // Sub Combo (New Targeting) 2
                     },
                     {
-                        config.UseNewTargetReset, //BASE COMBO (New Targeting)
-                        config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation)
-                        config.ResetCombinations[2, 1] // Sub Combo (Combatant List)
+                        config.BaseNewTargetReset, //BASE COMBO (New Targeting) 2
+                        config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation) 0
+                        config.ResetCombinations[2, 1] // Sub Combo (Combatant List) 1
                     }
                 };
                 for (int baseIndex = 0; baseIndex < 3; baseIndex++)
@@ -191,8 +191,6 @@ namespace Tabnado.Util
                     if (!configCheck[baseIndex, 0]) continue;
 
                     if (!triggers[baseIndex]) continue;
-
-                    log.Warning(configCheck[baseIndex, 0].ToString());
 
                     bool subComboRequired = false;
                     bool subComboMet = true;
@@ -208,7 +206,7 @@ namespace Tabnado.Util
                             bool triggerValue;
                             if (triggerIndex == 0)
                             {
-                                triggerValue = rotationChecks[baseIndex];
+                                triggerValue = cameraFlag[baseIndex];
                             }
                             else
                             {
@@ -230,6 +228,11 @@ namespace Tabnado.Util
                         if (subComboRequired)
                         {
                             resetReason += $" with subcombos: {string.Join(" + ", activeSubCombos)}";
+                        }
+                        if(enemies.Count > 0)
+                        {
+                            cameraFlag[baseIndex] = false;
+                            cameraScene.UpdateMatrice(baseIndex);
                         }
                         break;
                     }
@@ -289,33 +292,28 @@ namespace Tabnado.Util
 
             drawList.AddCircleFilled(screenCenter, 3f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
 
-            if (config.UseCameraRotationReset)
+            if (config.BaseCameraReset)
             {
                 float rotationLength = cameraScene.GetRotationPercentage(0);
                 float maxThreshold = config.RotationPercent[0] / 100f;
 
-                drawList.AddCircle(
-                    screenCenter,
-                    rotationLength * ImGui.GetIO().DisplaySize.Y,
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1f)),
-                    32
-                );
+                if (rotationLength < maxThreshold && !cameraFlag[0]) {
 
-                if (rotationLength >= maxThreshold)
+                    drawList.AddCircle(
+                        screenCenter,
+                        rotationLength * ImGui.GetIO().DisplaySize.Y,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1f)),
+                        32
+                    );
+
+                }
+
+                if (rotationLength >= maxThreshold || cameraFlag[0])
                 {
                     drawList.AddCircle(
                         screenCenter,
                         maxThreshold * ImGui.GetIO().DisplaySize.Y,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0.65f, 0, 1f)),
-                        32
-                    );
-                }
-                else
-                {
-                    drawList.AddCircle(
-                        screenCenter,
-                        maxThreshold * ImGui.GetIO().DisplaySize.Y,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 0.5f)),
                         32
                     );
                 }

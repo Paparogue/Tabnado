@@ -278,7 +278,14 @@ namespace Tabnado.Util
             return isAlliance || isGroup;
         }
 
-        public bool CameraExceedsRotation(int percent, int index)
+        public bool UpdateMatrice(int index)
+        {
+            if (index < 0 || index >= 3) return false;
+            lastViewMatrices[index] = camera->ViewMatrix;
+            return true;
+        }
+
+        public bool CameraExceedsRotation(int percent, int index, bool updateMatrice)
         {
             if (index < 0 || index >= 3) return false;
 
@@ -296,7 +303,8 @@ namespace Tabnado.Util
 
             if (rotationPercentages[index] >= ((float)percent / 100f))
             {
-                lastViewMatrices[index] = currentViewMatrix;
+                if(updateMatrice)
+                    lastViewMatrices[index] = currentViewMatrix;
                 return true;
             }
 

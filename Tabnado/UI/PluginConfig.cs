@@ -7,7 +7,7 @@ namespace Tabnado.UI
     [Serializable]
     public class PluginConfig : IPluginConfiguration
     {
-        public int Version { get; set; } = 2;
+        public int Version { get; set; } = 3;
 
         [NonSerialized]
         private IDalamudPluginInterface? pluginInterface;
@@ -31,13 +31,13 @@ namespace Tabnado.UI
         public int VisibilityPercent { get; set; } = 35;
         public float CameraDepth { get; set; } = 1f;
         public float DistanceLerp { get; set; } = 5f;
-        public float CameraLerp { get; set; } = 0.02f;
+        public float CameraLerp { get; set; } = 0.01f;
         public float MonitorX { get; set; } = 50f;
-        public float MonitorY { get; set; } = 49f;
+        public float MonitorY { get; set; } = 48f;
         public int DrawRefreshRate { get; set; } = 5;
-        public bool UseCameraRotationReset { get; set; } = true;
-        public bool UseCombatantReset { get; set; } = false;
-        public bool UseNewTargetReset { get; set; } = true;
+        public bool BaseCameraReset { get; set; } = true;
+        public bool BaseCombatantReset { get; set; } = false;
+        public bool BaseNewTargetReset { get; set; } = true;
         public bool StickyTargetOnReset { get; set; } = false;
         public bool OnlyAttackableObjects { get; set; } = true;
         //public bool OnlyBattleNPCs { get; set; } = true;

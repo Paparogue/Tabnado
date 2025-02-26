@@ -211,10 +211,10 @@ namespace Tabnado.UI
                 ImGui.TextDisabled("Target Reset Options");
                 ImGui.Separator();
 
-                bool useCameraRotationReset = config.UseCameraRotationReset;
+                bool useCameraRotationReset = config.BaseCameraReset;
                 if (ImGui.Checkbox("Camera Rotation Reset", ref useCameraRotationReset))
                 {
-                    config.UseCameraRotationReset = useCameraRotationReset;
+                    config.BaseCameraReset = useCameraRotationReset;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
@@ -253,10 +253,10 @@ namespace Tabnado.UI
                     ImGui.Unindent();
                 }
 
-                bool useNewEntityReset = config.UseCombatantReset;
+                bool useNewEntityReset = config.BaseCombatantReset;
                 if (ImGui.Checkbox("New Entity Reset", ref useNewEntityReset))
                 {
-                    config.UseCombatantReset = useNewEntityReset;
+                    config.BaseCombatantReset = useNewEntityReset;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
@@ -294,10 +294,10 @@ namespace Tabnado.UI
                     ImGui.Unindent();
                 }
 
-                bool useProximityReset = config.UseNewTargetReset;
+                bool useProximityReset = config.BaseNewTargetReset;
                 if (ImGui.Checkbox("Proximity Reset", ref useProximityReset))
                 {
-                    config.UseNewTargetReset = useProximityReset;
+                    config.BaseNewTargetReset = useProximityReset;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
