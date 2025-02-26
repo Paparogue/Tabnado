@@ -48,7 +48,8 @@ namespace Tabnado.Util
             keyDetection = plugin.KeyDetection;
             lastClearTime = DateTime.Now;
             circlePoints = new Vector3[CIRCLE_SEGMENTS];
-            currentEnemyIndex = -1;
+            currentEnemyIndex = 0;
+            previousClosestTargetId = 0;
             lastEnemyList = new();
             InitCirclePoints();
         }
@@ -124,7 +125,7 @@ namespace Tabnado.Util
             var buttonPressed = keyDetection.IsKeyPressed();
             var currentTime = DateTime.Now;
             bool clearTargetUpdate = config.ClearTargetTable &&
-                                     (currentTime - lastClearTime).TotalMilliseconds > config.ClearDeadTable;
+                                     (currentTime - lastClearTime).TotalMilliseconds > config.ClearTargetTableTimer;
 
             if ((config.ShowDebugRaycast || config.ShowDebugSelection && !buttonPressed) &&
                  (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate
@@ -134,13 +135,23 @@ namespace Tabnado.Util
                 enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
                 lastClearTime = currentTime;
 
-                if (enemies.Count <= 0)
+                if (enemies.Count <= 0 && config.ClearTargetTable)
                 {
                     currentEnemyIndex = -1;
                     lastEnemyList.Clear();
                     previousClosestTargetId = 0;
+
                 }
             }
+
+            //this needs to change to trigger a global flag when a reset occured and set it false again when a tab check was used
+            //this also needs to calculate the absolute path moved instead of relative to the last point
+            bool[] rotationChecks = new bool[3]
+            {
+                cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0),
+                cameraScene.CameraExceedsRotation(config.RotationPercent[1], 1),
+                cameraScene.CameraExceedsRotation(config.RotationPercent[2], 2)
+            };
 
             if (buttonPressed)
             {
@@ -149,13 +160,6 @@ namespace Tabnado.Util
                 string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
                 bool resetTarget = false;
                 string resetReason = "";
-
-                bool[] rotationChecks = new bool[3]
-{
-                    cameraScene.CameraExceedsRotation(config.RotationPercent[0], 0),
-                    cameraScene.CameraExceedsRotation(config.RotationPercent[1], 1),
-                    cameraScene.CameraExceedsRotation(config.RotationPercent[2], 2)
-};
 
                 bool[] triggers = new bool[3]
                 {
@@ -182,12 +186,13 @@ namespace Tabnado.Util
                         config.ResetCombinations[2, 1] // Sub Combo (Combatant List)
                     }
                 };
-
                 for (int baseIndex = 0; baseIndex < 3; baseIndex++)
                 {
                     if (!configCheck[baseIndex, 0]) continue;
 
                     if (!triggers[baseIndex]) continue;
+
+                    log.Warning(configCheck[baseIndex, 0].ToString());
 
                     bool subComboRequired = false;
                     bool subComboMet = true;
@@ -237,9 +242,8 @@ namespace Tabnado.Util
 
                 if (enemies.Count > 0)
                 {
-                    if (resetTarget && (config.StickyTargetOnReset || 
-                        (!config.StickyTargetOnReset || 
-                        enemies[currentEnemyIndex].GameObject?.Address != targetManager.Target?.Address)))
+                    if (resetTarget && (config.StickyTargetOnReset || (!config.StickyTargetOnReset && 
+                        enemies[0].GameObject?.Address != targetManager.Target?.Address)))
                     {
                         currentEnemyIndex = 0;
                     }
@@ -264,7 +268,6 @@ namespace Tabnado.Util
                 ShowDebugSelection();
             }
         }
-
 
         private bool IsListEqual(List<ScreenObject> list1, List<ScreenObject> list2)
         {

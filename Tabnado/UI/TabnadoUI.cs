@@ -405,10 +405,10 @@ namespace Tabnado.UI
 
                 if (clearTargetTable)
                 {
-                    int clearDeadTable = config.ClearDeadTable;
+                    int clearDeadTable = config.ClearTargetTableTimer;
                     if (ImGui.SliderInt("Reset Target Table every (ms)", ref clearDeadTable, 1, 2000))
                     {
-                        config.ClearDeadTable = clearDeadTable;
+                        config.ClearTargetTableTimer = clearDeadTable;
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())

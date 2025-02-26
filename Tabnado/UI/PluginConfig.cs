@@ -23,7 +23,7 @@ namespace Tabnado.UI
         }
 
         public int MaxTargetDistance { get; set; } = 55;
-        public int ClearDeadTable { get; set; } = 1000;
+        public int ClearTargetTableTimer { get; set; } = 1000;
         public int CameraRadius { get; set; } = 350;
         public int[] RotationPercent { get; set; } = new int[3] { 5, 5, 2};
         public int RaycastMultiplier { get; set; } = 4;
