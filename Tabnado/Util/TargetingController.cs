@@ -156,7 +156,7 @@ namespace Tabnado.Util
             {
                 cameraScene.UpdateSceneList();
                 enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
-                string[] triggerNames = new string[] { "Camera Rotation", "Combatant List", "New Target" };
+                string[] triggerNames = new string[] { "Camera Rotation", "New Target", "New Closest Target" };
                 bool resetTarget = false;
                 string resetReason = "";
 
@@ -164,26 +164,26 @@ namespace Tabnado.Util
                 bool[] triggers = new bool[3]
                 {
                     cameraFlag[0], //BASE COMBO (Camera Rotation) 0
-                    !IsListEqual(lastEnemyList, enemies), //BASE COMBO (Combatant List) 1 
-                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //BASE COMBO (New Targeting) 2
+                    !IsListEqual(lastEnemyList, enemies), //BASE COMBO (New Target) 1 
+                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //BASE COMBO (New Closest Target) 2
                 };
 
                 bool[,] configCheck = new bool[3, 3]
                 {
                     {
                         config.BaseCameraReset, //BASE COMBO (Camera Rotation) 0
-                        config.ResetCombinations[0, 0], // Sub Combo B (Combatant List) 1
-                        config.ResetCombinations[0, 1] // Sub Combo C (New Targeting) 2
+                        config.ResetCombinations[0, 0], // Sub Combo B (New Target) 1
+                        config.ResetCombinations[0, 1] // Sub Combo C (New Closest Target) 2
                     },
                     {
-                        config.BaseCombatantReset, //BASE COMBO (Combatant List) 1
-                        config.ResetCombinations[1, 0], // Sub Combo (Camera Rotation) 0
-                        config.ResetCombinations[1, 1] // Sub Combo (New Targeting) 2
+                        config.BaseCombatantReset, //BASE COMBO (New Target) 1
+                        config.ResetCombinations[1, 1], // Sub Combo (New Closest Target) 2
+                        config.ResetCombinations[1, 0] // Sub Combo (Camera Rotation) 0
                     },
                     {
-                        config.BaseNewTargetReset, //BASE COMBO (New Targeting) 2
+                        config.BaseNewTargetReset, //BASE COMBO (New Closest Target) 2
                         config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation) 0
-                        config.ResetCombinations[2, 1] // Sub Combo (Combatant List) 1
+                        config.ResetCombinations[2, 1] // Sub Combo (New Target) 1
                     }
                 };
                 for (int baseIndex = 0; baseIndex < 3; baseIndex++)
@@ -241,6 +241,7 @@ namespace Tabnado.Util
                 if (config.ShowDebugSelection && resetTarget)
                 {
                     log.Warning($"Reset triggered by: {resetReason}");
+                    log.Warning("===================================");
                 }
 
                 if (enemies.Count > 0)

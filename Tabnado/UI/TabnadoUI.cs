@@ -212,7 +212,7 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool useCameraRotationReset = config.BaseCameraReset;
-                if (ImGui.Checkbox("Camera Rotation Reset", ref useCameraRotationReset))
+                if (ImGui.Checkbox("Camera Rotation Reset##1", ref useCameraRotationReset))
                 {
                     config.BaseCameraReset = useCameraRotationReset;
                     configChanged = true;
@@ -238,14 +238,14 @@ namespace Tabnado.UI
                     ImGui.Text("Combine with:");
 
                     bool combineWithNewEntity = config.ResetCombinations[0, 0];
-                    if (ImGui.Checkbox("New Entity Reset##camera_entity", ref combineWithNewEntity))
+                    if (ImGui.Checkbox("New Target Reset##1", ref combineWithNewEntity))
                     {
                         config.ResetCombinations[0, 0] = combineWithNewEntity;
                         configChanged = true;
                     }
 
                     bool combineWithProximity = config.ResetCombinations[0, 1];
-                    if (ImGui.Checkbox("Proximity Reset##camera_proximity", ref combineWithProximity))
+                    if (ImGui.Checkbox("New Closest Target Reset##1", ref combineWithProximity))
                     {
                         config.ResetCombinations[0, 1] = combineWithProximity;
                         configChanged = true;
@@ -254,14 +254,14 @@ namespace Tabnado.UI
                 }
 
                 bool useNewEntityReset = config.BaseCombatantReset;
-                if (ImGui.Checkbox("New Entity Reset", ref useNewEntityReset))
+                if (ImGui.Checkbox("New Target Reset##2", ref useNewEntityReset))
                 {
                     config.BaseCombatantReset = useNewEntityReset;
                     configChanged = true;
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Resets to nearest target when new entities appear in targeting range.");
+                    ImGui.SetTooltip("Resets to nearest target when new entities appear or leave in targeting range.");
                 }
                 if (useNewEntityReset)
                 {
@@ -269,7 +269,7 @@ namespace Tabnado.UI
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[1, 0];
-                    if (ImGui.Checkbox("Camera Rotation Reset##entity_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation Reset##2", ref combineWithCamera))
                     {
                         config.ResetCombinations[1, 0] = combineWithCamera;
                         configChanged = true;
@@ -286,7 +286,7 @@ namespace Tabnado.UI
                     }
 
                     bool combineWithProximity = config.ResetCombinations[1, 1];
-                    if (ImGui.Checkbox("Proximity Reset##entity_proximity", ref combineWithProximity))
+                    if (ImGui.Checkbox("New Closest Target Reset##2", ref combineWithProximity))
                     {
                         config.ResetCombinations[1, 1] = combineWithProximity;
                         configChanged = true;
@@ -295,7 +295,7 @@ namespace Tabnado.UI
                 }
 
                 bool useProximityReset = config.BaseNewTargetReset;
-                if (ImGui.Checkbox("Proximity Reset", ref useProximityReset))
+                if (ImGui.Checkbox("New Closest Target Reset##3", ref useProximityReset))
                 {
                     config.BaseNewTargetReset = useProximityReset;
                     configChanged = true;
@@ -310,7 +310,7 @@ namespace Tabnado.UI
                     ImGui.Text("Combine with:");
 
                     bool combineWithCamera = config.ResetCombinations[2, 0];
-                    if (ImGui.Checkbox("Camera Rotation Reset##proximity_camera", ref combineWithCamera))
+                    if (ImGui.Checkbox("Camera Rotation Reset##3", ref combineWithCamera))
                     {
                         config.ResetCombinations[2, 0] = combineWithCamera;
                         configChanged = true;
@@ -327,7 +327,7 @@ namespace Tabnado.UI
                     }
 
                     bool combineWithNewEntity = config.ResetCombinations[2, 1];
-                    if (ImGui.Checkbox("New Entity Reset##proximity_entity", ref combineWithNewEntity))
+                    if (ImGui.Checkbox("New Target Reset##3", ref combineWithNewEntity))
                     {
                         config.ResetCombinations[2, 1] = combineWithNewEntity;
                         configChanged = true;
