@@ -223,7 +223,7 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 bool resetOnNoTarget = config.ResetOnNoTarget;
-                if (ImGui.Checkbox("Reset On No Target", ref resetOnNoTarget))
+                if (ImGui.Checkbox("No Target Reset", ref resetOnNoTarget))
                 {
                     config.ResetOnNoTarget = resetOnNoTarget;
                     configChanged = true;
@@ -412,25 +412,18 @@ namespace Tabnado.UI
                 ImGui.TextDisabled("Debug Options");
                 ImGui.Separator();
 
-                bool clearTargetTable = config.ClearTargetTable;
-                if (ImGui.Checkbox("Reset Target Table", ref clearTargetTable))
+                bool showDebugOptions = config.ShowDebugOptions;
+                if (ImGui.Checkbox("Show Debug Options", ref showDebugOptions))
                 {
-                    config.ClearTargetTable = clearTargetTable;
+                    config.ShowDebugOptions = showDebugOptions;
                     configChanged = true;
                 }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                    ImGui.PopStyleColor();
-                }
 
-                if (clearTargetTable)
-                {
-                    int clearDeadTable = config.ClearTargetTableTimer;
-                    if (ImGui.SliderInt("Reset Target Table every (ms)", ref clearDeadTable, 1, 2000))
+                if(showDebugOptions) {
+                    bool clearTargetTable = config.ClearTargetTable;
+                    if (ImGui.Checkbox("Reset Target Table", ref clearTargetTable))
                     {
-                        config.ClearTargetTableTimer = clearDeadTable;
+                        config.ClearTargetTable = clearTargetTable;
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())
@@ -439,58 +432,74 @@ namespace Tabnado.UI
                         ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
                         ImGui.PopStyleColor();
                     }
-                }
 
-                bool showDebugRaycast = config.ShowDebugRaycast;
-                if (ImGui.Checkbox("Show Raycast Info", ref showDebugRaycast))
-                {
-                    config.ShowDebugRaycast = showDebugRaycast;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                    ImGui.PopStyleColor();
-                }
+                    if (clearTargetTable)
+                    {
+                        int clearDeadTable = config.ClearTargetTableTimer;
+                        if (ImGui.SliderInt("Reset Target Table every (ms)", ref clearDeadTable, 1, 2000))
+                        {
+                            config.ClearTargetTableTimer = clearDeadTable;
+                            configChanged = true;
+                        }
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                            ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                            ImGui.PopStyleColor();
+                        }
+                    }
 
-                bool showDebug = config.ShowDebugSelection;
-                if (ImGui.Checkbox("Show Selection Info", ref showDebug))
-                {
-                    config.ShowDebugSelection = showDebug;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                    ImGui.PopStyleColor();
-                }
+                    bool showDebugRaycast = config.ShowDebugRaycast;
+                    if (ImGui.Checkbox("Show Raycast Info", ref showDebugRaycast))
+                    {
+                        config.ShowDebugRaycast = showDebugRaycast;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
+                    }
 
-                int drawRefreshRate = config.DrawRefreshRate;
-                if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
-                {
-                    config.DrawRefreshRate = drawRefreshRate;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                    ImGui.PopStyleColor();
-                }
+                    bool showDebug = config.ShowDebugSelection;
+                    if (ImGui.Checkbox("Show Selection Info", ref showDebug))
+                    {
+                        config.ShowDebugSelection = showDebug;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
+                    }
 
-                float cameraDepth = config.CameraDepth;
-                if (ImGui.SliderFloat("Camera Depth", ref cameraDepth, 1f, 10f, "%.1f"))
-                {
-                    config.CameraDepth = cameraDepth;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                    ImGui.SetTooltip("Advanced setting: Modify only if you understand the implications.");
-                    ImGui.PopStyleColor();
+                    int drawRefreshRate = config.DrawRefreshRate;
+                    if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
+                    {
+                        config.DrawRefreshRate = drawRefreshRate;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
+                        ImGui.PopStyleColor();
+                    }
+
+                    float cameraDepth = config.CameraDepth;
+                    if (ImGui.SliderFloat("Camera Depth", ref cameraDepth, 1f, 10f, "%.1f"))
+                    {
+                        config.CameraDepth = cameraDepth;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
+                        ImGui.SetTooltip("Advanced setting: Modify only if you understand the implications.");
+                        ImGui.PopStyleColor();
+                    }
                 }
 
                 if (configChanged)
