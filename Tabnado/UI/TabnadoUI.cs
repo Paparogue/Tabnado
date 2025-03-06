@@ -206,6 +206,17 @@ namespace Tabnado.UI
                     }
                 }
 
+                bool alternativeTargeting = config.AlternativeTargeting;
+                if (ImGui.Checkbox("Alternative Targeting Mode", ref alternativeTargeting))
+                {
+                    config.AlternativeTargeting = alternativeTargeting;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("In alternative mode, only the target closest to the camera's target point is initially selected. Subsequently, cycling through targets will proceed based on proximity to the currently selected target.");
+                }
+
                 ImGui.Spacing();
 
                 ImGui.TextDisabled("Target Reset Options");

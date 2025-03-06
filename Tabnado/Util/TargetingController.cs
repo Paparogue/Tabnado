@@ -70,6 +70,7 @@ namespace Tabnado.Util
             }
         }
 
+        /* Maybe has some usage in future
         private void Draw3DSelectionCircle(Character* character)
         {
             var cameraManager = CameraManager.Instance();
@@ -111,7 +112,7 @@ namespace Tabnado.Util
                 lastScreenPos = screenPos;
                 lastInView = inView;
             }
-        }
+        }*/
 
         public void Draw()
         {
@@ -134,7 +135,7 @@ namespace Tabnado.Util
                 || clearTargetUpdate)
             {
                 cameraScene.UpdateSceneList();
-                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
+                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
                 lastClearTime = currentTime;
 
                 if (enemies.Count <= 0 && config.ClearTargetTable)
@@ -155,7 +156,7 @@ namespace Tabnado.Util
             if (buttonPressed)
             {
                 cameraScene.UpdateSceneList();
-                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
+                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
                 string[] triggerNames = new string[] { "Camera Rotation", "New Target", "New Closest Target" };
                 bool resetTarget = false;
                 string resetReason = "";
@@ -327,7 +328,7 @@ namespace Tabnado.Util
                 32
             );
 
-            var enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius);
+            var enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)

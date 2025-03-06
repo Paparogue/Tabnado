@@ -31,7 +31,7 @@ namespace Tabnado.Util
         private readonly PluginConfig config;
         private readonly IPluginLog log;
         private Camera* camera;
-        private List<ScreenObject> screenMonsterObjects;
+        private List<ScreenObject> screenObjectList;
         private GroupManager* groupManager;
         private float screenWidth;
         private float screenHeight;
@@ -50,7 +50,7 @@ namespace Tabnado.Util
             this.state = plugin.ClientState;
             this.config = plugin.PluginConfig;
             this.log = plugin.Log;
-            screenMonsterObjects = new();
+            screenObjectList = new();
         }
 
         public GroupManager* GetGroupManager()
@@ -375,7 +375,7 @@ namespace Tabnado.Util
                     }
                 }
             }
-            screenMonsterObjects = results;
+            screenObjectList = results;
         }
 
         private bool IsSanitized(ICharacter npc)
@@ -394,21 +394,47 @@ namespace Tabnado.Util
             Update();
         }
 
-        public List<ScreenObject> GetObjectInsideRadius(float radius)
+        public List<ScreenObject> GetObjectInsideRadius(float radius, bool alternative = false)
         {
-            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
-                return new List<ScreenObject>();
-            return screenMonsterObjects
-                .Where(monster => monster.CameraDistance <= radius)
-                .OrderBy(monster => monster.CameraDistance)
+            if (screenObjectList == null || screenObjectList.Count == 0)
+                return [];
+
+            var objectsInRadius = screenObjectList
+                .Where(o => o.CameraDistance <= radius)
                 .ToList();
+
+            if (objectsInRadius.Count == 0)
+                return [];
+
+            if (!alternative)
+            {
+                return objectsInRadius
+                    .OrderBy(o => o.CameraDistance)
+                    .ToList();
+            }
+            else
+            {
+                var closestObject = objectsInRadius
+                    .OrderBy(o => o.CameraDistance)
+                    .First();
+
+                var remainingObjects = objectsInRadius
+                    .Where(o => o != closestObject)
+                    .OrderBy(o => Vector3.Distance(o.GameObject!.Position, closestObject.GameObject!.Position))
+                    .ToList();
+
+                var result = new List<ScreenObject> { closestObject };
+                result.AddRange(remainingObjects);
+
+                return result;
+            }
         }
 
         public ScreenObject? GetClosestEnemyInCircle()
         {
-            if (screenMonsterObjects == null || screenMonsterObjects.Count == 0)
+            if (screenObjectList == null || screenObjectList.Count == 0)
                 return null;
-            return screenMonsterObjects
+            return screenObjectList
                 .Where(monster => monster.CameraDistance <= config.CameraRadius)
                 .MinBy(m => m.CameraDistance);
         }

@@ -33,7 +33,7 @@ namespace Tabnado.UI
         public float DistanceLerp { get; set; } = 5f;
         public float CameraLerp { get; set; } = 0.01f;
         public float MonitorX { get; set; } = 50f;
-        public float MonitorY { get; set; } = 48f;
+        public float MonitorY { get; set; } = 42.5f;
         public int DrawRefreshRate { get; set; } = 5;
         public bool BaseCameraReset { get; set; } = true;
         public bool BaseCombatantReset { get; set; } = false;
@@ -47,6 +47,8 @@ namespace Tabnado.UI
         public bool ShowDebugRaycast { get; set; } = false;
         public bool UseCameraLerp { get; set; } = true;
         public bool UseDistanceLerp { get; set; } = true;
+        public bool AlternativeTargeting { get; set; } = true;
+
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
         { false, false },
         { false, false },
