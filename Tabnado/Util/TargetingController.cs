@@ -153,9 +153,6 @@ namespace Tabnado.Util
                     cameraFlag[i] = true;
             }
 
-            if (config.ResetOnNoTarget && clientState.LocalPlayer?.TargetObjectId == 0)
-                currentEnemyIndex = 0;
-
             if (buttonPressed)
             {
                 cameraScene.UpdateSceneList();
@@ -250,8 +247,9 @@ namespace Tabnado.Util
 
                 if (enemies.Count > 0)
                 {
-                    if (resetTarget && (config.StickyTargetOnReset || (!config.StickyTargetOnReset && 
-                        enemies[0].GameObject?.Address != targetManager.Target?.Address)))
+                    var noTarget = config.ResetOnNoTarget && clientState.LocalPlayer?.TargetObjectId == 0;
+                    if (noTarget || (resetTarget && (config.StickyTargetOnReset || (!config.StickyTargetOnReset && 
+                        enemies[0].GameObject?.Address != targetManager.Target?.Address))))
                     {
                         currentEnemyIndex = 0;
                     }
