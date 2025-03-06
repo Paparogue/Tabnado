@@ -48,7 +48,7 @@ namespace Tabnado.UI
         public bool UseCameraLerp { get; set; } = true;
         public bool UseDistanceLerp { get; set; } = true;
         public bool AlternativeTargeting { get; set; } = true;
-
+        public bool ResetOnNoTarget { get; set; } = true;
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
         { false, false },
         { false, false },

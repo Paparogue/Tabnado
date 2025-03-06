@@ -79,7 +79,7 @@ namespace Tabnado.UI
                 ImGui.Separator();
 
                 float monitorX = config.MonitorX;
-                if (ImGui.SliderFloat("Target Point X (%)", ref monitorX, 0, 100, "%.1f"))
+                if (ImGui.SliderFloat("Target Center X (%)", ref monitorX, 0, 100, "%.1f"))
                 {
                     config.MonitorX = monitorX;
                     configChanged = true;
@@ -90,7 +90,7 @@ namespace Tabnado.UI
                 }
 
                 float monitorY = config.MonitorY;
-                if (ImGui.SliderFloat("Target Point Y (%)", ref monitorY, 0, 100, "%.1f"))
+                if (ImGui.SliderFloat("Target Center Y (%)", ref monitorY, 0, 100, "%.1f"))
                 {
                     config.MonitorY = monitorY;
                     configChanged = true;
@@ -108,7 +108,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Sets the maximum targeting range. Objects beyond this distance (in yalms) will be ignored when cycling through targets.");
+                    ImGui.SetTooltip("Sets the maximum targeting range. Objects beyond this distance (in yalms) will be ignored.");
                 }
 
                 int cameraRadius = config.CameraRadius;
@@ -119,7 +119,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Defines the circular search area around your target point for detecting targetable objects.");
+                    ImGui.SetTooltip("Defines the circular search area around your target center for detecting targetable objects.");
                 }
 
                 if (config.OnlyVisibleObjects)
@@ -166,7 +166,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Automatically adjusts target point height based on camera zoom. When zoomed out, targeting shifts upward to maintain accuracy.");
+                    ImGui.SetTooltip("Automatically adjusts target center based on camera zoom. When zoomed out, targeting shifts upward to maintain accuracy.");
                 }
 
                 if (useCameraLerp) {
@@ -178,7 +178,7 @@ namespace Tabnado.UI
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Controls how quickly the target point adjusts to camera zoom changes. Higher values mean faster adjustment.");
+                        ImGui.SetTooltip("Controls how quickly the target center adjusts to camera zoom changes. Higher values mean faster adjustment.");
                     }
                 }
 
@@ -202,7 +202,7 @@ namespace Tabnado.UI
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Controls how quickly the target point adjusts based on enemy distance. Higher values mean faster adjustment.");
+                        ImGui.SetTooltip("Controls how quickly the target point adjusts based on object distance. Higher values mean faster adjustment.");
                     }
                 }
 
@@ -214,13 +214,24 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("In alternative mode, only the target closest to the camera's target point is initially selected. Subsequently, cycling through targets will proceed based on proximity to the currently selected target.");
+                    ImGui.SetTooltip("In alternative mode, the closest target to the camera's center point is selected first. Afterward, you can cycle through targets based on proximity to your current selection.");
                 }
 
                 ImGui.Spacing();
 
                 ImGui.TextDisabled("Target Reset Options");
                 ImGui.Separator();
+
+                bool resetOnNoTarget = config.ResetOnNoTarget;
+                if (ImGui.Checkbox("Reset On No Target", ref resetOnNoTarget))
+                {
+                    config.ResetOnNoTarget = resetOnNoTarget;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Resets to nearest target when no target is selected.");
+                }
 
                 bool useCameraRotationReset = config.BaseCameraReset;
                 if (ImGui.Checkbox("Camera Rotation Reset##1", ref useCameraRotationReset))
@@ -272,7 +283,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Resets to nearest target when new entities appear or leave in targeting range.");
+                    ImGui.SetTooltip("Resets to nearest target when new entities appear or leave the targeting range.");
                 }
                 if (useNewEntityReset)
                 {
@@ -313,7 +324,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Resets to nearest target when a closer entity becomes available.");
+                    ImGui.SetTooltip("Resets to nearest target when a new closer entity becomes available.");
                 }
                 if (useProximityReset)
                 {

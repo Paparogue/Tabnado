@@ -153,6 +153,9 @@ namespace Tabnado.Util
                     cameraFlag[i] = true;
             }
 
+            if (config.ResetOnNoTarget && clientState.LocalPlayer?.TargetObjectId == 0)
+                currentEnemyIndex = 0;
+
             if (buttonPressed)
             {
                 cameraScene.UpdateSceneList();
