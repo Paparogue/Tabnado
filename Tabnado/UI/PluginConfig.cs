@@ -7,7 +7,7 @@ namespace Tabnado.UI
     [Serializable]
     public class PluginConfig : IPluginConfiguration
     {
-        public int Version { get; set; } = 3;
+        public int Version { get; set; } = 4;
 
         [NonSerialized]
         private IDalamudPluginInterface? pluginInterface;

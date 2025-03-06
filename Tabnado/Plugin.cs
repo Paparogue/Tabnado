@@ -42,7 +42,7 @@ namespace Tabnado
             CommandManager = commandManager;
 
             PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
-            if (PluginInterface.GetPluginConfig() != null && PluginConfig.Version != 3)
+            if (PluginInterface.GetPluginConfig() != null && PluginConfig.Version != 4)
                 PluginConfig = new PluginConfig();
             PluginConfig.Initialize(PluginInterface);
             PluginConfig.Save();
