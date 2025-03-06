@@ -75,7 +75,7 @@ namespace Tabnado.UI
 
                 ImGui.Spacing();
 
-                ImGui.TextDisabled("Targeting Range Settings");
+                ImGui.TextDisabled("Targeting Settings");
                 ImGui.Separator();
 
                 float monitorX = config.MonitorX;
@@ -190,7 +190,7 @@ namespace Tabnado.UI
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Automatically raises target point when valid objects are closer, making nearby targets easier to select.");
+                    ImGui.SetTooltip("Automatically raises the objects target point when getting closer, making nearby targets easier to select.");
                 }
 
                 if (useDistanceLerp) {
