@@ -10,7 +10,7 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 ```
 
 ## Configuration Guide
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/1d8bd06165db514748ca9d5c11c7c0c6a6793d54/tabnado_1.4.1.png)
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/master/tabnado_v1.4.7.png)
 
 ### Targeting Key
 - Select your preferred key for targeting
