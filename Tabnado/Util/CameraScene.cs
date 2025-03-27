@@ -18,7 +18,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Lumina.Data.Parsing;
 using Microsoft.VisualBasic;
 
 namespace Tabnado.Util
@@ -382,7 +381,7 @@ namespace Tabnado.Util
         {
             return npc != null &&
                     npc.IsTargetable &&
-                   !npc.Name.TextValue.IsNullOrEmpty() &&
+                   !(npc.Name.TextValue.Length == 0) &&
                    !npc.IsDead &&
                    npc.CurrentHp > 0 &&
                    state.LocalPlayer != null &&
