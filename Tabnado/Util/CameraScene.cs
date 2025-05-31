@@ -340,8 +340,7 @@ namespace Tabnado.Util
 
                     if (config.OnlyAttackableObjects &&
                         (isTraderNPC || isMinion || isPetOrCompanion ||
-                        (!isPlayer && !isHostile && !isNeutral) ||
-                        (isPlayer && IsObjectAllianceOrGroup((GameObject*)obj.Address))))
+                        (!isHostile && !isNeutral)))
                         continue;
 
                     float npcBodyY;

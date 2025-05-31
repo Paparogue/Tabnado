@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<VersionPrefix>1.4.8</VersionPrefix>
+		<VersionPrefix>1.4.9</VersionPrefix>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net9.0-windows7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
