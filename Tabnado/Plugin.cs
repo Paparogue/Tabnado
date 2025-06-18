@@ -43,7 +43,6 @@ namespace Tabnado
         public CameraScene CameraScene;
         public TargetingHook TargetingHook { get; private set; } = null!;
 
-        private bool LOCKOUT = false;
         private DateTime lastCameraCheckTime = DateTime.MinValue;
         private const int CAMERA_CHECK_INTERVAL_MS = 50;
 
@@ -85,19 +84,14 @@ namespace Tabnado
         {
             try
             {
-                if(!LOCKOUT) {
-                    LOCKOUT = true;
-                    allowOriginal = false;
-                    TabController.TargetFunc();
-                    Log.Verbose("Replaced original targeting function with TabController.TargetFunc()");
-                    LOCKOUT = false;
-                }
+                allowOriginal = false;
+                TabController.TargetFunc();
+                Log.Verbose("Replaced original targeting function with TabController.TargetFunc()");
             }
             catch (Exception ex)
             {
                 Log.Error($"Error in custom targeting function: {ex}");
                 allowOriginal = true;
-                LOCKOUT = false;
             }
         }
 
@@ -139,11 +133,15 @@ namespace Tabnado
         {
             if (ClientState is not null && ClientState.LocalPlayer is not null)
             {
-                if (PluginConfig.ShowDebugSelection && !LOCKOUT)
-                {
+                if(PluginConfig.ShowDebugRaycast || PluginConfig.ShowDebugSelection)
                     CameraScene.UpdateSceneList();
+
+                if (PluginConfig.ShowDebugRaycast)
+                    CameraScene.DrawDebugRaycast();
+
+                if (PluginConfig.ShowDebugSelection)
                     TabController.ShowDebugSelection();
-                }
+
                 CameraMatrixDraw();
                 TabnadoUI.Draw();
             }

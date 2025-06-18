@@ -40,7 +40,29 @@ namespace Tabnado.Util
         private float rotationPercentage = 0f;
         private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
         private float[] rotationPercentages = new float[3];
-        private readonly uint OWNER_IS_WORLD = 3758096384;
+        private readonly uint OWNER_IS_WORLD = 0xE0000000;
+
+        private class RaycastDebugData
+        {
+            public Vector2 Origin { get; set; }
+            public Vector2 Target { get; set; }
+            public bool IsVisible { get; set; }
+            public float HitDistance { get; set; }
+            public float ActualDistance { get; set; }
+        }
+
+        private class NPCDebugData
+        {
+            public Vector2 FeetScreenPos { get; set; }
+            public Vector2 HeadScreenPos { get; set; }
+            public bool FeetInView { get; set; }
+            public bool HeadInView { get; set; }
+            public float VisibilityPercentage { get; set; }
+            public List<RaycastDebugData> Raycasts { get; set; } = new List<RaycastDebugData>();
+        }
+
+        private readonly Dictionary<ulong, NPCDebugData> debugDataCache = new Dictionary<ulong, NPCDebugData>();
+        private readonly object debugDataLock = new object();
 
         public CameraScene(Plugin plugin)
         {
@@ -99,7 +121,6 @@ namespace Tabnado.Util
             if (config.UseCameraLerp)
             {
                 CameraEx* cam = (CameraEx*)camera;
-                //log.Debug($"0x{((IntPtr)cam).ToInt64():X}");
                 float currentZoom = cam->currentZoom;
                 float maxZoom = cam->maxZoom;
                 float minZoom = cam->minZoom;
@@ -171,13 +192,18 @@ namespace Tabnado.Util
         {
             int successfulRays = 0;
             int totalRays = screenEdgePoints.Length * 2;
-            bool showDebugRaycast = config.ShowDebugRaycast;
-            var drawList = showDebugRaycast ? ImGui.GetBackgroundDrawList() : null;
+            bool collectDebugData = config.ShowDebugRaycast;
+
+            NPCDebugData debugData = null!;
+            if (collectDebugData)
+            {
+                debugData = new NPCDebugData();
+            }
 
             Vector2 npcFeetScreenPos, npcHeadScreenPos;
             bool npcInView, npcHeadInView;
             GameObject* npcObject = (GameObject*)npc.Address;
-            Character* npcCharacter = (Character *)npcObject;
+            Character* npcCharacter = (Character*)npcObject;
             float npcHeadFloat = npcCharacter->ModelContainer.CalculateHeight();
             float npcFeetFloat = npcHeadFloat * 0.2f;
 
@@ -198,12 +224,20 @@ namespace Tabnado.Util
             gameGui.WorldToScreen(npcFeet, out npcFeetScreenPos, out npcInView);
             gameGui.WorldToScreen(npcHead, out npcHeadScreenPos, out npcHeadInView);
 
-            Vector3[] edgeWorldPositions = GetCameraCornerPositions((config.CameraDepth-1f));
+            if (collectDebugData)
+            {
+                debugData!.FeetScreenPos = npcFeetScreenPos;
+                debugData!.HeadScreenPos = npcHeadScreenPos;
+                debugData!.FeetInView = npcInView;
+                debugData!.HeadInView = npcHeadInView;
+            }
+
+            Vector3[] edgeWorldPositions = GetCameraCornerPositions((config.CameraDepth - 1f));
 
             float requiredPercentage = config.VisibilityPercent / 100f;
             int requiredSuccessCount = (int)Math.Ceiling(requiredPercentage * totalRays);
 
-            bool RaycastAndDraw(Vector3 edgeWorldPos, Vector3 target, Vector2 screenEdgePoint, Vector2 targetScreenPos)
+            bool RaycastAndCollectData(Vector3 edgeWorldPos, Vector3 target, Vector2 screenEdgePoint, Vector2 targetScreenPos)
             {
                 Vector3 delta = target - edgeWorldPos;
                 float distance = delta.Length();
@@ -212,10 +246,19 @@ namespace Tabnado.Util
                 Vector3 direction = delta / distance;
                 Collision.TryRaycastDetailed(edgeWorldPos, direction, out RaycastHit hit);
                 bool isVisible = hit.Distance + RAYCAST_TOLERANCE >= distance;
-                if (showDebugRaycast)
+
+                if (collectDebugData)
                 {
-                    DrawDebugRaycast(drawList, screenEdgePoint, targetScreenPos, isVisible, hit, distance);
+                    debugData!.Raycasts.Add(new RaycastDebugData
+                    {
+                        Origin = screenEdgePoint,
+                        Target = targetScreenPos,
+                        IsVisible = isVisible,
+                        HitDistance = hit.Distance,
+                        ActualDistance = distance
+                    });
                 }
+
                 return isVisible;
             }
 
@@ -223,12 +266,12 @@ namespace Tabnado.Util
             {
                 Vector3 edgeWorldPos = edgeWorldPositions[i];
 
-                if (RaycastAndDraw(edgeWorldPos, npcFeet, screenEdgePoints[i], npcFeetScreenPos))
+                if (RaycastAndCollectData(edgeWorldPos, npcFeet, screenEdgePoints[i], npcFeetScreenPos))
                     successfulRays++;
-                if (RaycastAndDraw(edgeWorldPos, npcHead, screenEdgePoints[i], npcHeadScreenPos))
+                if (RaycastAndCollectData(edgeWorldPos, npcHead, screenEdgePoints[i], npcHeadScreenPos))
                     successfulRays++;
 
-                if (!showDebugRaycast)
+                if (!collectDebugData)
                 {
                     int raysDone = (i + 1) * 2;
                     int raysLeft = totalRays - raysDone;
@@ -239,35 +282,65 @@ namespace Tabnado.Util
                 }
             }
 
-            if (showDebugRaycast)
-            {
-                if (npcInView)
-                {
-                    drawList.AddCircleFilled(npcFeetScreenPos, 5f,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f)));
-                }
-                if (npcHeadInView)
-                {
-                    drawList.AddCircleFilled(npcHeadScreenPos, 5f,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)));
-                }
+            float visibilityPercentage = (successfulRays * 100f) / totalRays;
 
-                Vector2 textPos = new Vector2(npcFeetScreenPos.X, npcFeetScreenPos.Y - 20);
-                float visibilityPercentage = (successfulRays * 100f) / totalRays;
-                string percentageText = $"{visibilityPercentage:F1}%";
-                drawList.AddText(textPos,
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), percentageText);
+            if (collectDebugData)
+            {
+                debugData!.VisibilityPercentage = visibilityPercentage;
+                lock (debugDataLock)
+                {
+                    debugDataCache[npc.GameObjectId] = debugData;
+                }
             }
 
             return (successfulRays / (float)totalRays) >= requiredPercentage;
         }
 
-
-        private void DrawDebugRaycast(ImDrawListPtr drawList, Vector2 originPos, Vector2 targetPos, bool isVisible, RaycastHit hit, float distance)
+        public void DrawDebugRaycast()
         {
-            drawList.AddCircleFilled(originPos, 5f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
-            Vector4 lineColor = isVisible ? new Vector4(0, 1, 0, 0.5f) : new Vector4(1, 0, 0, 0.5f);
-            drawList.AddLine(originPos, targetPos, ImGui.ColorConvertFloat4ToU32(lineColor), 1.0f);
+            if (!config.ShowDebugRaycast)
+                return;
+
+            var drawList = ImGui.GetBackgroundDrawList();
+
+            lock (debugDataLock)
+            {
+                foreach (var kvp in debugDataCache)
+                {
+                    var debugData = kvp.Value;
+
+                    foreach (var raycast in debugData.Raycasts)
+                    {
+                        drawList.AddCircleFilled(raycast.Origin, 5f, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0, 0, 1)));
+                        Vector4 lineColor = raycast.IsVisible ? new Vector4(0, 1, 0, 0.5f) : new Vector4(1, 0, 0, 0.5f);
+                        drawList.AddLine(raycast.Origin, raycast.Target, ImGui.ColorConvertFloat4ToU32(lineColor), 1.0f);
+                    }
+
+                    if (debugData.FeetInView)
+                    {
+                        drawList.AddCircleFilled(debugData.FeetScreenPos, 5f,
+                            ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f)));
+                    }
+                    if (debugData.HeadInView)
+                    {
+                        drawList.AddCircleFilled(debugData.HeadScreenPos, 5f,
+                            ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 1, 0.8f)));
+                    }
+
+                    Vector2 textPos = new Vector2(debugData.FeetScreenPos.X, debugData.FeetScreenPos.Y - 20);
+                    string percentageText = $"{debugData.VisibilityPercentage:F1}%";
+                    drawList.AddText(textPos,
+                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), percentageText);
+                }
+            }
+        }
+
+        public void ClearDebugData()
+        {
+            lock (debugDataLock)
+            {
+                debugDataCache.Clear();
+            }
         }
 
         public unsafe bool IsObjectAllianceOrGroup(GameObject* ob)
@@ -303,7 +376,7 @@ namespace Tabnado.Util
 
             if (rotationPercentages[index] >= ((float)percent / 100f))
             {
-                if(updateMatrice)
+                if (updateMatrice)
                     lastViewMatrices[index] = currentViewMatrix;
                 return true;
             }
@@ -313,15 +386,21 @@ namespace Tabnado.Util
 
         private void Update()
         {
-            if (camera is null || groupManager is null) {
+            if (camera is null || groupManager is null)
+            {
                 InitManagerInstances();
+            }
+
+            if (config.ShowDebugRaycast)
+            {
+                ClearDebugData();
             }
 
             var results = new List<ScreenObject>();
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             foreach (var obj in objectTable)
             {
-                if ( obj is ICharacter npc && IsSanitized(npc))
+                if (obj is ICharacter npc && IsSanitized(npc))
                 {
                     Vector2 screenPos;
                     bool inView;
@@ -344,7 +423,7 @@ namespace Tabnado.Util
                         continue;
 
                     float npcBodyY;
-                    if(config.UseDistanceLerp)
+                    if (config.UseDistanceLerp)
                         npcBodyY = TabMath.Lerp(npc.Position.Y, npc.Position.Y + (structCharacter->ModelContainer.CalculateHeight() / 2f), TabMath.NormalizeDistance(unitDistance, config.MaxTargetDistance, config.DistanceLerp));
                     else
                         npcBodyY = npc.Position.Y;
@@ -360,7 +439,7 @@ namespace Tabnado.Util
                     {
                         if (!IsVisibleFromAnyEdge(npc, screenEdgePoints) && config.OnlyVisibleObjects)
                             continue;
-                                
+
                         results.Add(new ScreenObject
                         {
                             GameObjectId = npc.GameObjectId,
