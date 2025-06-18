@@ -347,18 +347,6 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("When enabled, only attackable Objects will be targeted.");
                 }
 
-                /*
-                bool onlyBattleNPCs = config.OnlyBattleNPCs;
-                if (ImGui.Checkbox("Target Only Battle NPCs", ref onlyBattleNPCs))
-                {
-                    config.OnlyBattleNPCs = onlyBattleNPCs;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("When enabled, only Battle NPCs will be targeted, ignoring event NPCs, traders, and pets.");
-                }*/
-
                 bool onlyVisibleObjects = config.OnlyVisibleObjects;
                 if (ImGui.Checkbox("Target Only Visible Objects", ref onlyVisibleObjects))
                 {
@@ -384,35 +372,6 @@ namespace Tabnado.UI
 
                 if (showDebugOptions)
                 {
-                    bool clearTargetTable = config.ClearTargetTable;
-                    if (ImGui.Checkbox("Reset Target Table", ref clearTargetTable))
-                    {
-                        config.ClearTargetTable = clearTargetTable;
-                        configChanged = true;
-                    }
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                        ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                        ImGui.PopStyleColor();
-                    }
-
-                    if (clearTargetTable)
-                    {
-                        int clearDeadTable = config.ClearTargetTableTimer;
-                        if (ImGui.SliderInt("Reset Target Table every (ms)", ref clearDeadTable, 1, 2000))
-                        {
-                            config.ClearTargetTableTimer = clearDeadTable;
-                            configChanged = true;
-                        }
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));
-                            ImGui.SetTooltip("WARNING: Enabling this option may significantly impact performance!");
-                            ImGui.PopStyleColor();
-                        }
-                    }
-
                     bool showDebugRaycast = config.ShowDebugRaycast;
                     if (ImGui.Checkbox("Show Raycast Info", ref showDebugRaycast))
                     {
@@ -439,12 +398,6 @@ namespace Tabnado.UI
                         ImGui.PopStyleColor();
                     }
 
-                    int drawRefreshRate = config.DrawRefreshRate;
-                    if (ImGui.SliderInt("Draw Refresh Rate", ref drawRefreshRate, 1, 100))
-                    {
-                        config.DrawRefreshRate = drawRefreshRate;
-                        configChanged = true;
-                    }
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0f, 0f, 1f));

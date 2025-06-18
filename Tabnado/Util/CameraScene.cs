@@ -315,7 +315,6 @@ namespace Tabnado.Util
         {
             if (camera is null || groupManager is null) {
                 InitManagerInstances();
-                log.Error("The Camera or GroupManager was not initilized, called for it again in Update()");
             }
 
             var results = new List<ScreenObject>();
@@ -361,7 +360,7 @@ namespace Tabnado.Util
                     {
                         if (!IsVisibleFromAnyEdge(npc, screenEdgePoints) && config.OnlyVisibleObjects)
                             continue;
-
+                                
                         results.Add(new ScreenObject
                         {
                             GameObjectId = npc.GameObjectId,

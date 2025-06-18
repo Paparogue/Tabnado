@@ -32,7 +32,7 @@ namespace Tabnado.Util
         private DateTime lastClearTime;
         private ulong previousClosestTargetId;
         private Vector3[] circlePoints;
-        private bool[] cameraFlag;
+        public bool[] cameraFlag;
         private const int CIRCLE_SEGMENTS = 16;
 
         public TargetingController(Plugin plugin)
@@ -70,22 +70,17 @@ namespace Tabnado.Util
 
         public void TargetFunc()
         {
+
             if (cameraScene is null)
             {
                 log.Error("Camera Scene is null. This should not happen and we are sorry about that!");
                 return;
             }
+
             if (cameraScene.GetCamera() is null || cameraScene.GetGroupManager() is null)
                 cameraScene.InitManagerInstances();
 
             List<ScreenObject> enemies = null!;
-
-            for (int i = 0; i < 3; i++)
-            {
-                if (cameraScene.CameraExceedsRotation(config.RotationPercent[i], i, false))
-                    cameraFlag[i] = true;
-            }
-
 
             cameraScene.UpdateSceneList();
             enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
@@ -93,7 +88,7 @@ namespace Tabnado.Util
             bool resetTarget = false;
             string resetReason = "";
 
-            //dont touch if not broken i guess
+            //here?
             bool[] triggers = new bool[3]
             {
                     cameraFlag[0], //BASE COMBO (Camera Rotation) 0

@@ -43,13 +43,17 @@ namespace Tabnado
         public CameraScene CameraScene;
         public TargetingHook TargetingHook { get; private set; } = null!;
 
+        private bool LOCKOUT = false;
+        private DateTime lastCameraCheckTime = DateTime.MinValue;
+        private const int CAMERA_CHECK_INTERVAL_MS = 50;
+
         public Plugin(IDalamudPluginInterface pluginInterface, ICommandManager commandManager)
         {
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
 
             PluginConfig = PluginInterface.GetPluginConfig() as PluginConfig ?? new PluginConfig();
-            if (PluginInterface.GetPluginConfig() != null && PluginConfig.Version != 4)
+            if (PluginInterface.GetPluginConfig() != null && PluginConfig.Version != 5)
                 PluginConfig = new PluginConfig();
             PluginConfig.Initialize(PluginInterface);
             PluginConfig.Save();
@@ -62,6 +66,8 @@ namespace Tabnado
             TargetingHook.BlockOriginalCall = true;
 
             CameraScene = new CameraScene(this);
+            CameraScene.InitManagerInstances();
+
             TabController = new TargetingController(this);
             TabnadoUI = new TabnadoUI(this);
 
@@ -79,14 +85,19 @@ namespace Tabnado
         {
             try
             {
-                allowOriginal = false;
-                TabController.TargetFunc();
-                Log.Verbose("Replaced original targeting function with TabController.TargetFunc()");
+                if(!LOCKOUT) {
+                    LOCKOUT = true;
+                    allowOriginal = false;
+                    TabController.TargetFunc();
+                    Log.Verbose("Replaced original targeting function with TabController.TargetFunc()");
+                    LOCKOUT = false;
+                }
             }
             catch (Exception ex)
             {
                 Log.Error($"Error in custom targeting function: {ex}");
                 allowOriginal = true;
+                LOCKOUT = false;
             }
         }
 
@@ -109,15 +120,31 @@ namespace Tabnado
             OnToggleUI(null!, null!);
         }
 
+        private void CameraMatrixDraw()
+        {
+            var currentTime = DateTime.Now;
+            if ((currentTime - lastCameraCheckTime).TotalMilliseconds >= CAMERA_CHECK_INTERVAL_MS)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (CameraScene.CameraExceedsRotation(PluginConfig.RotationPercent[i], i, false))
+                        TabController.cameraFlag[i] = true;
+                }
+
+                lastCameraCheckTime = currentTime;
+            }
+        }
+
         private void OnDraw()
         {
             if (ClientState is not null && ClientState.LocalPlayer is not null)
             {
-                if(PluginConfig.ShowDebugSelection)
+                if (PluginConfig.ShowDebugSelection && !LOCKOUT)
                 {
                     CameraScene.UpdateSceneList();
                     TabController.ShowDebugSelection();
                 }
+                CameraMatrixDraw();
                 TabnadoUI.Draw();
             }
         }
