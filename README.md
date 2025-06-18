@@ -10,11 +10,10 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 ```
 
 ## Configuration Guide
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/master/tabnado_v1.4.7.png)
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/4fefc214e380ff3cf8471b8a1560a5691a87422e/Tabnado_v1.5.0.png)
 
 ### Targeting Key
-- Select your preferred key for targeting
-- **Warning**: If using Tab, you may need to unbind it in game settings to avoid conflicts
+- No key needs to be set—Tabnado overrides the in-game targeting system.
 
 ### Targeting Settings
 
@@ -77,6 +76,5 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 - **Camera Depth**: Adjusts visibility check depth (1.0-10.0)
 
 ## Important Notes
-- If your selected targeting key conflicts with game keybinds, unbind it in the game's settings
 - Debug options may significantly impact performance when enabled
 - Higher raycast multiplier values improve accuracy but may affect performance
