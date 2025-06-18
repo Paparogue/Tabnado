@@ -13,13 +13,11 @@ namespace Tabnado.UI
         private bool settingsVisible = false;
         private readonly PluginConfig config;
         private readonly IDalamudPluginInterface pluginInterface;
-        private readonly KeyDetection keyDetection;
 
         public TabnadoUI(Plugin plugin)
         {
             this.pluginInterface = plugin.PluginInterface;
             this.config = plugin.PluginConfig;
-            this.keyDetection = plugin.KeyDetection;
         }
 
         public void ToggleVisibility()
@@ -37,43 +35,6 @@ namespace Tabnado.UI
             if (ImGui.Begin("Tabnado Target Settings", ref settingsVisible, ImGuiWindowFlags.AlwaysAutoResize))
             {
                 bool configChanged = false;
-
-                ImGui.PushStyleColor(ImGuiCol.Text, WarningColor);
-                ImGui.TextWrapped("WARNING: If your selected key conflicts with any game keybind, please unbind it in the game's keybind settings to avoid conflicts!");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
-                ImGui.Spacing();
-
-                if (ImGui.BeginCombo("Target Key", config.SelectedKey))
-                {
-                    foreach (var key in KeyConfig.VirtualKeys)
-                    {
-                        bool isSelected = config.SelectedKey.Equals(key.Key);
-                        if (ImGui.Selectable(key.Key, isSelected))
-                        {
-                            config.SelectedKey = key.Key;
-                            keyDetection.SetCurrentKey(key.Value);
-                            configChanged = true;
-                        }
-                        if (isSelected)
-                        {
-                            ImGui.SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui.EndCombo();
-                }
-
-                if (config.SelectedKey == "Tab")
-                {
-                    ImGui.SameLine();
-                    ImGui.TextDisabled("(?)");
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip("Note: Using 'Tab' requires unbinding the default target key in your game settings to avoid conflicts.");
-                    }
-                }
-
-                ImGui.Spacing();
 
                 ImGui.TextDisabled("Targeting Settings");
                 ImGui.Separator();
@@ -169,7 +130,8 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("Automatically adjusts target center based on camera zoom. When zoomed out, targeting shifts upward to maintain accuracy.");
                 }
 
-                if (useCameraLerp) {
+                if (useCameraLerp)
+                {
                     float cameraLerp = config.CameraLerp;
                     if (ImGui.SliderFloat("Camera Zoom Lerp", ref cameraLerp, 0.001f, 0.1f, "%.3f"))
                     {
@@ -193,7 +155,8 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("Automatically raises the objects target point when getting closer, making nearby targets easier to select.");
                 }
 
-                if (useDistanceLerp) {
+                if (useDistanceLerp)
+                {
                     float distanceLerp = config.DistanceLerp;
                     if (ImGui.SliderFloat("Distance Lerp", ref distanceLerp, 0.01f, 10f, "%.2f"))
                     {
@@ -419,7 +382,8 @@ namespace Tabnado.UI
                     configChanged = true;
                 }
 
-                if(showDebugOptions) {
+                if (showDebugOptions)
+                {
                     bool clearTargetTable = config.ClearTargetTable;
                     if (ImGui.Checkbox("Reset Target Table", ref clearTargetTable))
                     {

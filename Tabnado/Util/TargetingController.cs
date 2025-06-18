@@ -27,7 +27,6 @@ namespace Tabnado.Util
         private readonly CameraScene cameraScene;
         private readonly IGameGui gameGui;
         private readonly IPluginLog log;
-        private readonly KeyDetection keyDetection;
         private int currentEnemyIndex;
         private List<ScreenObject> lastEnemyList;
         private DateTime lastClearTime;
@@ -46,7 +45,6 @@ namespace Tabnado.Util
             cameraScene = plugin.CameraScene;
             gameGui = plugin.GameGUI;
             log = plugin.Log;
-            keyDetection = plugin.KeyDetection;
             lastClearTime = DateTime.Now;
             circlePoints = new Vector3[CIRCLE_SEGMENTS];
             currentEnemyIndex = 0;
@@ -70,51 +68,7 @@ namespace Tabnado.Util
             }
         }
 
-        /* Maybe has some usage in future
-        private void Draw3DSelectionCircle(Character* character)
-        {
-            var cameraManager = CameraManager.Instance();
-            if (cameraManager == null || cameraManager->CurrentCamera == null) return;
-
-            float radius = character->Height * 0.5f;
-            Vector3 characterPos = new(character->Position.X, character->Position.Y, character->Position.Z);
-
-            var drawList = ImGui.GetBackgroundDrawList();
-            Vector2 lastScreenPos = new();
-            bool lastInView = false;
-
-            for (int i = 0; i <= CIRCLE_SEGMENTS; i++)
-            {
-                int index = i % CIRCLE_SEGMENTS;
-                Vector3 worldPoint = new(
-                    characterPos.X + circlePoints[index].X * radius,
-                    characterPos.Y + 0.1f,
-                    characterPos.Z + circlePoints[index].Z * radius
-                );
-
-                Vector2 screenPos;
-                bool inView;
-                gameGui.WorldToScreen(worldPoint, out screenPos, out inView);
-
-                if (i > 0 && (inView || lastInView))
-                {
-                    float time = DateTime.Now.Millisecond / 1000f;
-                    float alpha = 0.4f + MathF.Sin(time * MathF.PI * 2) * 0.2f;
-
-                    drawList.AddLine(
-                        lastScreenPos,
-                        screenPos,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0.7f, 0, alpha)),
-                        2f
-                    );
-                }
-
-                lastScreenPos = screenPos;
-                lastInView = inView;
-            }
-        }*/
-
-        public void Draw()
+        public void TargetFunc()
         {
             if (cameraScene is null)
             {
@@ -125,27 +79,6 @@ namespace Tabnado.Util
                 cameraScene.InitManagerInstances();
 
             List<ScreenObject> enemies = null!;
-            var buttonPressed = keyDetection.IsKeyPressed();
-            var currentTime = DateTime.Now;
-            bool clearTargetUpdate = config.ClearTargetTable &&
-                                     (currentTime - lastClearTime).TotalMilliseconds > config.ClearTargetTableTimer;
-
-            if ((config.ShowDebugRaycast || config.ShowDebugSelection && !buttonPressed) &&
-                 (currentTime - lastClearTime).TotalMilliseconds > config.DrawRefreshRate
-                || clearTargetUpdate)
-            {
-                cameraScene.UpdateSceneList();
-                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
-                lastClearTime = currentTime;
-
-                if (enemies.Count <= 0 && config.ClearTargetTable)
-                {
-                    currentEnemyIndex = 0;
-                    lastEnemyList.Clear();
-                    previousClosestTargetId = 0;
-
-                }
-            }
 
             for (int i = 0; i < 3; i++)
             {
@@ -153,24 +86,23 @@ namespace Tabnado.Util
                     cameraFlag[i] = true;
             }
 
-            if (buttonPressed)
-            {
-                cameraScene.UpdateSceneList();
-                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
-                string[] triggerNames = new string[] { "Camera Rotation", "New Target", "New Closest Target" };
-                bool resetTarget = false;
-                string resetReason = "";
 
-                //dont touch if not broken i guess
-                bool[] triggers = new bool[3]
-                {
+            cameraScene.UpdateSceneList();
+            enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
+            string[] triggerNames = new string[] { "Camera Rotation", "New Target", "New Closest Target" };
+            bool resetTarget = false;
+            string resetReason = "";
+
+            //dont touch if not broken i guess
+            bool[] triggers = new bool[3]
+            {
                     cameraFlag[0], //BASE COMBO (Camera Rotation) 0
                     !IsListEqual(lastEnemyList, enemies), //BASE COMBO (New Target) 1 
                     enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //BASE COMBO (New Closest Target) 2
-                };
+            };
 
-                bool[,] configCheck = new bool[3, 3]
-                {
+            bool[,] configCheck = new bool[3, 3]
+            {
                     {
                         config.BaseCameraReset, //BASE COMBO (Camera Rotation) 0
                         config.ResetCombinations[0, 0], // Sub Combo B (New Target) 1
@@ -186,92 +118,86 @@ namespace Tabnado.Util
                         config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation) 0
                         config.ResetCombinations[2, 1] // Sub Combo (New Target) 1
                     }
-                };
-                for (int baseIndex = 0; baseIndex < 3; baseIndex++)
+            };
+            for (int baseIndex = 0; baseIndex < 3; baseIndex++)
+            {
+                if (!configCheck[baseIndex, 0]) continue;
+
+                if (!triggers[baseIndex]) continue;
+
+                bool subComboRequired = false;
+                bool subComboMet = true;
+                List<string> activeSubCombos = new List<string>();
+
+                for (int subIndex = 1; subIndex < 3; subIndex++)
                 {
-                    if (!configCheck[baseIndex, 0]) continue;
-
-                    if (!triggers[baseIndex]) continue;
-
-                    bool subComboRequired = false;
-                    bool subComboMet = true;
-                    List<string> activeSubCombos = new List<string>();
-
-                    for (int subIndex = 1; subIndex < 3; subIndex++)
+                    if (configCheck[baseIndex, subIndex])
                     {
-                        if (configCheck[baseIndex, subIndex])
-                        {
-                            subComboRequired = true;
-                            int triggerIndex = subIndex == 1 ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
+                        subComboRequired = true;
+                        int triggerIndex = subIndex == 1 ? (baseIndex + 1) % 3 : (baseIndex + 2) % 3;
 
-                            bool triggerValue;
-                            if (triggerIndex == 0)
-                            {
-                                triggerValue = cameraFlag[baseIndex];
-                            }
-                            else
-                            {
-                                triggerValue = triggers[triggerIndex];
-                            }
-
-                            if (triggerValue)
-                            {
-                                activeSubCombos.Add(triggerNames[triggerIndex]);
-                            }
-                            subComboMet &= triggerValue;
-                        }
-                    }
-
-                    if (!subComboRequired || subComboMet)
-                    {
-                        resetTarget = true;
-                        resetReason = $"Base: {triggerNames[baseIndex]}";
-                        if (subComboRequired)
+                        bool triggerValue;
+                        if (triggerIndex == 0)
                         {
-                            resetReason += $" with subcombos: {string.Join(" + ", activeSubCombos)}";
+                            triggerValue = cameraFlag[baseIndex];
                         }
-                        if(enemies.Count > 0)
+                        else
                         {
-                            cameraFlag[baseIndex] = false;
-                            cameraScene.UpdateMatrice(baseIndex);
+                            triggerValue = triggers[triggerIndex];
                         }
-                        break;
+
+                        if (triggerValue)
+                        {
+                            activeSubCombos.Add(triggerNames[triggerIndex]);
+                        }
+                        subComboMet &= triggerValue;
                     }
                 }
 
-                if (config.ShowDebugSelection && resetTarget)
+                if (!subComboRequired || subComboMet)
                 {
-                    log.Warning($"Reset triggered by: {resetReason}");
-                    log.Warning("===================================");
-                }
-
-                if (enemies.Count > 0)
-                {
-                    var noTarget = config.ResetOnNoTarget && clientState.LocalPlayer?.TargetObjectId == 0;
-                    if (noTarget || (resetTarget && (config.StickyTargetOnReset || (!config.StickyTargetOnReset && 
-                        enemies[0].GameObject?.Address != targetManager.Target?.Address))))
+                    resetTarget = true;
+                    resetReason = $"Base: {triggerNames[baseIndex]}";
+                    if (subComboRequired)
                     {
-                        currentEnemyIndex = 0;
+                        resetReason += $" with subcombos: {string.Join(" + ", activeSubCombos)}";
                     }
-                    else
+                    if (enemies.Count > 0)
                     {
-                        currentEnemyIndex++;
-                        if (currentEnemyIndex >= enemies.Count)
-                            currentEnemyIndex = 0;
+                        cameraFlag[baseIndex] = false;
+                        cameraScene.UpdateMatrice(baseIndex);
                     }
-                    targetManager.Target = enemies[currentEnemyIndex].GameObject;
-                }
-
-                if (enemies != null && enemies.Count > 0)
-                {
-                    lastEnemyList = new List<ScreenObject>(enemies);
-                    previousClosestTargetId = enemies[0].GameObjectId;
+                    break;
                 }
             }
 
-            if (config.ShowDebugSelection)
+            if (config.ShowDebugSelection && resetTarget)
             {
-                ShowDebugSelection();
+                log.Warning($"Reset triggered by: {resetReason}");
+                log.Warning("===================================");
+            }
+
+            if (enemies.Count > 0)
+            {
+                var noTarget = config.ResetOnNoTarget && clientState.LocalPlayer?.TargetObjectId == 0;
+                if (noTarget || (resetTarget && (config.StickyTargetOnReset || (!config.StickyTargetOnReset &&
+                    enemies[0].GameObject?.Address != targetManager.Target?.Address))))
+                {
+                    currentEnemyIndex = 0;
+                }
+                else
+                {
+                    currentEnemyIndex++;
+                    if (currentEnemyIndex >= enemies.Count)
+                        currentEnemyIndex = 0;
+                }
+                targetManager.Target = enemies[currentEnemyIndex].GameObject;
+            }
+
+            if (enemies != null && enemies.Count > 0)
+            {
+                lastEnemyList = new List<ScreenObject>(enemies);
+                previousClosestTargetId = enemies[0].GameObjectId;
             }
         }
 
@@ -286,7 +212,7 @@ namespace Tabnado.Util
             return ids1.SetEquals(ids2);
         }
 
-        private void ShowDebugSelection()
+        public void ShowDebugSelection()
         {
             if (!config.ShowDebugSelection) return;
 

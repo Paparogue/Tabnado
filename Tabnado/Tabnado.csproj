@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<VersionPrefix>1.4.9</VersionPrefix>
+		<VersionPrefix>1.5.0</VersionPrefix>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net9.0-windows7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -9,60 +9,53 @@
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-
 	<PropertyGroup>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<Version>$(VersionPrefix)</Version>
 	</PropertyGroup>
-
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="11.0.0" />
+		<PackageReference Include="DalamudPackager" Version="12.0.0" />
 	</ItemGroup>
-
 	<ItemGroup>
-	  <Reference Include="Dalamud">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\Dalamud.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="FFXIVClientStructs">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\FFXIVClientStructs.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ImGui.NET">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\ImGui.NET.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ImGuiScene">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\ImGuiScene.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="InteropGenerator.Runtime">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\InteropGenerator.Runtime.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="Lumina">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\Lumina.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
-	  <Reference Include="Lumina.Excel">
-	    <HintPath>..\..\..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\11.0.8.0-78-g6dddfa15\Lumina.Excel.dll</HintPath>
-	    <Private>False</Private>
-	  </Reference>
+		<Reference Include="Dalamud">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="FFXIVClientStructs">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="ImGui.NET">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="ImGuiScene">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="InteropGenerator.Runtime">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\InteropGenerator.Runtime.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Lumina">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Lumina.Excel">
+			<HintPath>..\..\..\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 	</ItemGroup>
 </Project>

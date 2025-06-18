@@ -99,6 +99,7 @@ namespace Tabnado.Util
             if (config.UseCameraLerp)
             {
                 CameraEx* cam = (CameraEx*)camera;
+                //log.Debug($"0x{((IntPtr)cam).ToInt64():X}");
                 float currentZoom = cam->currentZoom;
                 float maxZoom = cam->maxZoom;
                 float minZoom = cam->minZoom;
