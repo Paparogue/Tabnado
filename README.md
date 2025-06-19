@@ -68,11 +68,8 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 - **Target Only Visible Objects**: Enables visibility checking system
 
 ### Debug Options
-- **Reset Target Table**: Clears the target list periodically
-  - **Reset Timer**: Millisecond interval between resets (1-2000ms)
 - **Show Raycast Info**: Displays visibility check information
 - **Show Selection Info**: Shows targeting diagnostic information
-- **Draw Refresh Rate**: Controls debug visualization update frequency (1-100)
 - **Camera Depth**: Adjusts visibility check depth (1.0-10.0)
 
 ## Important Notes
