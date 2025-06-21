@@ -420,7 +420,7 @@ namespace Tabnado.Util
 
                     if (config.OnlyAttackableObjects &&
                         (isTraderNPC || isMinion || isPetOrCompanion ||
-                        (!isHostile && !isNeutral) || isFriendlyPvPPlayer))
+                        ((!isHostile && !isNeutral) && !state.IsPvP) ||  isFriendlyPvPPlayer))
                         continue;
 
                     float npcBodyY;
