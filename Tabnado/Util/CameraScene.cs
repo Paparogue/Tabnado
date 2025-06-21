@@ -36,7 +36,7 @@ namespace Tabnado.Util
         private float screenHeight;
         private Vector2 screenCenter;
         private Matrix4x4 lastViewMatrix;
-        const float RAYCAST_TOLERANCE = 0.1f;
+        const float RAYCAST_TOLERANCE = 0.2f;
         private float rotationPercentage = 0f;
         private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
         private float[] rotationPercentages = new float[3];
@@ -343,7 +343,7 @@ namespace Tabnado.Util
             }
         }
 
-        public unsafe bool IsObjectAllianceOrGroup(GameObject* ob)
+        public unsafe bool IsPlayerGroupOrAlliance(GameObject* ob)
         {
             if (ob is null) return false;
             bool isAlliance = groupManager->MainGroup.IsEntityIdInAlliance(ob->EntityId);
@@ -384,7 +384,7 @@ namespace Tabnado.Util
             return false;
         }
 
-        private void Update()
+        public void UpdateSceneList()
         {
             if (camera is null || groupManager is null)
             {
@@ -416,10 +416,11 @@ namespace Tabnado.Util
                     bool isMinion = obj.ObjectKind == ObjectKind.Companion;
                     bool isTraderNPC = obj.ObjectKind == ObjectKind.EventNpc;
                     bool isPlayer = obj.ObjectKind == ObjectKind.Player;
+                    bool isFriendlyPvPPlayer = state.IsPvP && isPlayer && IsPlayerGroupOrAlliance((GameObject*)obj.Address);
 
                     if (config.OnlyAttackableObjects &&
                         (isTraderNPC || isMinion || isPetOrCompanion ||
-                        (!isHostile && !isNeutral)))
+                        (!isHostile && !isNeutral) || isFriendlyPvPPlayer))
                         continue;
 
                     float npcBodyY;
@@ -464,11 +465,6 @@ namespace Tabnado.Util
                    npc.CurrentHp > 0 &&
                    state.LocalPlayer != null &&
                    npc.Address != state.LocalPlayer.Address;
-        }
-
-        public void UpdateSceneList()
-        {
-            Update();
         }
 
         public List<ScreenObject> GetObjectInsideRadius(float radius, bool alternative = false)
