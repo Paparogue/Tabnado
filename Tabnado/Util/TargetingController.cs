@@ -70,25 +70,29 @@ namespace Tabnado.Util
 
         public void TargetFunc()
         {
-
             if (cameraScene is null)
             {
-                log.Error("Camera Scene is null. This should not happen and we are sorry about that!");
+                log.Error("Camera Scene is null. This should not happen!");
                 return;
             }
 
-            if (cameraScene.GetCamera() is null || cameraScene.GetGroupManager() is null)
-                cameraScene.InitManagerInstances();
-
             List<ScreenObject> enemies = null!;
 
-            cameraScene.UpdateSceneList();
-            enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
+            try
+            {
+                cameraScene.UpdateSceneList();
+                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Failed to update scene list: {ex}");
+                return;
+            }
+
             string[] triggerNames = new string[] { "Camera Rotation", "New Target", "New Closest Target" };
             bool resetTarget = false;
             string resetReason = "";
 
-            //here?
             bool[] triggers = new bool[3]
             {
                     cameraFlag[0], //BASE COMBO (Camera Rotation) 0
@@ -114,6 +118,7 @@ namespace Tabnado.Util
                         config.ResetCombinations[2, 1] // Sub Combo (New Target) 1
                     }
             };
+
             for (int baseIndex = 0; baseIndex < 3; baseIndex++)
             {
                 if (!configCheck[baseIndex, 0]) continue;
@@ -221,7 +226,8 @@ namespace Tabnado.Util
                 float rotationLength = cameraScene.GetRotationPercentage(0);
                 float maxThreshold = config.RotationPercent[0] / 100f;
 
-                if (rotationLength < maxThreshold && !cameraFlag[0]) {
+                if (rotationLength < maxThreshold && !cameraFlag[0])
+                {
 
                     drawList.AddCircle(
                         screenCenter,

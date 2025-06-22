@@ -65,7 +65,6 @@ namespace Tabnado
             TargetingHook.BlockOriginalCall = true;
 
             CameraScene = new CameraScene(this);
-            CameraScene.InitManagerInstances();
 
             TabController = new TargetingController(this);
             TabnadoUI = new TabnadoUI(this);
@@ -133,7 +132,7 @@ namespace Tabnado
         {
             if (ClientState is not null && ClientState.LocalPlayer is not null)
             {
-                if(PluginConfig.ShowDebugRaycast || PluginConfig.ShowDebugSelection)
+                if (PluginConfig.ShowDebugRaycast || PluginConfig.ShowDebugSelection)
                     CameraScene.UpdateSceneList();
 
                 if (PluginConfig.ShowDebugRaycast)

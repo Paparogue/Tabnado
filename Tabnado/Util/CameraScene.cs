@@ -41,6 +41,8 @@ namespace Tabnado.Util
         private Matrix4x4[] lastViewMatrices = new Matrix4x4[3];
         private float[] rotationPercentages = new float[3];
         private readonly uint OWNER_IS_WORLD = 0xE0000000;
+        private bool isInitialized = false;
+        private bool initializationAttempted = false;
 
         private class RaycastDebugData
         {
@@ -76,37 +78,78 @@ namespace Tabnado.Util
 
         public GroupManager* GetGroupManager()
         {
+            EnsureInitialized();
             return groupManager;
         }
 
         public Camera* GetCamera()
         {
+            EnsureInitialized();
             return camera;
         }
 
-        public void InitManagerInstances()
+        private bool TryInitialize()
         {
-            groupManager = GroupManager.Instance();
-            var cameraManager = CameraManager.Instance();
-            if (cameraManager != null)
+            try
             {
+                groupManager = GroupManager.Instance();
+                if (groupManager == null)
+                {
+                    log.Verbose("GroupManager not ready yet");
+                    return false;
+                }
+
+                var cameraManager = CameraManager.Instance();
+                if (cameraManager == null)
+                {
+                    log.Verbose("CameraManager not ready yet");
+                    return false;
+                }
+
                 camera = cameraManager->CurrentCamera;
+                if (camera == null)
+                {
+                    log.Verbose("CurrentCamera not ready yet");
+                    return false;
+                }
+
+                var viewMatrix = camera->ViewMatrix;
+                if (viewMatrix.Equals(Matrix4x4.Identity) || float.IsNaN(viewMatrix.M11))
+                {
+                    log.Verbose("Camera matrices not properly initialized yet");
+                    return false;
+                }
+
                 for (int i = 0; i < 3; i++)
                 {
-                    lastViewMatrices[i] = camera->ViewMatrix;
+                    lastViewMatrices[i] = viewMatrix;
                 }
+
+                isInitialized = true;
+                log.Information("CameraScene successfully initialized");
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                log.Error("CameraManager->CurrentCamera is null");
+                log.Error($"Failed to initialize CameraScene: {ex}");
+                return false;
             }
         }
 
-        public float GetRotationPercentage(int index)
+        private void EnsureInitialized()
         {
-            if (index >= 0 && index < 3)
-                return rotationPercentages[index];
-            return 0f;
+            if (!isInitialized && !initializationAttempted)
+            {
+                initializationAttempted = true;
+                if (!TryInitialize())
+                {
+                    log.Warning("Initial CameraScene initialization failed, will retry on next access");
+                }
+            }
+            else if (!isInitialized)
+            {
+                TryInitialize();
+            }
         }
 
         public Vector2 GetPositionFromMonitor()
@@ -118,7 +161,7 @@ namespace Tabnado.Util
             float baseX = screenWidth * normalizedX;
             float baseY = screenHeight * normalizedY;
 
-            if (config.UseCameraLerp)
+            if (config.UseCameraLerp && isInitialized && camera != null)
             {
                 CameraEx* cam = (CameraEx*)camera;
                 float currentZoom = cam->currentZoom;
@@ -176,20 +219,40 @@ namespace Tabnado.Util
 
         public Vector3[] GetCameraCornerPositions(float depth = 1f)
         {
+            EnsureInitialized();
+            if (!isInitialized || camera == null)
+            {
+                log.Warning("Cannot get camera corner positions - camera not initialized");
+                return Array.Empty<Vector3>();
+            }
+
             Vector2[] screenEdgePoints = GetScreenEdgePoints();
             Vector3[] worldPoints = new Vector3[screenEdgePoints.Length];
             for (int i = 0; i < screenEdgePoints.Length; i++)
             {
                 Ray ray;
                 camera->ScreenPointToRay(&ray, (int)screenEdgePoints[i].X, (int)screenEdgePoints[i].Y);
-                float t = depth / ray.Direction.Z;
-                worldPoints[i] = ray.Origin + ray.Direction * t;
+
+                // Validate ray direction
+                if (Math.Abs(ray.Direction.Z) < 0.0001f)
+                {
+                    log.Warning($"Invalid ray direction at point {i}: {ray.Direction}");
+                    worldPoints[i] = ray.Origin + ray.Direction * depth;
+                }
+                else
+                {
+                    float t = depth / ray.Direction.Z;
+                    worldPoints[i] = ray.Origin + ray.Direction * t;
+                }
             }
             return worldPoints;
         }
 
         private bool IsVisibleFromAnyEdge(ICharacter npc, Vector2[] screenEdgePoints)
         {
+            if (!isInitialized || camera == null)
+                return true; // Default to visible if we can't check
+
             int successfulRays = 0;
             int totalRays = screenEdgePoints.Length * 2;
             bool collectDebugData = config.ShowDebugRaycast;
@@ -233,6 +296,8 @@ namespace Tabnado.Util
             }
 
             Vector3[] edgeWorldPositions = GetCameraCornerPositions((config.CameraDepth - 1f));
+            if (edgeWorldPositions.Length == 0)
+                return true;
 
             float requiredPercentage = config.VisibilityPercent / 100f;
             int requiredSuccessCount = (int)Math.Ceiling(requiredPercentage * totalRays);
@@ -262,7 +327,7 @@ namespace Tabnado.Util
                 return isVisible;
             }
 
-            for (int i = 0; i < screenEdgePoints.Length; i++)
+            for (int i = 0; i < screenEdgePoints.Length && i < edgeWorldPositions.Length; i++)
             {
                 Vector3 edgeWorldPos = edgeWorldPositions[i];
 
@@ -346,6 +411,9 @@ namespace Tabnado.Util
         public unsafe bool IsPlayerGroupOrAlliance(GameObject* ob)
         {
             if (ob is null) return false;
+            EnsureInitialized();
+            if (!isInitialized || groupManager == null) return false;
+
             bool isAlliance = groupManager->MainGroup.IsEntityIdInAlliance(ob->EntityId);
             bool isGroup = groupManager->MainGroup.IsEntityIdInParty(ob->EntityId);
             return isAlliance || isGroup;
@@ -354,6 +422,9 @@ namespace Tabnado.Util
         public bool UpdateMatrice(int index)
         {
             if (index < 0 || index >= 3) return false;
+            EnsureInitialized();
+            if (!isInitialized || camera == null) return false;
+
             lastViewMatrices[index] = camera->ViewMatrix;
             return true;
         }
@@ -361,6 +432,8 @@ namespace Tabnado.Util
         public bool CameraExceedsRotation(int percent, int index, bool updateMatrice)
         {
             if (index < 0 || index >= 3) return false;
+            EnsureInitialized();
+            if (!isInitialized || camera == null) return false;
 
             Matrix4x4 currentViewMatrix = camera->ViewMatrix;
             Vector3 lastForward = new Vector3(lastViewMatrices[index].M13, lastViewMatrices[index].M23, lastViewMatrices[index].M33);
@@ -384,11 +457,21 @@ namespace Tabnado.Util
             return false;
         }
 
+        public float GetRotationPercentage(int index)
+        {
+            if (index >= 0 && index < 3)
+                return rotationPercentages[index];
+            return 0f;
+        }
+
         public void UpdateSceneList()
         {
-            if (camera is null || groupManager is null)
+            EnsureInitialized();
+            if (!isInitialized)
             {
-                InitManagerInstances();
+                log.Verbose("Skipping UpdateSceneList - not initialized");
+                screenObjectList = new List<ScreenObject>();
+                return;
             }
 
             if (config.ShowDebugRaycast)
@@ -420,7 +503,7 @@ namespace Tabnado.Util
 
                     if (config.OnlyAttackableObjects &&
                         (isTraderNPC || isMinion || isPetOrCompanion ||
-                        ((!isHostile && !isNeutral) && !state.IsPvP) ||  isFriendlyPvPPlayer))
+                        ((!isHostile && !isNeutral) && !state.IsPvP) || isFriendlyPvPPlayer))
                         continue;
 
                     float npcBodyY;
