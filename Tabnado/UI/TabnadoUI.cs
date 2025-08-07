@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using Dalamud.Plugin;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Tabnado.Util;
 
 namespace Tabnado.UI

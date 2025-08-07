@@ -7,7 +7,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Tabnado.UI;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using static FFXIVClientStructs.ThisAssembly;
 using static Tabnado.Util.CameraScene;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
