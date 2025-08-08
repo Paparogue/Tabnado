@@ -163,6 +163,7 @@ namespace Tabnado.Util
 
             if (config.UseCameraLerp && isInitialized && camera != null)
             {
+                //log.Information($"Camera pointer address: 0x{(IntPtr)camera:X}");
                 CameraEx* cam = (CameraEx*)camera;
                 float currentZoom = cam->currentZoom;
                 float maxZoom = cam->maxZoom;

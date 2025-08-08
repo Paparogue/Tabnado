@@ -10,8 +10,8 @@ namespace Tabnado.Util
     [StructLayout(LayoutKind.Explicit)]
     public unsafe partial struct CameraEx
     {
-        [FieldOffset(0x104)] public float currentZoom;
-        [FieldOffset(0x108)] public float minZoom;
-        [FieldOffset(0x10C)] public float maxZoom;
+        [FieldOffset(0x114)] public float currentZoom;
+        [FieldOffset(0x118)] public float minZoom;
+        [FieldOffset(0x11C)] public float maxZoom;
     }
 }
