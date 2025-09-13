@@ -95,27 +95,27 @@ namespace Tabnado.Util
 
             bool[] triggers = new bool[3]
             {
-                    cameraFlag[0], //BASE COMBO (Camera Rotation) 0
-                    !IsListEqual(lastEnemyList, enemies), //BASE COMBO (New Target) 1 
-                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId, //BASE COMBO (New Closest Target) 2
+                    cameraFlag[0],
+                    !IsListEqual(lastEnemyList, enemies),
+                    enemies.Count > 0 && enemies[0].GameObjectId != previousClosestTargetId,
             };
 
             bool[,] configCheck = new bool[3, 3]
             {
                     {
-                        config.BaseCameraReset, //BASE COMBO (Camera Rotation) 0
-                        config.ResetCombinations[0, 0], // Sub Combo B (New Target) 1
-                        config.ResetCombinations[0, 1] // Sub Combo C (New Closest Target) 2
+                        config.BaseCameraReset,
+                        config.ResetCombinations[0, 0],
+                        config.ResetCombinations[0, 1]
                     },
                     {
-                        config.BaseCombatantReset, //BASE COMBO (New Target) 1
-                        config.ResetCombinations[1, 1], // Sub Combo (New Closest Target) 2
-                        config.ResetCombinations[1, 0] // Sub Combo (Camera Rotation) 0
+                        config.BaseCombatantReset,
+                        config.ResetCombinations[1, 1],
+                        config.ResetCombinations[1, 0]
                     },
                     {
-                        config.BaseNewTargetReset, //BASE COMBO (New Closest Target) 2
-                        config.ResetCombinations[2, 0], // Sub Combo (Camera Rotation) 0
-                        config.ResetCombinations[2, 1] // Sub Combo (New Target) 1
+                        config.BaseNewTargetReset,
+                        config.ResetCombinations[2, 0],
+                        config.ResetCombinations[2, 1]
                     }
             };
 
@@ -249,10 +249,20 @@ namespace Tabnado.Util
 
             if (config.UseRectangleSelection)
             {
-                float halfWidth = config.RectangleWidth / 2f;
-                float halfHeight = config.RectangleHeight / 2f;
-                Vector2 topLeft = new Vector2(screenCenter.X - halfWidth, screenCenter.Y - halfHeight);
-                Vector2 bottomRight = new Vector2(screenCenter.X + halfWidth, screenCenter.Y + halfHeight);
+                float screenWidth = ImGui.GetIO().DisplaySize.X;
+                float screenHeight = ImGui.GetIO().DisplaySize.Y;
+                float width = screenWidth * (config.RectangleWidth / 100f);
+                float height = screenHeight * (config.RectangleHeight / 100f);
+                float halfWidth = width / 2f;
+                float halfHeight = height / 2f;
+
+                float leftEdge = Math.Max(0, screenCenter.X - halfWidth);
+                float rightEdge = Math.Min(screenWidth, screenCenter.X + halfWidth);
+                float topEdge = Math.Max(0, screenCenter.Y - halfHeight);
+                float bottomEdge = Math.Min(screenHeight, screenCenter.Y + halfHeight);
+
+                Vector2 topLeft = new Vector2(leftEdge, topEdge);
+                Vector2 bottomRight = new Vector2(rightEdge, bottomEdge);
 
                 drawList.AddRect(
                     topLeft,

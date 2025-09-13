@@ -163,7 +163,6 @@ namespace Tabnado.Util
 
             if (config.UseCameraLerp && isInitialized && camera != null)
             {
-                //log.Information($"Camera pointer address: 0x{(IntPtr)camera:X}");
                 CameraEx* cam = (CameraEx*)camera;
                 float currentZoom = cam->currentZoom;
                 float maxZoom = cam->maxZoom;
@@ -635,7 +634,11 @@ namespace Tabnado.Util
         {
             if (config.UseRectangleSelection)
             {
-                return GetObjectInsideRectangle(config.RectangleWidth, config.RectangleHeight, alternative);
+                screenWidth = ImGui.GetIO().DisplaySize.X;
+                screenHeight = ImGui.GetIO().DisplaySize.Y;
+                float width = screenWidth * (config.RectangleWidth / 100f);
+                float height = screenHeight * (config.RectangleHeight / 100f);
+                return GetObjectInsideRectangle(width, height, alternative);
             }
             else
             {
@@ -658,15 +661,24 @@ namespace Tabnado.Util
                 return null;
 
             screenCenter = GetPositionFromMonitor();
-            float halfWidth = config.RectangleWidth / 2f;
-            float halfHeight = config.RectangleHeight / 2f;
+            screenWidth = ImGui.GetIO().DisplaySize.X;
+            screenHeight = ImGui.GetIO().DisplaySize.Y;
+
+            float width = screenWidth * (config.RectangleWidth / 100f);
+            float height = screenHeight * (config.RectangleHeight / 100f);
+            float halfWidth = width / 2f;
+            float halfHeight = height / 2f;
+
+            float leftEdge = Math.Max(0, screenCenter.X - halfWidth);
+            float rightEdge = Math.Min(screenWidth, screenCenter.X + halfWidth);
+            float topEdge = Math.Max(0, screenCenter.Y - halfHeight);
+            float bottomEdge = Math.Min(screenHeight, screenCenter.Y + halfHeight);
 
             return screenObjectList
                 .Where(monster =>
                 {
-                    float xDist = Math.Abs(monster.ScreenPos.X - screenCenter.X);
-                    float yDist = Math.Abs(monster.ScreenPos.Y - screenCenter.Y);
-                    return xDist <= halfWidth && yDist <= halfHeight;
+                    return monster.ScreenPos.X >= leftEdge && monster.ScreenPos.X <= rightEdge &&
+                           monster.ScreenPos.Y >= topEdge && monster.ScreenPos.Y <= bottomEdge;
                 })
                 .MinBy(m => m.CameraDistance);
         }

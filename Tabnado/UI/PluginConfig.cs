@@ -29,7 +29,7 @@ namespace Tabnado.UI
         public int RayCastPercent { get; set; } = 100;
         public int VisibilityPercent { get; set; } = 35;
         public float CameraDepth { get; set; } = 1f;
-        public float DistanceLerp { get; set; } = 4f;
+        public float DistanceLerp { get; set; } = 5f;
         public float CameraLerp { get; set; } = 0.01f;
         public float MonitorX { get; set; } = 50f;
         public float MonitorY { get; set; } = 50f;
@@ -47,13 +47,12 @@ namespace Tabnado.UI
         public bool ResetOnNoTarget { get; set; } = true;
         public bool ShowDebugOptions { get; set; } = false;
         public bool UseRectangleSelection { get; set; } = false;
-        public int RectangleWidth { get; set; } = 600;
-        public int RectangleHeight { get; set; } = 400;
+        public int RectangleWidth { get; set; } = 30;
+        public int RectangleHeight { get; set; } = 30;
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
         { false, false },
         { false, false },
         { false, false }
         };
-        public string SelectedKey { get; set; } = "Tab";
     }
 }

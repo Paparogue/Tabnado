@@ -197,25 +197,25 @@ namespace Tabnado.UI
                 if (config.UseRectangleSelection)
                 {
                     int rectangleWidth = config.RectangleWidth;
-                    if (ImGui.SliderInt("Rectangle Width", ref rectangleWidth, 50, 1500))
+                    if (ImGui.SliderInt("Rectangle Width (%)", ref rectangleWidth, 1, 100))
                     {
                         config.RectangleWidth = rectangleWidth;
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Sets the width of the rectangular targeting area in pixels.");
+                        ImGui.SetTooltip("Sets the width of the rectangular targeting area as a percentage of screen width.");
                     }
 
                     int rectangleHeight = config.RectangleHeight;
-                    if (ImGui.SliderInt("Rectangle Height", ref rectangleHeight, 50, 1000))
+                    if (ImGui.SliderInt("Rectangle Height (%)", ref rectangleHeight, 1, 100))
                     {
                         config.RectangleHeight = rectangleHeight;
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Sets the height of the rectangular targeting area in pixels.");
+                        ImGui.SetTooltip("Sets the height of the rectangular targeting area as a percentage of screen height.");
                     }
                 }
 
