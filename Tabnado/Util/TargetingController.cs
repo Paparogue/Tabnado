@@ -81,7 +81,7 @@ namespace Tabnado.Util
             try
             {
                 cameraScene.UpdateSceneList();
-                enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
+                enemies = cameraScene.GetObjectsInSelectionArea(config.AlternativeTargeting);
             }
             catch (Exception ex)
             {
@@ -228,14 +228,12 @@ namespace Tabnado.Util
 
                 if (rotationLength < maxThreshold && !cameraFlag[0])
                 {
-
                     drawList.AddCircle(
                         screenCenter,
                         rotationLength * ImGui.GetIO().DisplaySize.Y,
                         ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1f)),
                         32
                     );
-
                 }
 
                 if (rotationLength >= maxThreshold || cameraFlag[0])
@@ -249,14 +247,33 @@ namespace Tabnado.Util
                 }
             }
 
-            drawList.AddCircle(
-                screenCenter,
-                config.CameraRadius,
-                ImGui.ColorConvertFloat4ToU32(new Vector4(2, 0, 0, 1f)),
-                32
-            );
+            if (config.UseRectangleSelection)
+            {
+                float halfWidth = config.RectangleWidth / 2f;
+                float halfHeight = config.RectangleHeight / 2f;
+                Vector2 topLeft = new Vector2(screenCenter.X - halfWidth, screenCenter.Y - halfHeight);
+                Vector2 bottomRight = new Vector2(screenCenter.X + halfWidth, screenCenter.Y + halfHeight);
 
-            var enemies = cameraScene.GetObjectInsideRadius(config.CameraRadius, config.AlternativeTargeting);
+                drawList.AddRect(
+                    topLeft,
+                    bottomRight,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(2, 0, 0, 1f)),
+                    0.0f,
+                    ImDrawFlags.None,
+                    2.0f
+                );
+            }
+            else
+            {
+                drawList.AddCircle(
+                    screenCenter,
+                    config.CameraRadius,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(2, 0, 0, 1f)),
+                    32
+                );
+            }
+
+            var enemies = cameraScene.GetObjectsInSelectionArea(config.AlternativeTargeting);
             if (enemies != null)
             {
                 foreach (var enemy in enemies)

@@ -234,7 +234,6 @@ namespace Tabnado.Util
                 Ray ray;
                 camera->ScreenPointToRay(&ray, (int)screenEdgePoints[i].X, (int)screenEdgePoints[i].Y);
 
-                // Validate ray direction
                 if (Math.Abs(ray.Direction.Z) < 0.0001f)
                 {
                     log.Warning($"Invalid ray direction at point {i}: {ray.Direction}");
@@ -252,7 +251,7 @@ namespace Tabnado.Util
         private bool IsVisibleFromAnyEdge(ICharacter npc, Vector2[] screenEdgePoints)
         {
             if (!isInitialized || camera == null)
-                return true; // Default to visible if we can't check
+                return true;
 
             int successfulRays = 0;
             int totalRays = screenEdgePoints.Length * 2;
@@ -587,6 +586,63 @@ namespace Tabnado.Util
             }
         }
 
+        public List<ScreenObject> GetObjectInsideRectangle(float width, float height, bool alternative = false)
+        {
+            if (screenObjectList == null || screenObjectList.Count == 0)
+                return [];
+
+            screenCenter = GetPositionFromMonitor();
+            float halfWidth = width / 2f;
+            float halfHeight = height / 2f;
+
+            var objectsInRectangle = screenObjectList
+                .Where(o =>
+                {
+                    float xDist = Math.Abs(o.ScreenPos.X - screenCenter.X);
+                    float yDist = Math.Abs(o.ScreenPos.Y - screenCenter.Y);
+                    return xDist <= halfWidth && yDist <= halfHeight;
+                })
+                .ToList();
+
+            if (objectsInRectangle.Count == 0)
+                return [];
+
+            if (!alternative)
+            {
+                return objectsInRectangle
+                    .OrderBy(o => o.CameraDistance)
+                    .ToList();
+            }
+            else
+            {
+                var closestObject = objectsInRectangle
+                    .OrderBy(o => o.CameraDistance)
+                    .First();
+
+                var remainingObjects = objectsInRectangle
+                    .Where(o => o != closestObject)
+                    .OrderBy(o => Vector3.Distance(o.GameObject!.Position, closestObject.GameObject!.Position))
+                    .ToList();
+
+                var result = new List<ScreenObject> { closestObject };
+                result.AddRange(remainingObjects);
+
+                return result;
+            }
+        }
+
+        public List<ScreenObject> GetObjectsInSelectionArea(bool alternative = false)
+        {
+            if (config.UseRectangleSelection)
+            {
+                return GetObjectInsideRectangle(config.RectangleWidth, config.RectangleHeight, alternative);
+            }
+            else
+            {
+                return GetObjectInsideRadius(config.CameraRadius, alternative);
+            }
+        }
+
         public ScreenObject? GetClosestEnemyInCircle()
         {
             if (screenObjectList == null || screenObjectList.Count == 0)
@@ -594,6 +650,37 @@ namespace Tabnado.Util
             return screenObjectList
                 .Where(monster => monster.CameraDistance <= config.CameraRadius)
                 .MinBy(m => m.CameraDistance);
+        }
+
+        public ScreenObject? GetClosestEnemyInRectangle()
+        {
+            if (screenObjectList == null || screenObjectList.Count == 0)
+                return null;
+
+            screenCenter = GetPositionFromMonitor();
+            float halfWidth = config.RectangleWidth / 2f;
+            float halfHeight = config.RectangleHeight / 2f;
+
+            return screenObjectList
+                .Where(monster =>
+                {
+                    float xDist = Math.Abs(monster.ScreenPos.X - screenCenter.X);
+                    float yDist = Math.Abs(monster.ScreenPos.Y - screenCenter.Y);
+                    return xDist <= halfWidth && yDist <= halfHeight;
+                })
+                .MinBy(m => m.CameraDistance);
+        }
+
+        public ScreenObject? GetClosestEnemyInSelectionArea()
+        {
+            if (config.UseRectangleSelection)
+            {
+                return GetClosestEnemyInRectangle();
+            }
+            else
+            {
+                return GetClosestEnemyInCircle();
+            }
         }
     }
 }

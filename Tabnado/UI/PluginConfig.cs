@@ -46,6 +46,9 @@ namespace Tabnado.UI
         public bool AlternativeTargeting { get; set; } = true;
         public bool ResetOnNoTarget { get; set; } = true;
         public bool ShowDebugOptions { get; set; } = false;
+        public bool UseRectangleSelection { get; set; } = false;
+        public int RectangleWidth { get; set; } = 600;
+        public int RectangleHeight { get; set; } = 400;
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
         { false, false },
         { false, false },

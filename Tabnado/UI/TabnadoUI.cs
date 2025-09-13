@@ -72,15 +72,18 @@ namespace Tabnado.UI
                     ImGui.SetTooltip("Sets the maximum targeting range. Objects beyond this distance (in yalms) will be ignored.");
                 }
 
-                int cameraRadius = config.CameraRadius;
-                if (ImGui.SliderInt("Camera Search Radius", ref cameraRadius, 1, 1000))
+                if (!config.UseRectangleSelection)
                 {
-                    config.CameraRadius = cameraRadius;
-                    configChanged = true;
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Defines the circular search area around your target center for detecting targetable objects.");
+                    int cameraRadius = config.CameraRadius;
+                    if (ImGui.SliderInt("Camera Search Radius", ref cameraRadius, 1, 1000))
+                    {
+                        config.CameraRadius = cameraRadius;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Defines the circular search area around your target center for detecting targetable objects.");
+                    }
                 }
 
                 if (config.OnlyVisibleObjects)
@@ -178,6 +181,42 @@ namespace Tabnado.UI
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.SetTooltip("In alternative mode, the closest target to the camera's center point is selected first. Afterward, you can cycle through targets based on proximity to your current selection.");
+                }
+
+                bool useRectangleSelection = config.UseRectangleSelection;
+                if (ImGui.Checkbox("Use Rectangle Selection", ref useRectangleSelection))
+                {
+                    config.UseRectangleSelection = useRectangleSelection;
+                    configChanged = true;
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Switches from circular target selection area to a rectangular one. Useful for wider or taller targeting zones.");
+                }
+
+                if (config.UseRectangleSelection)
+                {
+                    int rectangleWidth = config.RectangleWidth;
+                    if (ImGui.SliderInt("Rectangle Width", ref rectangleWidth, 50, 1500))
+                    {
+                        config.RectangleWidth = rectangleWidth;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Sets the width of the rectangular targeting area in pixels.");
+                    }
+
+                    int rectangleHeight = config.RectangleHeight;
+                    if (ImGui.SliderInt("Rectangle Height", ref rectangleHeight, 50, 1000))
+                    {
+                        config.RectangleHeight = rectangleHeight;
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Sets the height of the rectangular targeting area in pixels.");
+                    }
                 }
 
                 ImGui.Spacing();
