@@ -585,21 +585,30 @@ namespace Tabnado.Util
             }
         }
 
-        public List<ScreenObject> GetObjectInsideRectangle(float width, float height, bool alternative = false)
+        public List<ScreenObject> GetObjectInsideRectangle(float leftPercent, float rightPercent, float topPercent, float bottomPercent, bool alternative = false)
         {
             if (screenObjectList == null || screenObjectList.Count == 0)
                 return [];
 
             screenCenter = GetPositionFromMonitor();
-            float halfWidth = width / 2f;
-            float halfHeight = height / 2f;
+            screenWidth = ImGui.GetIO().DisplaySize.X;
+            screenHeight = ImGui.GetIO().DisplaySize.Y;
+
+            float leftExtent = screenWidth * (leftPercent / 100f);
+            float rightExtent = screenWidth * (rightPercent / 100f);
+            float topExtent = screenHeight * (topPercent / 100f);
+            float bottomExtent = screenHeight * (bottomPercent / 100f);
+
+            float leftEdge = Math.Max(0, screenCenter.X - leftExtent);
+            float rightEdge = Math.Min(screenWidth, screenCenter.X + rightExtent);
+            float topEdge = Math.Max(0, screenCenter.Y - topExtent);
+            float bottomEdge = Math.Min(screenHeight, screenCenter.Y + bottomExtent);
 
             var objectsInRectangle = screenObjectList
                 .Where(o =>
                 {
-                    float xDist = Math.Abs(o.ScreenPos.X - screenCenter.X);
-                    float yDist = Math.Abs(o.ScreenPos.Y - screenCenter.Y);
-                    return xDist <= halfWidth && yDist <= halfHeight;
+                    return o.ScreenPos.X >= leftEdge && o.ScreenPos.X <= rightEdge &&
+                           o.ScreenPos.Y >= topEdge && o.ScreenPos.Y <= bottomEdge;
                 })
                 .ToList();
 
@@ -634,11 +643,8 @@ namespace Tabnado.Util
         {
             if (config.UseRectangleSelection)
             {
-                screenWidth = ImGui.GetIO().DisplaySize.X;
-                screenHeight = ImGui.GetIO().DisplaySize.Y;
-                float width = screenWidth * (config.RectangleWidth / 100f);
-                float height = screenHeight * (config.RectangleHeight / 100f);
-                return GetObjectInsideRectangle(width, height, alternative);
+                return GetObjectInsideRectangle(config.RectangleLeft, config.RectangleRight,
+                    config.RectangleTop, config.RectangleBottom, alternative);
             }
             else
             {
@@ -664,15 +670,15 @@ namespace Tabnado.Util
             screenWidth = ImGui.GetIO().DisplaySize.X;
             screenHeight = ImGui.GetIO().DisplaySize.Y;
 
-            float width = screenWidth * (config.RectangleWidth / 100f);
-            float height = screenHeight * (config.RectangleHeight / 100f);
-            float halfWidth = width / 2f;
-            float halfHeight = height / 2f;
+            float leftExtent = screenWidth * (config.RectangleLeft / 100f);
+            float rightExtent = screenWidth * (config.RectangleRight / 100f);
+            float topExtent = screenHeight * (config.RectangleTop / 100f);
+            float bottomExtent = screenHeight * (config.RectangleBottom / 100f);
 
-            float leftEdge = Math.Max(0, screenCenter.X - halfWidth);
-            float rightEdge = Math.Min(screenWidth, screenCenter.X + halfWidth);
-            float topEdge = Math.Max(0, screenCenter.Y - halfHeight);
-            float bottomEdge = Math.Min(screenHeight, screenCenter.Y + halfHeight);
+            float leftEdge = Math.Max(0, screenCenter.X - leftExtent);
+            float rightEdge = Math.Min(screenWidth, screenCenter.X + rightExtent);
+            float topEdge = Math.Max(0, screenCenter.Y - topExtent);
+            float bottomEdge = Math.Min(screenHeight, screenCenter.Y + bottomExtent);
 
             return screenObjectList
                 .Where(monster =>

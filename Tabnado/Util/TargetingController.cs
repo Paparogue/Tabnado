@@ -251,15 +251,16 @@ namespace Tabnado.Util
             {
                 float screenWidth = ImGui.GetIO().DisplaySize.X;
                 float screenHeight = ImGui.GetIO().DisplaySize.Y;
-                float width = screenWidth * (config.RectangleWidth / 100f);
-                float height = screenHeight * (config.RectangleHeight / 100f);
-                float halfWidth = width / 2f;
-                float halfHeight = height / 2f;
 
-                float leftEdge = Math.Max(0, screenCenter.X - halfWidth);
-                float rightEdge = Math.Min(screenWidth, screenCenter.X + halfWidth);
-                float topEdge = Math.Max(0, screenCenter.Y - halfHeight);
-                float bottomEdge = Math.Min(screenHeight, screenCenter.Y + halfHeight);
+                float leftExtent = screenWidth * (config.RectangleLeft / 100f);
+                float rightExtent = screenWidth * (config.RectangleRight / 100f);
+                float topExtent = screenHeight * (config.RectangleTop / 100f);
+                float bottomExtent = screenHeight * (config.RectangleBottom / 100f);
+
+                float leftEdge = Math.Max(0, screenCenter.X - leftExtent);
+                float rightEdge = Math.Min(screenWidth, screenCenter.X + rightExtent);
+                float topEdge = Math.Max(0, screenCenter.Y - topExtent);
+                float bottomEdge = Math.Min(screenHeight, screenCenter.Y + bottomExtent);
 
                 Vector2 topLeft = new Vector2(leftEdge, topEdge);
                 Vector2 bottomRight = new Vector2(rightEdge, bottomEdge);

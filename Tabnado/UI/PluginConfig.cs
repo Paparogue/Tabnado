@@ -47,12 +47,14 @@ namespace Tabnado.UI
         public bool ResetOnNoTarget { get; set; } = true;
         public bool ShowDebugOptions { get; set; } = false;
         public bool UseRectangleSelection { get; set; } = false;
-        public int RectangleWidth { get; set; } = 30;
-        public int RectangleHeight { get; set; } = 30;
+        public float RectangleLeft { get; set; } = 30f;
+        public float RectangleRight { get; set; } = 30f;
+        public float RectangleTop { get; set; } = 30f;
+        public float RectangleBottom { get; set; } = 30f;
         public bool[,] ResetCombinations { get; set; } = new bool[3, 2] {
-        { false, false },
-        { false, false },
-        { false, false }
+            { false, false },
+            { false, false },
+            { false, false }
         };
     }
 }

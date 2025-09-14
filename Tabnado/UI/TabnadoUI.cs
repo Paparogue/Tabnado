@@ -196,26 +196,58 @@ namespace Tabnado.UI
 
                 if (config.UseRectangleSelection)
                 {
-                    int rectangleWidth = config.RectangleWidth;
-                    if (ImGui.SliderInt("Rectangle Width (%)", ref rectangleWidth, 1, 100))
+                    float screenWidth = ImGui.GetIO().DisplaySize.X;
+                    float screenHeight = ImGui.GetIO().DisplaySize.Y;
+                    float centerX = config.MonitorX / 100f * screenWidth;
+                    float centerY = config.MonitorY / 100f * screenHeight;
+
+                    float maxLeft = centerX / screenWidth * 100f;
+                    float maxRight = (screenWidth - centerX) / screenWidth * 100f;
+                    float maxTop = centerY / screenHeight * 100f;
+                    float maxBottom = (screenHeight - centerY) / screenHeight * 100f;
+
+                    float rectangleLeft = config.RectangleLeft;
+                    if (ImGui.SliderFloat("Rectangle Left (%)", ref rectangleLeft, 0, maxLeft, "%.1f"))
                     {
-                        config.RectangleWidth = rectangleWidth;
+                        config.RectangleLeft = Math.Min(rectangleLeft, maxLeft);
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Sets the width of the rectangular targeting area as a percentage of screen width.");
+                        ImGui.SetTooltip($"Extends rectangle left from target center. Max: {maxLeft:F1}%");
                     }
 
-                    int rectangleHeight = config.RectangleHeight;
-                    if (ImGui.SliderInt("Rectangle Height (%)", ref rectangleHeight, 1, 100))
+                    float rectangleRight = config.RectangleRight;
+                    if (ImGui.SliderFloat("Rectangle Right (%)", ref rectangleRight, 0, maxRight, "%.1f"))
                     {
-                        config.RectangleHeight = rectangleHeight;
+                        config.RectangleRight = Math.Min(rectangleRight, maxRight);
                         configChanged = true;
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Sets the height of the rectangular targeting area as a percentage of screen height.");
+                        ImGui.SetTooltip($"Extends rectangle right from target center. Max: {maxRight:F1}%");
+                    }
+
+                    float rectangleTop = config.RectangleTop;
+                    if (ImGui.SliderFloat("Rectangle Top (%)", ref rectangleTop, 0, maxTop, "%.1f"))
+                    {
+                        config.RectangleTop = Math.Min(rectangleTop, maxTop);
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip($"Extends rectangle up from target center. Max: {maxTop:F1}%");
+                    }
+
+                    float rectangleBottom = config.RectangleBottom;
+                    if (ImGui.SliderFloat("Rectangle Bottom (%)", ref rectangleBottom, 0, maxBottom, "%.1f"))
+                    {
+                        config.RectangleBottom = Math.Min(rectangleBottom, maxBottom);
+                        configChanged = true;
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip($"Extends rectangle down from target center. Max: {maxBottom:F1}%");
                     }
                 }
 
