@@ -285,23 +285,123 @@ namespace Tabnado.Util
             }
 
             var enemies = cameraScene.GetObjectsInSelectionArea(config.AlternativeTargeting);
-            if (enemies != null)
+            if (enemies != null && enemies.Count > 0)
             {
-                foreach (var enemy in enemies)
+                for (int i = 0; i < enemies.Count; i++)
                 {
+                    var enemy = enemies[i];
+                    bool isClosest = i == 0;
+
+                    Vector4 lineColor = isClosest
+                        ? new Vector4(0, 1, 0.5f, 0.8f)
+                        : new Vector4(1, 1, 0, 0.5f);
+
+                    float lineThickness = isClosest ? 3.0f : 2.0f;
+
                     drawList.AddLine(
                         screenCenter,
                         enemy.ScreenPos,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.5f)),
-                        2.0f
+                        ImGui.ColorConvertFloat4ToU32(lineColor),
+                        lineThickness
                     );
+
+                    Vector4 circleColor = isClosest
+                        ? new Vector4(0, 1, 0.5f, 1f)
+                        : new Vector4(1, 1, 0, 0.8f);
+
+                    float circleSize = isClosest ? 7f : 5f;
+
                     drawList.AddCircleFilled(
                         enemy.ScreenPos,
-                        5f,
-                        ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 0.8f))
+                        circleSize,
+                        ImGui.ColorConvertFloat4ToU32(circleColor)
                     );
-                    string distanceText = $"Details: {enemy.GlobalInfo} {enemy.WorldDistance:F1}";
-                    drawList.AddText(enemy.ScreenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1)), distanceText);
+
+                    if (isClosest)
+                    {
+                        drawList.AddCircle(
+                            enemy.ScreenPos,
+                            circleSize + 2f,
+                            ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 0.8f)),
+                            16,
+                            2.0f
+                        );
+                    }
+
+                    Vector2 infoBoxStart = new Vector2(enemy.ScreenPos.X + 15, enemy.ScreenPos.Y - 10);
+                    Vector4 bgColor = isClosest
+                        ? new Vector4(0, 0.15f, 0.1f, 0.9f)
+                        : new Vector4(0.1f, 0.1f, 0.1f, 0.85f);
+
+                    List<string> infoLines = new List<string>();
+                    infoLines.Add($"[{i + 1}] {enemy.Name}");
+                    infoLines.Add($"Type: {enemy.ObjectType}");
+                    infoLines.Add($"Distance: {enemy.WorldDistance:F1}y");
+                    infoLines.Add($"Camera: {enemy.CameraDistance:F0}px");
+
+                    if (enemy.IsHostile)
+                        infoLines.Add("Hostile");
+                    else if (enemy.IsNeutral)
+                        infoLines.Add("Neutral");
+                    else if (enemy.IsPlayer)
+                        infoLines.Add("Player");
+
+                    if (enemy.IsPet)
+                        infoLines.Add($"Pet (Btn: {enemy.Battalion})");
+
+                    float maxWidth = 0;
+                    foreach (var line in infoLines)
+                    {
+                        var textSize = ImGui.CalcTextSize(line);
+                        if (textSize.X > maxWidth)
+                            maxWidth = textSize.X;
+                    }
+
+                    float boxHeight = infoLines.Count * 16 + 8;
+                    float boxWidth = maxWidth + 16;
+
+                    drawList.AddRectFilled(
+                        infoBoxStart,
+                        new Vector2(infoBoxStart.X + boxWidth, infoBoxStart.Y + boxHeight),
+                        ImGui.ColorConvertFloat4ToU32(bgColor),
+                        5.0f
+                    );
+
+                    if (isClosest)
+                    {
+                        drawList.AddRect(
+                            infoBoxStart,
+                            new Vector2(infoBoxStart.X + boxWidth, infoBoxStart.Y + boxHeight),
+                            ImGui.ColorConvertFloat4ToU32(new Vector4(0, 1, 0.5f, 0.8f)),
+                            5.0f,
+                            ImDrawFlags.None,
+                            2.0f
+                        );
+                    }
+
+                    float yOffset = 4;
+                    foreach (var line in infoLines)
+                    {
+                        Vector4 textColor = new Vector4(1, 1, 1, 1);
+
+                        if (line.Contains("Hostile"))
+                            textColor = new Vector4(1, 0.3f, 0.3f, 1);
+                        else if (line.Contains("Neutral"))
+                            textColor = new Vector4(1, 1, 0.5f, 1);
+                        else if (line.Contains("Player"))
+                            textColor = new Vector4(0.5f, 0.8f, 1, 1);
+                        else if (line.Contains("Pet"))
+                            textColor = new Vector4(0.8f, 0.5f, 1, 1);
+                        else if (i == 0 && line.StartsWith("["))
+                            textColor = new Vector4(0.5f, 1, 0.7f, 1);
+
+                        drawList.AddText(
+                            new Vector2(infoBoxStart.X + 8, infoBoxStart.Y + yOffset),
+                            ImGui.ColorConvertFloat4ToU32(textColor),
+                            line
+                        );
+                        yOffset += 16;
+                    }
                 }
             }
         }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
-		<VersionPrefix>1.6.3</VersionPrefix>
+		<VersionPrefix>1.6.4</VersionPrefix>
 		<OutputType>Library</OutputType>
 		<TargetFramework>net9.0-windows7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>

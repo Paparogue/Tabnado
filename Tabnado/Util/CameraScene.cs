@@ -530,7 +530,14 @@ namespace Tabnado.Util
                             GlobalInfo = $"Pet: {isPetOrCompanion} Battalion: {structCharacter->Battalion} Hostile: {isHostile} Neutral: {isNeutral} Player: {isPlayer} Name: {npc.Name} Kind: {obj.ObjectKind}",
                             ScreenPos = screenPos,
                             CameraDistance = Vector2.Distance(screenCenter, screenPos),
-                            WorldDistance = unitDistance
+                            WorldDistance = unitDistance,
+                            Name = npc.Name.TextValue,
+                            ObjectType = obj.ObjectKind.ToString(),
+                            IsHostile = isHostile,
+                            IsNeutral = isNeutral,
+                            IsPlayer = isPlayer,
+                            IsPet = isPetOrCompanion,
+                            Battalion = structCharacter->Battalion
                         });
                     }
                 }
