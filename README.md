@@ -80,9 +80,9 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 
 ### Debug Options
 - **Show Debug Options**: Toggles visibility of advanced debugging features
-- **Show Selection Info**: Shows targeting diagnostic information (⚠️ Performance impact)
+- **Show Selection Info**: Shows targeting diagnostic information
   ![Visibility](https://raw.github.com/Paparogue/Tabnado/2de89869b1076fefbba66c799fed0e4ca5bc3add/Selection_Information.jpg)
-- **Show Raycast Info**: Displays visibility raycast information (⚠️ Performance impact)
+- **Show Raycast Info**: Displays visibility raycast information
   ![Raycast](https://raw.githubusercontent.com/Paparogue/Tabnado/2de89869b1076fefbba66c799fed0e4ca5bc3add/Visibility_information.jpg)
 - **Camera Depth**: Adjusts visibility check depth (1.0-10.0) - Advanced setting
 
