@@ -10,10 +10,10 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 ```
 
 ## Configuration Guide
-![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/4fefc214e380ff3cf8471b8a1560a5691a87422e/Tabnado_v1.5.0.png)
+![Tabnado Config](https://raw.github.com/Paparogue/Tabnado/4e136700e6277247c241a4c26b142613224cd55f/Tabnado_v1.6.4.png)
 
 ### Targeting Key
-- No key needs to be set—Tabnado overrides the in-game targeting system.
+- No key needs to be set - Tabnado overrides the in-game targeting system automatically.
 
 ### Targeting Settings
 
@@ -21,22 +21,32 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 - **Target Center X (%)**: Horizontal position of your targeting center (0-100%)
 - **Target Center Y (%)**: Vertical position of your targeting center (0-100%)
 - **Max Target Distance**: Range limit for targeting (1-55 yalms)
-- **Camera Search Radius**: Size of circular detection area (1-1000)
+
+#### Selection Area
+- **Use Rectangle Selection**: Switch between circular and rectangular targeting areas
+  - When disabled: Uses **Camera Search Radius** (1-1000) for circular detection
+  - When enabled: Configure rectangular area with:
+    - **Rectangle Left (%)**: Extends selection area left from center
+    - **Rectangle Right (%)**: Extends selection area right from center
+    - **Rectangle Top (%)**: Extends selection area up from center
+    - **Rectangle Bottom (%)**: Extends selection area down from center
 
 #### Visibility Options (when "Target Only Visible Objects" is enabled)
 - **Minimum Visibility (%)**: Required visibility percentage for valid targets
 - **Raycast Transformation (%)**: Adjusts raycast points toward camera center
-- **Raycast Multiplier**: Increases raycast density for better detection accuracy
+- **Raycast Multiplier**: Increases raycast density for better detection accuracy (1-16)
 
 #### Dynamic Adjustments
 - **Camera Lerp**: Automatically adjusts target center based on camera zoom
   - Targeting shifts upward when zoomed out for better accuracy
-  - **Camera Lerp Speed**: Controls adjustment rate (0.001-1.0)
+  - **Camera Zoom Lerp**: Controls adjustment rate (0.001-0.1)
+  
 - **Distance Lerp**: Raises object target point when closer
   - Makes nearby targets easier to select
-  - **Distance Lerp Speed**: Controls adjustment rate (0.01-10.0)
+  - **Distance Lerp**: Controls adjustment rate (0.01-10.0)
+  
 - **Alternative Targeting Mode**: First selects closest target to camera center
-  - After initial selection, cycles through targets based on proximity
+  - After initial selection, cycles through targets based on proximity to current selection
 
 ### Target Reset Options
 
@@ -45,7 +55,7 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
 
 #### Camera Rotation Reset
 - Resets to nearest target when camera moves beyond rotation threshold
-- **Rotation Threshold**: Percentage of movement required to trigger reset
+- **Rotation threshold (% movement)**: Percentage of movement required to trigger reset (1-100%)
 - Can be combined with:
   - New Target Reset
   - New Closest Target Reset
@@ -62,15 +72,17 @@ https://raw.githubusercontent.com/Paparogue/PaparogueRepo/refs/heads/main/repo.j
   - Camera Rotation Reset (with adjustable threshold)
   - New Target Reset
 
-### Filtering Options
+### Target Filtering Options
 - **Sticky Target On Reset**: Maintains current target after reset if still closest
+  - When disabled, resets to the second closest enemy
 - **Target Only Attackable Objects**: Only targets attackable entities
-- **Target Only Visible Objects**: Enables visibility checking system
+- **Target Only Visible Objects**: Enables visibility checking system using raycasts
 
 ### Debug Options
-- **Show Raycast Info**: Displays visibility check information
-- **Show Selection Info**: Shows targeting diagnostic information
-- **Camera Depth**: Adjusts visibility check depth (1.0-10.0)
+- **Show Debug Options**: Toggles visibility of advanced debugging features
+- **Show Raycast Info**: Displays visibility raycast information (⚠️ Performance impact)
+- **Show Selection Info**: Shows targeting diagnostic information (⚠️ Performance impact)
+- **Camera Depth**: Adjusts visibility check depth (1.0-10.0) - Advanced setting
 
 ## Important Notes
 - Debug options may significantly impact performance when enabled
